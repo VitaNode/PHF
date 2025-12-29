@@ -8,12 +8,12 @@
 ## 0. Project Setup & Scaffolding
 **Goal**: 建立环境与物理骨架，完成依赖锁定。
 
-### T0: 依赖配置与环境初始化 [低]
-- [ ] **Implement**: 在 `pubspec.yaml` 中添加：`sqlcipher`, `riverpod`, `freezed`, `flutter_secure_storage`, `image`, `image_picker`, `path_provider`, `crypto`。运行 `flutter pub get`。
-- [ ] **Document**: `DEPENDENCIES.md` 记录各 package 用途及版本锁定策略。
-- [ ] **Test**: 物理验证所有依赖冲突已解决。
-- [ ] **Review**: `review_dependencies.md` - 确保所有三方库均为离线友好型，无后门上报风险。(Ref: Constitution#I. Privacy)
-- [ ] **Commit**: `chore: configure project dependencies and package versions`
+### T0: 依赖配置与环境初始化 [x]
+- [x] **Implement**: 在 `pubspec.yaml` 中添加核心依赖。执行 `flutter pub get`。
+- [x] **Document**: `DEPENDENCIES.md` 记录各 package 用途。
+- [x] **Test**: 物理验证所有依赖冲突已解决。
+- [x] **Review**: `review_dependencies.md` - 确保三方库离线友好。
+- [x] **Commit**: `chore: configure project dependencies and package versions`
 
 ### T1: 物理目录架构与脚手架 [低]
 - [ ] **Implement**: 创建核心分层目录。配置 `analysis_options.yaml` 强化 Lint。
