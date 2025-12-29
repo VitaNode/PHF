@@ -1,9 +1,9 @@
-<!-- 
+<!--
 SYNC IMPACT REPORT
-- Version: 1.4.1 → 1.4.2
-- Rationale: Merged "Layered Architecture" and "MVVM Layered Architecture" into a unified "Architecture Pattern" section for clarity. Renumbered subsequent sections.
+- Version: 1.4.2 → 1.4.3
+- Rationale: Added mandatory Task ID prefixing for all files in the `docs/` directory to ensure traceability between implementation tasks and documentation artifacts.
 - Modified Sections:
-  - "技术栈与架构原则 (Technology Stack & Architectural Principles)": Added Logger Tool section with rationale, added Error Handling & Logging principle, added Performance & Resource Management principle, added Git & Workflow principle, added Negative Constraints / Anti-Patterns principle, added Testing Standards principle
+  - #### 11. 代码提交与文档协作 (Code Commits & Documentation): Added "Documentation Naming" rule.
 - Templates Updated:
   - ✅ .specify/templates/plan-template.md: Updated Constitution Check to include new principles
   - ✅ .specify/templates/tasks-template.md: Updated to reflect new principles
@@ -146,12 +146,13 @@ SYNC IMPACT REPORT
   - **图片处理**: 所有图片必须指定占位图和错误图，优化加载体验
   - **计算优化**: 对于昂贵的计算，使用 Memoization 技术进行缓存优化
 
-#### 11. Git 提交与工作流 (Git & Workflow)
+#### 11. 代码提交与文档协作 (Code Commits & Documentation)
 - **原则**: 规范代码提交和协作流程，确保代码历史清晰可追溯
 - **实现**:
   - **提交规范**: 遵循 Conventional Commits 规范，格式为 `<type>(<scope>): <description>`
-  - **文档更新**: 每次修改代码后，更新相关的文档说明，文档统一放在 docs/ 目录下
-  - **分支管理**: 按照功能分支开发，通过 Pull Request 进行代码审查
+  - **文档更新**: 每次修改代码后，更新相关的文档说明，文档统一放在 `docs/` 目录下。
+  - **文档命名**: 存放在 `docs/` 目录下的所有文件必须包含关联的任务 ID，遵循 `T[ID]_描述` (知识库) 或 `review_T[ID]_描述` (审查报告) 的命名约定，例如 `T0_DEPENDENCIES.md` 或 `review_T2_entities.md`。
+  - **分支管理**: 按照功能分支开发，通过 Pull Request 进行代码审查。
 
 #### 12. 模块边界与禁止清单 (Negative Constraints / Anti-Patterns)
 - **原则**: 避免常见的代码问题，确保架构的清晰和可维护性
@@ -170,4 +171,4 @@ SYNC IMPACT REPORT
 ## 治理
 所有开发活动和功能变更都必须严格遵守本章程定义的原则。任何偏离核心原则的修改都需要经过正式的章程修订流程。
 
-**版本**: 1.4.2 | **批准于**: TODO(RATIFICATION_DATE): 初始批准日待定 | **最后修订于**: 2025-12-28
+**版本**: 1.4.3 | **批准于**: TODO(RATIFICATION_DATE): 初始批准日待定 | **最后修订于**: 2025-12-29
