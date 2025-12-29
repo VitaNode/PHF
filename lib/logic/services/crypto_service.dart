@@ -107,14 +107,12 @@ class CryptoService implements ICryptoService {
     try {
       while (offset < fileLen) {
         // Read chunk
-        // Note: readInto is more memory efficient but read is simpler for now.
-        // Given _chunkSize is 2MB, it's safe.
         final chunkLen = (offset + _chunkSize > fileLen) 
             ? fileLen - offset 
             : _chunkSize;
             
         final buffer = Uint8List(chunkLen);
-        await inputAccess.readInto(buffer);
+        await _readExact(inputAccess, buffer);
         
         // Encrypt chunk
         final secretBox = await _algorithm.encrypt(
@@ -172,7 +170,7 @@ class CryptoService implements ICryptoService {
         }
         
         final headerBytes = Uint8List(4);
-        await inputAccess.readInto(headerBytes);
+        await _readExact(inputAccess, headerBytes);
         offset += 4;
         
         final packetLen = ByteData.sublistView(headerBytes).getUint32(0, Endian.big);
@@ -183,7 +181,7 @@ class CryptoService implements ICryptoService {
         }
         
         final packetBytes = Uint8List(packetLen);
-        await inputAccess.readInto(packetBytes);
+        await _readExact(inputAccess, packetBytes);
         offset += packetLen;
         
         // 3. Decrypt
@@ -208,6 +206,19 @@ class CryptoService implements ICryptoService {
     } finally {
       await inputAccess.close();
       await outputSink.close();
+    }
+  }
+
+  /// Helper to ensure buffer is fully filled on read
+  Future<void> _readExact(RandomAccessFile file, Uint8List buffer) async {
+    int offset = 0;
+    while (offset < buffer.length) {
+      // readInto reads *up to* remaining bytes
+      final readCount = await file.readInto(buffer, offset, buffer.length);
+     if (readCount == 0) {
+        throw SecurityException('Unexpected end of file.');
+      }
+      offset += readCount;
     }
   }
 }

@@ -1,36 +1,38 @@
-# Review T5: Crypto Service
+# Review T5: Crypto Service Implementation
 
 **Review Date**: 2025-12-29
 **Reviewer**: Antigravity
 **Status**: 🟢 APPROVED
 
 ## Summary
-The `CryptoService` has been implemented using the `cryptography` package, providing robust AES-256-GCM capabilities. The service supports both small-data in-memory operations and large-file streaming operations.
+The `CryptoService` provides robust AES-256-GCM encryption for both in-memory data and file streams. It correctly implements the `ICryptoService` interface and handles large files via chunked streaming to prevent OOM errors.
 
 ## Security Audit
 
-### 1. Algorithm Strength
+### 1. Algorithm Selection
 - **Requirement**: AES-256-GCM.
-- **Implementation**: `AesGcm.with256bits(nonceLength: 12)`.
-- **Result**: 🟢 Pass. 12-byte nonce and 16-byte tag are standard for NIST SP 800-38D.
-
-### 2. Streaming Strategy (OOM Protection)
-- **Requirement**: Prevent OOM on large files.
-- **Implementation**: 
-    - Chunked processing (default 2MB).
-    - Format: `[Len 4B][Nonce 12B][Cipher][Tag 16B]` per chunk.
-    - Each chunk has a unique random nonce.
-- **Verification**: `crypto_service_test.dart` successfully encrypted and decrypted a 3MB file (forcing multi-chunk logic) without error.
+- **Implementation**: Uses `AesGcm.with256bits(nonceLength: 12)` from `cryptography` package.
 - **Result**: 🟢 Pass.
 
-### 3. Integrity
-- **Requirement**: Detect tampering.
-- **Verification**: Unit tests confirmed that modifying the cipher or using the wrong key throws `SecurityException`.
+### 2. File Streaming & OOM Protection
+- **Requirement**: Support large files without loading entire content into RAM.
+- **Implementation**: 
+    - Reads file in 2MB chunks.
+    - Encrypts each chunk independently with a unique nonce.
+    - Writes `[Length(4B)][Nonce(12B)][Ciphertext][Tag(16B)]` packet format.
+- **Verification**: `crypto_service_test.dart` confirms multi-chunk processing works for files > 2MB (tested with 3MB).
+- **Result**: 🟢 Pass.
+
+### 3. Data Integrity & Authenticity
+- **Requirement**: Detection of tampering.
+- **Implementation**: GCM mode includes a 16-byte authentication tag per chunk. Decryption throws `SecretBoxAuthenticationError` if tag mismatch.
+- **Verification**: Tests confirm `SecurityException` is thrown on bad keys or corrupted data.
 - **Result**: 🟢 Pass.
 
 ## Code Quality
-- **Error Handling**: Wraps library-specific exceptions into domain `SecurityException`.
-- **Resources**: Uses `try-finally` blocks to ensure file handles are closed.
+- **Test Coverage**: specific tests for memory encryption, file encryption, and error handling.
+- **Error Handling**: Wraps cryptographic exceptions in domain-specific `SecurityException`.
+- **Resource Management**: Uses `try-finally` blocks to ensure file handles (`openWrite`, `open`) are closed.
 
 ---
 **Final Status**: 🟢 APPROVED
