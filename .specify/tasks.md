@@ -29,12 +29,12 @@
 - [x] **Review**: 检查命名是否符合 Dart 驼峰规范。
 - [x] **Commit**: `feat(data): define core domain entities for records and images`
 
-### T3: 业务契约 (Interfaces) 定义 [低]
-- [ ] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口类。
-- [ ] **Document**: 为接口方法提供详尽的 `dartdoc` 以及预期行为说明。
-- [ ] **Test**: 验证接口不暴露底层加密/SQL 实现细节。 (Ref: Constitution#II. Architecture)
-- [ ] **Review**: 接口粒度是否符合单一职责原则。
-- [ ] **Commit**: `feat(architecture): define abstract interfaces for repositories and services`
+### T3: 业务契约 (Interfaces) 定义 [x]
+- [x] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口类。
+- [x] **Document**: 为接口方法提供详尽的 `dartdoc` 以及预期行为说明。
+- [x] **Test**: 验证接口不暴露底层加密/SQL 实现细节。 (Ref: Constitution#II. Architecture)
+- [x] **Review**: 接口粒度是否符合单一职责原则。
+- [x] **Commit**: `feat(architecture): define abstract interfaces for repositories and services`
 
 ---
 
