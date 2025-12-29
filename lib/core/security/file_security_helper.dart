@@ -47,6 +47,12 @@ class FileSecurityHelper {
     // 2. Determine Output Path
     final fileName = '${_uuid.v4()}.enc';
     final destPath = '$targetDir/$fileName';
+    
+    // Ensure parent directory exists
+    final dir = Directory(targetDir);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
 
     // 3. Encrypt Stream
     await _cryptoService.encryptFile(
