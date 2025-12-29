@@ -1,26 +1,36 @@
 # Review T3: Business Interfaces
 
 **Review Date**: 2025-12-29
-**Reviewer**: Antigravity (Guardian)
-**Status**: 🟢 APPROVED
+**Reviewer**: Antigravity
+**Status**: 🟡 APPROVED WITH MODIFICATIONS
 
-## Interface Scrutiny
+## Summary
+The interface definitions for Repositories and Services provide a solid foundation for Clean Architecture. The use of abstract classes decouples the logic layer from SQL and Encryption implementation details. However, one critical performance requirement from the Constitution is currently unaddressed in the interface contracts.
 
-### 1. ICryptoService
-- **Assessment**: Successfully abstracts AEAD (AES-GCM-256) logic. Does not expose specific library choices (e.g., `cryptography` vs `crypto`).
-- **Standard**: 🟢 Compliance with `Constitution#VI`.
+## Key Findings
 
-### 2. IImageService
-- **Assessment**: Includes mandatory `secureWipe` and `compressImage` methods. Uses `Uint8List` for all memory operations to minimize leakage.
-- **Privacy Core**: 🟢 Adherence to `Constitution#I. Privacy`.
+### 1. Missing Streaming Support (Performance & OOM Risk)
+- **Violation**: `ICryptoService` currently only defines `Uint8List` (memory-based) encryption/decryption.
+- **Constitution Reference**: `Constitution#Technology Stack#File Encryption` specifies: "Large files must use streaming encryption to avoid OOM."
+- **Risk**: Encrypting 10MB+ medical images entirely in memory will cause application crashes on lower-end devices.
+- **Action**: Add streaming methods to `ICryptoService` or a specialized `IFileSecurityService`.
+    - *Example*: `Future<void> encryptFile(String inputPath, String outputPath, Uint8List key)`.
 
-### 3. Repositories (Record & Image)
-- **Assessment**: CRUD signatures are correctly typed using Domain Entities defined in T2.
-- **Abstraction**: `IImageRepository` handles the complex tag synchronization logic required by `Spec#4.1`.
-- **Constraint**: 🟢 No SQL statements or DB cursors leaked to the interface level.
+### 2. Batch Operations for Images
+- **Observation**: `IImageRepository` should be reviewed to ensure it supports batch saving.
+- **Reasoning**: A single clinical visit often results in 5-10 images. Sequential individual saves are less efficient than a single transaction-backed batch save.
+- **Action**: Ensure `saveImages(List<MedicalImage> images)` is present in the contract.
 
-## Conclusion
-所有契约类（Interfaces）均已建立，定义了清晰的行为边界。业务逻辑层可以通过依赖注入（DI）基于这些契约进行开发，而无需关心具体的持久化或底层加密实现。
+### 3. Error Handling Standardization
+- **Observation**: `SecurityException` is a good start. 
+- **Recommendation**: Consider defining a base `DomainException` to standardize how Repositories report database or file system failures to the UI/ViewModel layer.
+
+## Architectural Alignment
+- **Domain Decoupling**: 🟢 Pass. Interfaces do not leak SQLCipher or AES implementation specifics.
+- **Naming Conventions**: 🟢 Pass. Follows standard `I[Name]` prefixing or clean abstract naming.
 
 ---
-**Final Status**: 🟢 APPROVED
+
+**Next Steps**:
+1. Update `lib/logic/services/interfaces/crypto_service.dart` to include file-based or stream-based encryption methods.
+2. Verify `IImageRepository` supports batch operations to handle multi-image ingestion efficiently.
