@@ -77,12 +77,12 @@
 ## 3. Data & Storage Implementation (P2)
 **Goal**: 数据库驱动与种子数据。
 
-### T8: SQLCipher 初始化与实体映射 (T2.1) [中]
-- [ ] **Implement**: 实现 `SQLCipherDatabaseService`。部署全量 Schema (records, images, tags 等)。 (Ref: Constitution#VI. Security)
-- [ ] **Document**: `DATABASE_SCHEMA.md` 记录详细表结构及外键约束逻辑。
-- [ ] **Test**: 导出 `.db` 物理文件并尝试破解（应失败）。
-- [ ] **Review**: `review_sqlcipher_config.md` - 审查 Page Size 和 KDF 参数配置。
-- [ ] **Commit**: `feat(data): deploy encrypted SQLCipher storage and core schema`
+### T8: SQLCipher 初始化与实体映射 (T2.1) [x]
+- [x] **Implement**: 实现 `SQLCipherDatabaseService`。部署全量 Schema (records, images, tags 等)。 (Ref: Constitution#VI. Security)
+- [x] **Document**: `DATABASE_SCHEMA.md` 记录详细表结构及外键约束逻辑。
+- [x] **Test**: 导出 `.db` 物理文件并尝试破解（应失败）。
+- [x] **Review**: `review_sqlcipher_config.md` - 审查 Page Size 和 KDF 参数配置。
+- [x] **Commit**: `feat(data): deploy encrypted SQLCipher storage and core schema`
 
 ### T9: 种子数据初始化与默认档案 [低]
 - [ ] **Implement**: 执行首次启动种子脚本。创建 `def_me` 档案与 4 个内置分类标签。 (Ref: Spec#FR-001)

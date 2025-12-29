@@ -82,10 +82,12 @@ class SQLCipherDatabaseService {
     // 启用外键约束
     await db.execute('PRAGMA foreign_keys = ON');
     
-    // 显式设置 Page Size (虽然 SQLCipher 4 默认通常是 4096，但显式设置更安全)
-    // 注意: 对已存在的数据库，修改 page_size 需要 vacuum，此处主要针对新库生效。
-    // await db.execute('PRAGMA cipher_page_size = 4096'); 
-    // sqflite_sqlcipher 通常在 openDatabase 内部处理了 key pragma
+    // 显式设置安全参数 (SQLCipher 4 Defaults but made explicit for future-proofing)
+    // 4096 bytes page size aligns with most filesystems
+    await db.execute('PRAGMA cipher_page_size = 4096'); 
+    
+    // 256,000 PBKDF2 iterations for key derivation
+    await db.execute('PRAGMA kdf_iter = 256000');
   }
 
   Future<void> _onCreate(Database db, int version) async {
