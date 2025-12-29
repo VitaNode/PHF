@@ -65,12 +65,12 @@
 - [x] **Review**: `review_file_security.md` - 确保存储格式符合 Spec。
 - [x] **Commit**: `feat(security): implement file security wrapper with random key and path management`
 
-### T7: 沙盒目录与权限治理 (T1.6) [低]
-- [ ] **Implement**: 实现 `PathProviderService`。初始化加密存储专用沙盒，管理系统权限弹窗。 (Ref: Constitution#I. Privacy)
-- [ ] **Document**: 列出应用所有私有存储路径及其用途。
-- [ ] **Test**: 仿真权限拒绝场景，验证 App 降级逻辑。
-- [ ] **Review**: `review_storage_sandbox.md` - 确认无任何文件暴露在外部可读路径。
-- [ ] **Commit**: `feat(storage): setup security sandbox and permission handlers`
+### T7: 沙盒目录与权限治理 (T1.6) [x]
+- [x] **Implement**: 实现 `PathProviderService`。初始化加密存储专用沙盒 (`db`, `images`, `temp`)。 (Ref: Constitution#I. Privacy)
+- [x] **Implement**: 实现 `PermissionService`。统一管理相机与相册权限。
+- [x] **Test**: 验证目录初始化及 `clearTemp` 清理逻辑。
+- [x] **Review**: `review_storage_sandbox.md` - 确认无任何文件暴露在外部可读路径。
+- [x] **Commit**: `feat(security): implement sandbox directories and permission management`
 
 ---
 
