@@ -50,12 +50,13 @@
 - [ ] **Review**: `review_keystore_security.md` - 审计 KeyStore/KeyChain 调用安全性。
 - [ ] **Commit**: `feat(security): implement master key and user salt management`
 
-### T5: AES-256-GCM 核心加密逻辑 [高]
-- [ ] **Implement**: 实现 `CryptoEngine`。封装物理加密逻辑，集成 AAD。 (Ref: Constitution#VI. Security)
-- [ ] **Document**: `ENCRYPTION_SPEC.md` 标注 AAD 和 Tag 字节长度。
-- [ ] **Test**: 编写针对边缘情况（空数据、超大数据分片）的单元测试。
-- [ ] **Review**: `review_encryption_flow.md` - 审查算法实现是否严格符合 GCM 范式。
-- [ ] **Commit**: `feat(security): implement core AES-256-GCM crypto engine`
+### T5: Crypto Service 实现 [x]
+- [x] **Implement**: 实现 `CryptoService` (基于 `ICryptoService`)。
+- [x] **Implement**: 使用 `cryptography` 包实现 AES-256-GCM 算法。
+- [x] **Implement**: 实现 `encryptFile` 流式加密，支持大文件分块处理 (Chunked Stream)。
+- [x] **Test**: 验证内存与文件流加密的正确性及 OOM 防护。
+- [x] **Review**: `review_crypto_service.md` - 算法选择与流式处理逻辑审查。
+- [x] **Commit**: `feat(security): implement aes-256-gcm crypto service with streaming support`
 
 ### T6: 文件安全封装器 (Stream & IV Prepend) [高]
 - [ ] **Implement**: 实现 `FileSecurityWrapper`。负责大文件流式加解密、IV 头部预置/提取 (T1.4)。 (Ref: Constitution#VII. Performance)
