@@ -17,6 +17,7 @@ import '../../data/repositories/record_repository.dart';
 import '../../data/repositories/app_meta_repository.dart';
 import '../../data/repositories/interfaces/tag_repository.dart';
 import '../../data/repositories/tag_repository.dart';
+import '../../data/models/tag.dart';
 import '../services/crypto_service.dart';
 import '../services/security_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -107,4 +108,10 @@ SecurityService securityService(SecurityServiceRef ref) {
 ITagRepository tagRepository(TagRepositoryRef ref) {
   final db = ref.watch(databaseServiceProvider);
   return TagRepository(db);
+}
+
+@riverpod
+Future<List<Tag>> allTags(AllTagsRef ref) async {
+  final repo = ref.watch(tagRepositoryProvider);
+  return await repo.getAllTags();
 }

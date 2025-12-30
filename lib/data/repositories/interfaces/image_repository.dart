@@ -30,4 +30,7 @@ abstract class IImageRepository {
 
   /// 删除单张图片元数据
   Future<void> deleteImage(String id);
+
+  /// 更新单张图片的元数据 (医院、日期)
+  Future<void> updateImageMetadata(String imageId, {String? hospitalName, DateTime? visitDate});
 }

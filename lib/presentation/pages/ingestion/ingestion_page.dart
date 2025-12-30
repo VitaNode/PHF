@@ -1,13 +1,11 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../../logic/providers/ingestion_provider.dart';
 import '../../../logic/providers/states/ingestion_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/active_button.dart';
-import '../../widgets/tag_selector.dart';
+import 'package:image_picker/image_picker.dart';
 
 class IngestionPage extends ConsumerStatefulWidget {
   const IngestionPage({super.key});
@@ -17,14 +15,45 @@ class IngestionPage extends ConsumerStatefulWidget {
 }
 
 class _IngestionPageState extends ConsumerState<IngestionPage> {
-  final TextEditingController _hospitalController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
-
+  
   @override
-  void dispose() {
-    _hospitalController.dispose();
-    _notesController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Auto-trigger picker if empty
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.read(ingestionControllerProvider).rawImages.isEmpty) {
+         _showPickerMenu();
+      }
+    });
+  }
+
+  void _showPickerMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('拍照'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(ingestionControllerProvider.notifier).takePhoto();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('从相册选择'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(ingestionControllerProvider.notifier).pickImages();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -32,19 +61,13 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
     final state = ref.watch(ingestionControllerProvider);
     final notifier = ref.read(ingestionControllerProvider.notifier);
 
-    // Sync controllers if needed (though usually we want one-way or careful two-way)
-    // For simplicity, we just use them to update the state on change.
-
-    // Handle Success/Error Navigation/Dialogs
     ref.listen(ingestionControllerProvider.select((s) => s.status), (previous, next) {
       if (next == IngestionStatus.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('保存成功')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
         Navigator.of(context).pop();
       } else if (next == IngestionStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('提交失败: ${state.errorMessage}')),
+          SnackBar(content: Text('保存受阻: ${state.errorMessage}')),
         );
       }
     });
@@ -52,197 +75,138 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('录入病历'),
+        title: const Text('预览与处理'),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            onPressed: _showPickerMenu,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: state.rawImages.isEmpty 
+        ? _buildEmpty(context) 
+        : _buildGrid(context, state, notifier),
+      bottomNavigationBar: state.rawImages.isEmpty ? null : SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '元数据将在保存后由背景 OCR 自动识别',
+                style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ActiveButton(
+                  text: '一键保存',
+                  onPressed: () => notifier.submit(),
+                  isLoading: state.status == IngestionStatus.processing,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Hospital Name
-            TextField(
-              controller: _hospitalController,
-              decoration: const InputDecoration(
-                labelText: '医院名称',
-                hintText: '例如：上海瑞金医院',
-                prefixIcon: Icon(Icons.apartment),
-              ),
-              onChanged: (val) => notifier.updateHospital(val),
-            ),
-            const SizedBox(height: 16),
+    );
+  }
 
-            // 2. Visit Date
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_today, color: AppTheme.primaryTeal),
-              title: const Text('就诊日期'),
-              subtitle: Text(
-                state.visitDate != null 
-                  ? DateFormat('yyyy-MM-dd').format(state.visitDate!) 
-                  : '未选择',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: state.visitDate ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime.now(),
-                );
-                if (date != null) {
-                  notifier.updateDate(date);
-                }
-              },
-            ),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            // 3. Image Grid
-            const Text(
-              '病历资料 (照片)',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: state.rawImages.length + 1,
-              itemBuilder: (context, index) {
-                if (index == state.rawImages.length) {
-                  // Add Button
-                  return GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet<void>(
-                        context: context,
-                        builder: (context) => SafeArea(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                leading: const Icon(Icons.camera_alt),
-                                title: const Text('拍照'),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  notifier.takePhoto();
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.photo_library),
-                                title: const Text('从相册选择'),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  notifier.pickImages();
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppTheme.bgGray,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.textHint.withValues(alpha: 0.3)),
-                      ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo, color: AppTheme.textHint),
-                          SizedBox(height: 4),
-                          Text('添加图片', style: TextStyle(fontSize: 10, color: AppTheme.textHint)),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                final image = state.rawImages[index];
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(image.path),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: () => notifier.removeImage(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.close, size: 16, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // 4. Notes
-            TextField(
-              controller: _notesController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: '备注',
-                hintText: '输入其他关键信息...',
-                alignLabelWithHint: true,
-              ),
-              onChanged: (val) => notifier.updateNotes(val),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 5. Tag Selector
-            const Text(
-              '标签',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TagSelector(
-              selectedTagIds: state.selectedTagIds,
-              onToggle: (id) => notifier.toggleTag(id),
-              onReorder: (oldIndex, newIndex) => notifier.reorderTags(oldIndex, newIndex),
-            ),
-
-            const SizedBox(height: 40),
-
-            // 6. Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ActiveButton(
-                text: '加密保存',
-                onPressed: (state.rawImages.isEmpty) ? null : () => notifier.submit(),
-                isLoading: state.status == IngestionStatus.processing || state.status == IngestionStatus.saving,
-              ),
-            ),
-          ],
-        ),
+  Widget _buildEmpty(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.photo_outlined, size: 64, color: AppTheme.textHint),
+          const SizedBox(height: 16),
+          const Text('请添加病历照片', style: TextStyle(color: AppTheme.textHint)),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _showPickerMenu,
+            child: const Text('立即添加'),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildGrid(BuildContext context, IngestionState state, IngestionController notifier) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.8,
+      ),
+      itemCount: state.rawImages.length,
+      itemBuilder: (context, index) {
+        final image = state.rawImages[index];
+        final rotation = state.rotations[index];
+
+        return Card(
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: RotatedBox(
+                  quarterTurns: rotation ~/ 90,
+                  child: Image.file(
+                    File(image.path),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // Toolbar
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 36,
+                  color: Colors.black54,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.rotate_right, size: 18, color: Colors.white),
+                        onPressed: () => notifier.rotateImage(index),
+                        padding: EdgeInsets.zero,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 18, color: Colors.white),
+                        onPressed: () => notifier.removeImage(index),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Index
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

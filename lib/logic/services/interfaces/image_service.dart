@@ -38,6 +38,12 @@ abstract class IImageService {
 
   /// 提取图像的基本尺寸信息（而不完整解码整个图像）
   Future<ImageDimensions> getDimensions(Uint8List data);
+
+  /// 旋转图像
+  Future<Uint8List> rotateImage({
+    required Uint8List data,
+    required int angle,
+  });
 }
 
 /// 图像尺寸数据模型

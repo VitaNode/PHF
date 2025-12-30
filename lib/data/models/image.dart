@@ -32,6 +32,7 @@ class MedicalImage with _$MedicalImage {
     required String id,
     required String recordId,
     required String encryptionKey,
+    required String thumbnailEncryptionKey,
     required String filePath,
     required String thumbnailPath,
     @Default('image/webp') String mimeType,
@@ -41,6 +42,8 @@ class MedicalImage with _$MedicalImage {
     int? height,
 
     required DateTime createdAt,
+    String? hospitalName,
+    DateTime? visitDate,
     
     /// 数据库存储的 Tag IDs (JSON List from DB)
     @Default([]) List<String> tagIds,

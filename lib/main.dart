@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/pages/home/home_page.dart';
 import 'presentation/pages/onboarding/security_onboarding_page.dart';
+import 'presentation/pages/auth/lock_screen.dart';
 import 'logic/providers/core_providers.dart';
+import 'logic/providers/auth_provider.dart';
 
 Future<void> main() async {
   // 确保 Flutter 绑定初始化，因为我们需要在 runApp 前或初始化 provider 时进行异步操作
@@ -83,7 +85,17 @@ class AppLoader extends ConsumerWidget {
           return const SecurityOnboardingPage();
         }
 
-        // 如果已设置应用锁，进入首页 (Phase 1 简化，未来需进入 LockScreen)
+        // 如果已设置应用锁且处于锁定状态，显示锁屏界面
+        final isLocked = ref.watch(authStateControllerProvider);
+        if (isLocked) {
+          return LockScreen(
+            onAuthenticated: () {
+              ref.read(authStateControllerProvider.notifier).unlock();
+            },
+          );
+        }
+
+        // 如果已设置应用锁且已验证，进入首页
         return const HomePage();
       },
     );

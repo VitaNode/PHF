@@ -23,6 +23,7 @@ mixin _$MedicalImage {
   String get id => throw _privateConstructorUsedError;
   String get recordId => throw _privateConstructorUsedError;
   String get encryptionKey => throw _privateConstructorUsedError;
+  String get thumbnailEncryptionKey => throw _privateConstructorUsedError;
   String get filePath => throw _privateConstructorUsedError;
   String get thumbnailPath => throw _privateConstructorUsedError;
   String get mimeType => throw _privateConstructorUsedError;
@@ -59,6 +60,7 @@ abstract class $MedicalImageCopyWith<$Res> {
       {String id,
       String recordId,
       String encryptionKey,
+      String thumbnailEncryptionKey,
       String filePath,
       String thumbnailPath,
       String mimeType,
@@ -89,6 +91,7 @@ class _$MedicalImageCopyWithImpl<$Res, $Val extends MedicalImage>
     Object? id = null,
     Object? recordId = null,
     Object? encryptionKey = null,
+    Object? thumbnailEncryptionKey = null,
     Object? filePath = null,
     Object? thumbnailPath = null,
     Object? mimeType = null,
@@ -112,6 +115,10 @@ class _$MedicalImageCopyWithImpl<$Res, $Val extends MedicalImage>
       encryptionKey: null == encryptionKey
           ? _value.encryptionKey
           : encryptionKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      thumbnailEncryptionKey: null == thumbnailEncryptionKey
+          ? _value.thumbnailEncryptionKey
+          : thumbnailEncryptionKey // ignore: cast_nullable_to_non_nullable
               as String,
       filePath: null == filePath
           ? _value.filePath
@@ -169,6 +176,7 @@ abstract class _$$MedicalImageImplCopyWith<$Res>
       {String id,
       String recordId,
       String encryptionKey,
+      String thumbnailEncryptionKey,
       String filePath,
       String thumbnailPath,
       String mimeType,
@@ -197,6 +205,7 @@ class __$$MedicalImageImplCopyWithImpl<$Res>
     Object? id = null,
     Object? recordId = null,
     Object? encryptionKey = null,
+    Object? thumbnailEncryptionKey = null,
     Object? filePath = null,
     Object? thumbnailPath = null,
     Object? mimeType = null,
@@ -220,6 +229,10 @@ class __$$MedicalImageImplCopyWithImpl<$Res>
       encryptionKey: null == encryptionKey
           ? _value.encryptionKey
           : encryptionKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      thumbnailEncryptionKey: null == thumbnailEncryptionKey
+          ? _value.thumbnailEncryptionKey
+          : thumbnailEncryptionKey // ignore: cast_nullable_to_non_nullable
               as String,
       filePath: null == filePath
           ? _value.filePath
@@ -272,6 +285,7 @@ class _$MedicalImageImpl implements _MedicalImage {
       {required this.id,
       required this.recordId,
       required this.encryptionKey,
+      required this.thumbnailEncryptionKey,
       required this.filePath,
       required this.thumbnailPath,
       this.mimeType = 'image/webp',
@@ -295,6 +309,8 @@ class _$MedicalImageImpl implements _MedicalImage {
   final String recordId;
   @override
   final String encryptionKey;
+  @override
+  final String thumbnailEncryptionKey;
   @override
   final String filePath;
   @override
@@ -341,7 +357,7 @@ class _$MedicalImageImpl implements _MedicalImage {
 
   @override
   String toString() {
-    return 'MedicalImage(id: $id, recordId: $recordId, encryptionKey: $encryptionKey, filePath: $filePath, thumbnailPath: $thumbnailPath, mimeType: $mimeType, fileSize: $fileSize, displayOrder: $displayOrder, width: $width, height: $height, createdAt: $createdAt, tagIds: $tagIds, tags: $tags)';
+    return 'MedicalImage(id: $id, recordId: $recordId, encryptionKey: $encryptionKey, thumbnailEncryptionKey: $thumbnailEncryptionKey, filePath: $filePath, thumbnailPath: $thumbnailPath, mimeType: $mimeType, fileSize: $fileSize, displayOrder: $displayOrder, width: $width, height: $height, createdAt: $createdAt, tagIds: $tagIds, tags: $tags)';
   }
 
   @override
@@ -354,6 +370,8 @@ class _$MedicalImageImpl implements _MedicalImage {
                 other.recordId == recordId) &&
             (identical(other.encryptionKey, encryptionKey) ||
                 other.encryptionKey == encryptionKey) &&
+            (identical(other.thumbnailEncryptionKey, thumbnailEncryptionKey) ||
+                other.thumbnailEncryptionKey == thumbnailEncryptionKey) &&
             (identical(other.filePath, filePath) ||
                 other.filePath == filePath) &&
             (identical(other.thumbnailPath, thumbnailPath) ||
@@ -379,6 +397,7 @@ class _$MedicalImageImpl implements _MedicalImage {
       id,
       recordId,
       encryptionKey,
+      thumbnailEncryptionKey,
       filePath,
       thumbnailPath,
       mimeType,
@@ -411,6 +430,7 @@ abstract class _MedicalImage implements MedicalImage {
       {required final String id,
       required final String recordId,
       required final String encryptionKey,
+      required final String thumbnailEncryptionKey,
       required final String filePath,
       required final String thumbnailPath,
       final String mimeType,
@@ -432,6 +452,8 @@ abstract class _MedicalImage implements MedicalImage {
   String get recordId;
   @override
   String get encryptionKey;
+  @override
+  String get thumbnailEncryptionKey;
   @override
   String get filePath;
   @override

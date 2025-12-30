@@ -70,9 +70,16 @@ class IngestionController extends _$IngestionController {
     if (files.isNotEmpty) {
       state = state.copyWith(
         rawImages: [...state.rawImages, ...files],
+        rotations: [...state.rotations, ...List.filled(files.length, 0)],
         status: IngestionStatus.idle,
       );
     }
+  }
+
+  void rotateImage(int index) {
+    final newRotations = [...state.rotations];
+    newRotations[index] = (newRotations[index] + 90) % 360;
+    state = state.copyWith(rotations: newRotations);
   }
 
   void _setError(Object e) {
@@ -84,9 +91,11 @@ class IngestionController extends _$IngestionController {
 
   /// 移除选中的图片
   void removeImage(int index) {
-    final newList = [...state.rawImages];
-    newList.removeAt(index);
-    state = state.copyWith(rawImages: newList);
+    final newImages = [...state.rawImages];
+    final newRotations = [...state.rotations];
+    newImages.removeAt(index);
+    newRotations.removeAt(index);
+    state = state.copyWith(rawImages: newImages, rotations: newRotations);
   }
 
   /// 切换标签选中状态
@@ -127,7 +136,7 @@ class IngestionController extends _$IngestionController {
       final fileSecurity = ref.read(fileSecurityHelperProvider);
       final cryptoService = ref.read(cryptoServiceProvider);
       final imageProcessing = ref.read(imageProcessingServiceProvider);
-      final pathService = ref.read(pathProviderServiceProvider); // Move up
+      final pathService = ref.read(pathProviderServiceProvider);
       
       const currentPersonId = 'def_me'; // Phase 1 Single User
       
@@ -137,8 +146,14 @@ class IngestionController extends _$IngestionController {
       await Future.wait(state.rawImages.asMap().entries.map((entry) async {
         final index = entry.key;
         final xFile = entry.value;
-        final rawBytes = await xFile.readAsBytes();
+        var rawBytes = await xFile.readAsBytes();
         
+        // Apply Rotation if needed
+        final rotation = state.rotations[index];
+        if (rotation != 0) {
+           rawBytes = await imageProcessing.rotateImage(data: rawBytes, angle: rotation);
+        }
+
         // 1. Image Processing
         final compressedBytes = await imageProcessing.compressImage(data: rawBytes);
         final thumbnailBytes = await imageProcessing.generateThumbnail(data: rawBytes);
@@ -147,40 +162,32 @@ class IngestionController extends _$IngestionController {
         // 2. Encrypt & Save Main File (Generate New Key)
         final fileResult = await fileSecurity.saveEncryptedFile(
           data: compressedBytes, 
-          targetDir: pathService.imagesDirPath, // Absolute path
+          targetDir: pathService.imagesDirPath,
         );
         
-        // 3. Encrypt & Save Thumbnail (REUSE Key)
-        final keyBytes = base64Decode(fileResult.base64Key);
-        final encryptedThumb = await cryptoService.encrypt(data: thumbnailBytes, key: keyBytes);
-        
-        final thumbFileName = '${const Uuid().v4()}.enc';
-        final thumbRelPath = 'images/thumbnails/$thumbFileName';
-        final thumbFile = await pathService.getSecureFile(thumbRelPath);
-        if (!await thumbFile.parent.exists()) {
-             await thumbFile.parent.create(recursive: true);
-        }
-        await thumbFile.writeAsBytes(encryptedThumb);
+        // 3. Encrypt & Save Thumbnail (NEW INDEPENDENT Key - T16.1)
+        final thumbResult = await fileSecurity.saveEncryptedFile(
+          data: thumbnailBytes,
+          targetDir: '${pathService.sandboxRoot}/images/thumbnails',
+        );
 
         // 4. Create Entity
         medicalImages.add(MedicalImage(
           id: const Uuid().v4(),
           recordId: recordId,
           encryptionKey: fileResult.base64Key,
-          filePath: 'images/${fileResult.relativePath}', // Fix path to be relative from sandbox root?
-          // Note: FileSecurityHelper returns relativePath as just the filename.
-          // DB schema expects relative path from sandbox root?
-          // T12/ImageRepo uses standard join logic?
-          // Let's look at `Image.filePath` definition: "Encrypted file relative path".
-          // If we store 'images/filename.enc', that's good.
-          thumbnailPath: thumbRelPath,
-          mimeType: 'image/png', // T10 fallback
+          thumbnailEncryptionKey: thumbResult.base64Key, // Independent key
+          filePath: 'images/${fileResult.relativePath}',
+          thumbnailPath: 'images/thumbnails/${thumbResult.relativePath}',
+          mimeType: 'image/webp', // T16.2
           fileSize: compressedBytes.lengthInBytes,
           displayOrder: index,
           width: dimensions.width,
           height: dimensions.height,
           createdAt: DateTime.now(),
-          tagIds: state.selectedTagIds, // Apply global tags to all images for Phase 1
+          hospitalName: state.hospitalName,
+          visitDate: state.visitDate,
+          tagIds: state.selectedTagIds,
         ));
       }));
 

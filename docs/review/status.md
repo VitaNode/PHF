@@ -1,30 +1,24 @@
 # Project Review Status Summary
 
-**Last Updated**: 2025-12-30
-**Coverage**: T0 - T15
+**Last Updated**: 2025-12-31
+**Coverage**: T0 - T16
 
-## 🟢 Approved Features (Highlights)
+## �� Approved Features (Highlights)
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
+- **Hardening (T16)**: Mandatory app lock on re-entry, independent thumbnail encryption keys, and optimized database configuration (Page Size = 4096).
 - **Onboarding & Auth**: Security Onboarding (T14) with PIN setup (SHA-256) and optional biometric authentication.
 - **Data Persistence**: Encrypted SQLCipher database (T8) with FTS5. Initial Schema and Seed Data (T9) deployed.
-- **Repository Layer**: Type-safe `RecordRepository` and `ImageRepository` (T12) with automated tag cache synchronization.
-- **Environment**: Secure sandbox directories (T7).
-- **Image Handling**: Basic processing (T10) and Gallery/Camera integration (T11).
-- **Domain Modeling**: Robust entities (T2) and clean business interfaces (T3).
-- **State Management**: Riverpod scaffold (T13) with Ingestion and Timeline controllers.
-- **UI Kit**: 
-  - Foundation: `AppTheme` (Teal/Monospace) and atomic security components (T13.1).
-  - Structure: Global `CustomTopBar` and `MainFab` (T13.2) with integrated security indicators.
-  - Components: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
-- **Features**:
-  - **Timeline**: Full browsing flow (Timeline -> Detail -> Zoomable Fullscreen) (T15).
+- **Repository Layer**: Type-safe `RecordRepository` and `ImageRepository` (T12) with automated tag cache synchronization. Optimized batch querying for images (T16).
+- **Image Handling**: WebP compression (T16), basic processing (T10), and Gallery/Camera integration (T11).
+- **UI & UX (T16 Overhaul)**: 
+  - **Timeline**: Simplified navigation (AppBar-only settings), 4-6 image grid preview, and optimized data loading.
+  - **Ingestion**: Streamlined "Capture -> Preview -> Save" flow.
+  - **Detail View**: Split-view layout with per-image metadata (Hospital, Date, Tags) support and in-place editing.
+- **Components**: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
 
 ## 🟡 Pending Issues / Technical Debt
-- **Performance**: Timeline loading performs N+1 query for images. (Phase 2 Optimization)
-- **T13: Thumbnail Encryption**: Reusing main image key due to entity schema limitations (Phase 1 Workaround).
-- **T10: PNG Fallback**: Currently using PNG instead of WebP. (High Priority for P2)
-- **T8: Database Configuration**: Explicitly set `PRAGMA cipher_page_size = 4096`.
 - **T10: Physical Wiping**: Reliance on OS file deletion.
+- **Phase 2 OCR Integration**: Ingestion flow is ready, but background processing logic is pending.
 
 ## 🔴 Blockers
 - None.

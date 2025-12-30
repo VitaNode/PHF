@@ -92,11 +92,31 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       orderBy: 'visit_date_ms DESC',
     );
 
-    // 列表页通常不需要加载 heavy 的 image objects list，或者只加载第一张作为封面？
-    // 为了性能，这里我们暂不加载 images，或者 record.images 为空列表。
-    // 如果 UI 需要封面图，建议在 Record 表增加 `cover_image_path` 字段 (Phase 2 优化)。
-    
-    return maps.map((m) => _mapToRecord(m, [])).toList();
+    if (maps.isEmpty) return [];
+
+    final recordIds = maps.map((m) => m['id'] as String).toList();
+
+    // 优化：一次性获取所有相关的图片元数据，避免 N+1 查询
+    final String placeholders = List.filled(recordIds.length, '?').join(',');
+    final List<Map<String, dynamic>> imageMaps = await db.query(
+      'images',
+      where: 'record_id IN ($placeholders)',
+      whereArgs: recordIds,
+      orderBy: 'page_index ASC',
+    );
+
+    // 按 record_id 分组
+    final Map<String, List<MedicalImage>> imagesByRecord = {};
+    for (var imgMap in imageMaps) {
+      final rid = imgMap['record_id'] as String;
+      imagesByRecord.putIfAbsent(rid, () => []);
+      imagesByRecord[rid]!.add(_mapToImage(imgMap));
+    }
+
+    return maps.map((m) {
+      final rid = m['id'] as String;
+      return _mapToRecord(m, imagesByRecord[rid] ?? []);
+    }).toList();
   }
 
   @override

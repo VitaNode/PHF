@@ -15,22 +15,10 @@ import '../../theme/app_theme.dart';
 import '../timeline/timeline_page.dart';
 import '../ingestion/ingestion_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const TimelinePage(),
-    const Center(child: Text('Settings (Phase 2)')),
-  ];
-
-  void _onFabPressed() {
+  void _onFabPressed(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const IngestionPage()),
     );
@@ -44,37 +32,24 @@ class _HomePageState extends State<HomePage> {
           'PaperHealth',
           style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              // TODO: Settings Route in Phase 2/3
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      floatingActionButton: _currentIndex == 0 ? FloatingActionButton(
-        onPressed: _onFabPressed,
+      body: const TimelinePage(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onFabPressed(context),
         backgroundColor: AppTheme.primaryTeal,
         child: const Icon(Icons.add_a_photo, color: Colors.white),
-      ) : null,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: AppTheme.primaryTeal,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Timeline',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
       ),
     );
   }

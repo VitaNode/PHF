@@ -16,9 +16,9 @@ import 'interfaces/image_service.dart';
 class ImageProcessingService implements IImageService {
   
   @override
-  /// 将原始图片数据转换为 PNG 格式 (暂时代替 WebP)
+  /// 将原始图片数据转换为 WebP 格式
   /// 
-  /// [quality] 参数目前对 PNG 无效（PNG 为无损）。
+  /// [quality] 控制压缩质量。
   Future<Uint8List> compressImage({
     required Uint8List data,
     int quality = 80,
@@ -29,15 +29,15 @@ class ImageProcessingService implements IImageService {
       throw Exception('Failed to decode image data.');
     }
 
-    // 2. Encode to PNG
-    final png = img.encodePng(image);
+    // 2. Encode to WebP
+    final webp = img.encodeWebp(image, quality: quality);
     
     // 3. Return as Uint8List
-    return Uint8List.fromList(png);
+    return Uint8List.fromList(webp);
   }
 
   @override
-  /// 生成缩略图数据 (PNG 格式)
+  /// 生成缩略图数据 (WebP 格式)
   Future<Uint8List> generateThumbnail({
     required Uint8List data,
     int width = 200,
@@ -52,10 +52,39 @@ class ImageProcessingService implements IImageService {
     // copyResize handles aspect ratio automatically if height is not provided
     final thumbnail = img.copyResize(image, width: width);
 
-    // 3. Encode to PNG
-    final png = img.encodePng(thumbnail);
+    // 3. Encode to WebP
+    final webp = img.encodeWebp(thumbnail, quality: 75);
 
-    return Uint8List.fromList(png);
+    return Uint8List.fromList(webp);
+  }
+
+  @override
+  /// 旋转图像
+  Future<Uint8List> rotateImage({
+    required Uint8List data,
+    required int angle,
+  }) async {
+    // 1. Decode
+    final image = img.decodeImage(data);
+    if (image == null) {
+      throw Exception('Failed to decode image data for rotation.');
+    }
+
+    // 2. Rotate
+    // The image package's copyRotate function rotates counter-clockwise.
+    // We need to convert common clockwise angles (e.g., 90, 180, 270)
+    // to counter-clockwise for the function.
+    // A 90-degree clockwise rotation is equivalent to a 270-degree counter-clockwise rotation.
+    // A 270-degree clockwise rotation is equivalent to a 90-degree counter-clockwise rotation.
+    // 180 degrees is the same for both.
+    final normalizedAngle = (360 - (angle % 360)) % 360; // Convert to CCW angle for img.copyRotate
+
+    final rotatedImage = img.copyRotate(image, angle: normalizedAngle);
+
+    // 3. Encode to WebP
+    final webp = img.encodeWebp(rotatedImage, quality: 80); // Use a default quality
+
+    return Uint8List.fromList(webp);
   }
 
   @override

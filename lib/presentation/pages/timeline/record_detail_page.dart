@@ -1,25 +1,14 @@
-/// # Record Detail Page
-///
-/// ## Description
-/// 展示单条医疗记录的详细信息及所有加密图片。
-///
-/// ## Features
-/// - **Metadata**: 医院、日期、备注、所有标签。
-/// - **Image Grid**: 网格展示所有缩略图 (`SecureImage`)。
-/// - **Interaction**: 点击缩略图进入 `FullImageViewer`。
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:phf/data/models/image.dart';
-import 'package:phf/data/models/record.dart';
-import 'package:phf/logic/providers/core_providers.dart';
-import 'package:phf/presentation/theme/app_theme.dart';
-import 'package:phf/presentation/widgets/secure_image.dart';
-import 'package:phf/data/models/tag.dart';
-import 'package:phf/logic/providers/core_providers.dart';
-import 'package:phf/presentation/widgets/full_image_viewer.dart';
-import 'dart:convert';
+import '../../../data/models/image.dart';
+import '../../../data/models/record.dart';
+import '../../../data/models/tag.dart';
+import '../../../logic/providers/core_providers.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/secure_image.dart';
+import '../../widgets/tag_selector.dart';
 
 class RecordDetailPage extends ConsumerStatefulWidget {
   final String recordId;
@@ -34,18 +23,28 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   MedicalRecord? _record;
   List<MedicalImage> _images = [];
   bool _isLoading = true;
+  int _currentIndex = 0;
+  bool _isEditing = false;
+  
+  // Edit controllers
+  late TextEditingController _hospitalController;
+  DateTime? _visitDate;
 
   @override
   void initState() {
     super.initState();
+    _hospitalController = TextEditingController();
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
+  @override
+  void dispose() {
+    _hospitalController.dispose();
+    super.dispose();
+  }
 
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
     try {
       final recordRepo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
@@ -58,240 +57,353 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           _record = record;
           _images = images;
           _isLoading = false;
+          // Sync controllers with first image or record
+          if (_images.isNotEmpty) {
+            _updateControllersForIndex(0);
+          }
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载详情失败: $e')),
-        );
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _openFullEditor(int initialIndex) {
+  void _updateControllersForIndex(int index) {
+    final img = _images[index];
+    _hospitalController.text = img.hospitalName ?? _record?.hospitalName ?? '';
+    _visitDate = img.visitDate ?? _record?.notedAt;
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+      if (!_isEditing) {
+        _updateControllersForIndex(index);
+      }
+    });
+  }
+
+  Future<void> _saveChanges() async {
     if (_images.isEmpty) return;
     
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => FullImageViewer(
-          images: _images,
-          initialIndex: initialIndex,
-        ),
+    final currentImage = _images[_currentIndex];
+    final imageRepo = ref.read(imageRepositoryProvider);
+    
+    try {
+      await imageRepo.updateImageMetadata(
+        currentImage.id,
+        hospitalName: _hospitalController.text,
+        visitDate: _visitDate,
+      );
+      
+      // Update local state
+      setState(() {
+        _images[_currentIndex] = currentImage.copyWith(
+          hospitalName: _hospitalController.text,
+          visitDate: _visitDate,
+        );
+        _isEditing = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+    }
+  }
+
+  Future<void> _deleteCurrentImage() async {
+    if (_images.isEmpty) return;
+    final currentImage = _images[_currentIndex];
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除确认'),
+        content: const Text('确定要删除当前这张图片吗？此操作不可撤销。'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), 
+            style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
+            child: const Text('删除')
+          ),
+        ],
       ),
     );
+
+    if (confirm != true) return;
+
+    try {
+      final imageRepo = ref.read(imageRepositoryProvider);
+      await imageRepo.deleteImage(currentImage.id);
+
+      // If it was the last image, go back
+      if (_images.length == 1) {
+        Navigator.pop(context);
+        return;
+      }
+
+      // Reload
+      await _loadData();
+      if (_currentIndex >= _images.length) {
+        _currentIndex = _images.length - 1;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_record == null || _images.isEmpty) return const Scaffold(body: Center(child: Text('记录不存在')));
 
-    if (_record == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('错误')),
-        body: const Center(child: Text('记录不存在或已被删除')),
-      );
-    }
-
-    final record = _record!;
-    final dateStr = DateFormat('yyyy-MM-dd HH:mm').format(record.notedAt);
-    
-    // Parse tags
-    List<String> tags = [];
-    if (record.tagsCache != null) {
-      try {
-        tags = (jsonDecode(record.tagsCache!) as List).cast<String>();
-      } catch (_) {}
-    }
+    final currentImage = _images[_currentIndex];
 
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('记录详情'),
+        title: Text(_isEditing ? '编辑详情' : '病历详情'),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Info
-            Text(
-              record.hospitalName ?? '未命名医院',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              dateStr,
-              style: AppTheme.monoStyle.copyWith(
-                fontSize: 14,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Tags
-            if (tags.isNotEmpty)
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: tags.map((tag) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.bgGray,
-                    borderRadius: BorderRadius.circular(4),
+        actions: [
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => setState(() => _isEditing = true),
+            )
+          else
+                        TextButton(
+                          onPressed: _saveChanges,
+                          child: const Text('保存', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      const SizedBox(width: 8),
+                    ],
                   ),
-                  child: Text(
-                    tag,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  body: Column(
+                    children: [
+                      // 1. Top Section - Image Pager
+                      Expanded(
+                        flex: 4,
+                        child: Stack(
+                          children: [
+                            PageView.builder(
+                              itemCount: _images.length,
+                              onPageChanged: _onPageChanged,
+                              itemBuilder: (context, index) {
+                                final img = _images[index];
+                                return Center(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Full screen viewer maybe?
+                                    },
+                                    child: SecureImage(
+                                      imagePath: img.filePath, // Use main file in detail
+                                      encryptionKey: img.encryptionKey,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            // Left/Right Indicators
+                            if (_images.length > 1) ...[
+                              if (_currentIndex > 0)
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.chevron_left, color: Colors.black54, size: 40),
+                                    onPressed: () {
+                                        // PageController navigation would be better
+                                    },
+                                  ),
+                                ),
+                              if (_currentIndex < _images.length - 1)
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.chevron_right, color: Colors.black54, size: 40),
+                                    onPressed: () {},
+                                  ),
+                                ),
+                            ],
+                            // Page indicator
+                            Positioned(
+                              bottom: 16,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(16)
+                                  ),
+                                  child: Text(
+                                    '${_currentIndex + 1} / ${_images.length}',
+                                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+            
+                      const Divider(height: 1),
+            
+                      // 2. Bottom Section - Details
+                      Expanded(
+                        flex: 6,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(20),
+                          child: _isEditing ? _buildEditView() : _buildInfoView(currentImage),
+                        ),
+                      ),
+                    ],
                   ),
-                )).toList(),
-              ),
-
-            // Notes
-            if (record.notes != null && record.notes!.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              const Text(
-                '备注',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.bgGray.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  record.notes!,
-                  style: const TextStyle(fontSize: 14, height: 1.5),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 16),
-      
-            // Tags from Images
-            if (_images.isNotEmpty) ...[
-               Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: _getAllUniqueTags().map((tagId) {
-                  // Need to fetch Tag Name by ID. 
-                  // Phase 1 Optimization: We use FutureBuilder to fetch Tag Name
-                  // Or better: Just show Tag ID for now or fetch all tags in initState?
-                  // To make it look good, let's fetch individual Tag name.
-                  return _TagNameChip(tagId: tagId);
-                }).toList(),
-               ),
-               const SizedBox(height: 16),
-            ],
-
-            Text(
-              widget.recordId,
-              style: AppTheme.monoStyle.copyWith(
-                fontSize: 12,
-                color: AppTheme.textHint,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 24),
-
-            // Images Grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 1.0,
-              ),
-              itemCount: _images.length,
-              itemBuilder: (context, index) {
-                final image = _images[index];
-                return GestureDetector(
-                  onTap: () => _openFullEditor(index),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SecureImage(
-                      imagePath: image.thumbnailPath,
-                      encryptionKey: image.encryptionKey, 
-                      fit: BoxFit.cover,
+                  bottomNavigationBar: _isEditing ? null : SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _deleteCurrentImage,
+                              icon: const Icon(Icons.delete_outline, size: 18),
+                              label: const Text('删除当前页'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.errorRed,
+                                side: const BorderSide(color: AppTheme.errorRed),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  List<String> _getAllUniqueTags() {
-    final Set<String> tags = {};
-    for (var img in _images) {
-      tags.addAll(img.tagIds);
-    }
-    return tags.toList();
-  }
-}
-
-class _TagNameChip extends ConsumerWidget {
-  final String tagId;
-  const _TagNameChip({required this.tagId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // In a real app, we'd cache all tags in a provider map to avoid N+1 queries.
-    // Here we just fetch all tags and find it.
-    final repo = ref.watch(tagRepositoryProvider);
-    return FutureBuilder(
-      future: repo.getAllTags(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox();
-        // Handle empty or missing tags gracefully
-        try {
-          final tag = snapshot.data!.firstWhere((t) => t.id == tagId, orElse: () => Tag(id: '', name: 'Unknown', createdAt: DateTime(0), color: '#808080')); // Default grey
-          if (tag.name == 'Unknown') return const SizedBox();
-          
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: (tag.color != null && tag.color!.isNotEmpty) 
-                  ? Color(int.parse(tag.color!.replaceAll('#', '0xFF'))) 
-                  : AppTheme.primaryTeal.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              tag.name,
-              style: const TextStyle(fontSize: 12, color: AppTheme.primaryTeal),
-            ),
-          );
-        } catch (e) {
-          return const SizedBox();
-        }
-      },
-    );
-  }
-}
+              }
+            
+              Widget _buildInfoView(MedicalImage img) {
+                final hospital = img.hospitalName ?? _record?.hospitalName ?? '未填写';
+                final date = img.visitDate ?? _record?.notedAt;
+                final dateStr = date != null ? DateFormat('yyyy-MM-dd').format(date) : '未知日期';
+            
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('医院', style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
+                    Text(hospital, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    
+                    const SizedBox(height: 16),
+                    
+                    const Text('就诊日期', style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
+                    Text(dateStr, style: AppTheme.monoStyle.copyWith(fontSize: 16)),
+                    
+                    const SizedBox(height: 24),
+                    
+                    const Text('标签', style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
+                    const SizedBox(height: 8),
+                    if (img.tagIds.isEmpty)
+                      const Text('无标签', style: TextStyle(color: AppTheme.textHint, fontSize: 14))
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: img.tagIds.map((tid) => _TagNameChip(tagId: tid)).toList(),
+                      ),
+                  ],
+                );
+              }
+            
+              Widget _buildEditView() {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _hospitalController,
+                      decoration: const InputDecoration(labelText: '医院名称'),
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('就诊日期'),
+                      subtitle: Text(_visitDate != null ? DateFormat('yyyy-MM-dd').format(_visitDate!) : '选择日期'),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _visitDate ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) setState(() => _visitDate = picked);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    const Text('管理标签', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    TagSelector(
+                      selectedTagIds: _images[_currentIndex].tagIds,
+                      onToggle: (tid) {
+                        final currentIds = [..._images[_currentIndex].tagIds];
+                        if (currentIds.contains(tid)) {
+                          currentIds.remove(tid);
+                        } else {
+                          currentIds.add(tid);
+                        }
+                        setState(() {
+                          _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds);
+                        });
+                        // Persist tag update
+                        ref.read(imageRepositoryProvider).updateImageTags(
+                          _images[_currentIndex].id, 
+                          currentIds
+                        );
+                      },
+                      onReorder: (oldIdx, newIdx) {
+                        final currentIds = [..._images[_currentIndex].tagIds];
+                        if (oldIdx < newIdx) newIdx -= 1;
+                        final item = currentIds.removeAt(oldIdx);
+                        currentIds.insert(newIdx, item);
+                        setState(() {
+                          _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds);
+                        });
+                        ref.read(imageRepositoryProvider).updateImageTags(
+                          _images[_currentIndex].id, 
+                          currentIds
+                        );
+                      },
+                    ),
+                  ],
+                );
+              }
+            }
+            
+            class _TagNameChip extends ConsumerWidget {
+              final String tagId;
+              const _TagNameChip({required this.tagId});
+            
+              @override
+              Widget build(BuildContext context, WidgetRef ref) {
+                final allTagsAsync = ref.watch(allTagsProvider);
+                return allTagsAsync.when(
+                  data: (allTags) {
+                    final tag = allTags.firstWhere((t) => t.id == tagId, orElse: () => Tag(id: '', name: '?', createdAt: DateTime(0), color: ''));
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                      ),
+                      child: Text(tag.name, style: const TextStyle(fontSize: 12, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+                    );
+                  },
+                  loading: () => const SizedBox(),
+                  error: (_, __) => const SizedBox(),
+                );
+              }
+            }

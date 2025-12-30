@@ -80,57 +80,42 @@ class EventCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                // Status Dot (e.g. if processing, show distinct indicator - Phase 2)
               ],
             ),
           ),
 
-          // 2. Body (Thumbnail)
-          if (firstImage != null)
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: SecureImage(
-                imagePath: firstImage!.thumbnailPath, // Use thumbnail for list view
-                encryptionKey: firstImage!.encryptionKey,
-                fit: BoxFit.cover,
-                // No radius here, or distinct radius? 
-                // Let's keep it straight as it's middle content
-              ),
+          // 2. Body (Thumbnail Grid)
+          if (record.images.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: _buildImageGrid(record.images),
             )
           else
             Container(
               height: 120,
-              color: AppTheme.bgGray,
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.bgGray,
+                borderRadius: BorderRadius.circular(8),
+              ),
               alignment: Alignment.center,
               child: const Icon(Icons.medical_services_outlined, color: AppTheme.textHint, size: 48),
             ),
 
-          // 3. Footer (Tags + Note/Image Tag)
+          // 3. Footer (Single Styled Tag)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
                 if (tags.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: tags.map((t) => _buildTagChip(t)).toList(),
-                    ),
-                  ),
-                
-                // Priority: First Image Tag > Notes
-                if (firstImage != null && firstImage!.tagIds.isNotEmpty)
-                  _buildFirstImageTag(ref, firstImage!.tagIds.first)
-                else if (record.notes?.isNotEmpty ?? false)
-                  Text(
-                    record.notes!,
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  _buildTagChip(tags.first),
+                const Spacer(),
+                // Display count of images
+                if (record.images.length > 6)
+                   Text(
+                     '共 ${record.images.length} 张图片 >',
+                     style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
+                   ),
               ],
             ),
           ),
@@ -139,31 +124,54 @@ class EventCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildFirstImageTag(WidgetRef ref, String tagId) {
-    final repo = ref.watch(tagRepositoryProvider);
-    return FutureBuilder<List<Tag>>(
-      future: repo.getAllTags(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox();
-        try {
-          final tag = snapshot.data!.firstWhere((t) => t.id == tagId, orElse: () => Tag(id: '', name: '', color: '', createdAt: DateTime.now()));
-          if (tag.name.isEmpty) return const SizedBox();
+  Widget _buildImageGrid(List<MedicalImage> images) {
+    // Show 4 to 6 images in a grid
+    final int displayCount = images.length > 6 ? 6 : images.length;
+    final List<MedicalImage> displayImages = images.take(displayCount).toList();
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final double spacing = 4.0;
+      final int crossAxisCount = 3;
+      final double itemSize = (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: List.generate(displayImages.length, (index) {
+          final isLast = index == 5 && images.length > 6;
           
-          return Text(
-            tag.name, // Display Tag Name as description
-            style: const TextStyle(
-              fontSize: 13, 
-              color: AppTheme.textPrimary, 
-              fontWeight: FontWeight.w500
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          return Stack(
+            children: [
+              SizedBox(
+                width: itemSize,
+                height: itemSize,
+                child: SecureImage(
+                  imagePath: displayImages[index].thumbnailPath,
+                  encryptionKey: displayImages[index].thumbnailEncryptionKey,
+                  borderRadius: BorderRadius.circular(4),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              if (isLast)
+                Container(
+                  width: itemSize,
+                  height: itemSize,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      '...',
+                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
           );
-        } catch (e) {
-          return const SizedBox();
-        }
-      },
-    );
+        }),
+      );
+    });
   }
 
   Widget _buildTagChip(String label) {
@@ -188,8 +196,6 @@ class EventCard extends ConsumerWidget {
   List<String> _parseTags(String? jsonCache) {
     if (jsonCache == null || jsonCache.isEmpty) return [];
     try {
-      // Expecting JSON array of strings: '["Check", "Blood"]'
-      // Or relying on Data Layer convention.
       final List<dynamic> list = jsonDecode(jsonCache) as List<dynamic>;
       return list.map((e) => e.toString()).toList();
     } catch (e) {

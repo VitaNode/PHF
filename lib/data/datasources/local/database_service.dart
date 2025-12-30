@@ -32,7 +32,7 @@ import 'seeds/database_seeder.dart';
 
 class SQLCipherDatabaseService {
   static const String _dbName = 'phf_encrypted.db';
-  static const int _dbVersion = 2;
+  static const int _dbVersion = 4;
 
   final MasterKeyManager keyManager;
   final PathProviderService pathService;
@@ -150,8 +150,11 @@ class SQLCipherDatabaseService {
         file_path       TEXT NOT NULL,
         thumbnail_path  TEXT NOT NULL,
         encryption_key  TEXT NOT NULL,
+        thumbnail_encryption_key TEXT NOT NULL,
         width           INTEGER,
         height          INTEGER,
+        hospital_name   TEXT,
+        visit_date_ms   INTEGER,
         mime_type       TEXT DEFAULT 'image/webp',
         file_size       INTEGER,
         page_index      INTEGER DEFAULT 0,
@@ -275,6 +278,34 @@ class SQLCipherDatabaseService {
           'created_at_ms': now,
         }, conflictAlgorithm: ConflictAlgorithm.ignore);
       }
+    }
+    
+    if (oldVersion < 3) {
+      // Upgrade to v3: Add thumbnail_encryption_key to images
+      try {
+        await db.execute('ALTER TABLE images ADD COLUMN thumbnail_encryption_key TEXT');
+        // For existing rows, we can't easily generate new random keys here without business logic,
+        // so we migrate by copying encryption_key (which was the previous workaround).
+        await db.execute('UPDATE images SET thumbnail_encryption_key = encryption_key WHERE thumbnail_encryption_key IS NULL');
+      } catch (_) {
+        // Ignore
+      }
+    }
+
+    if (oldVersion < 4) {
+      // Upgrade to v4: Add hospital_name and visit_date_ms to images
+      try {
+        await db.execute('ALTER TABLE images ADD COLUMN hospital_name TEXT');
+        await db.execute('ALTER TABLE images ADD COLUMN visit_date_ms INTEGER');
+        
+        // Migrate data from parent record to existing images
+        await db.execute('''
+          UPDATE images 
+          SET hospital_name = (SELECT hospital_name FROM records WHERE records.id = images.record_id),
+              visit_date_ms = (SELECT visit_date_ms FROM records WHERE records.id = images.record_id)
+          WHERE hospital_name IS NULL OR visit_date_ms IS NULL
+        ''');
+      } catch (_) {}
     }
     
     await batch.commit();

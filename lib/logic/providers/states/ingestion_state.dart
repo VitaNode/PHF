@@ -15,6 +15,7 @@ enum IngestionStatus {
 class IngestionState with _$IngestionState {
   const factory IngestionState({
     @Default([]) List<XFile> rawImages,
+    @Default([]) List<int> rotations, // 90, 180, 270 (degrees)
     DateTime? visitDate,
     String? hospitalName,
     String? notes,

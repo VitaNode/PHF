@@ -36,12 +36,15 @@ class ImageRepository extends BaseRepository implements IImageRepository {
           'file_path': image.filePath,
           'thumbnail_path': image.thumbnailPath,
           'encryption_key': image.encryptionKey,
+          'thumbnail_encryption_key': image.thumbnailEncryptionKey,
           'width': image.width,
           'height': image.height,
           'mime_type': image.mimeType,
           'file_size': image.fileSize,
           'page_index': image.displayOrder, // mapped
           'created_at_ms': image.createdAt.millisecondsSinceEpoch,
+          'hospital_name': image.hospitalName,
+          'visit_date_ms': image.visitDate?.millisecondsSinceEpoch,
           // Store tags (List<String> Ids) as JSON string in 'tags' column
           'tags': jsonEncode(image.tagIds),
         },
@@ -152,6 +155,20 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     });
   }
 
+  @override
+  Future<void> updateImageMetadata(String imageId, {String? hospitalName, DateTime? visitDate}) async {
+    final db = await dbService.database;
+    await db.update(
+      'images',
+      {
+        if (hospitalName != null) 'hospital_name': hospitalName,
+        if (visitDate != null) 'visit_date_ms': visitDate.millisecondsSinceEpoch,
+      },
+      where: 'id = ?',
+      whereArgs: [imageId],
+    );
+  }
+
   Future<void> _syncRecordTagsCache(Transaction txn, String recordId) async {
     // 1. Query all tags for this record
     // Join images -> image_tags -> tags to get Names
@@ -179,7 +196,10 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     List<String> tags = [];
     if (row['tags'] != null) {
       try {
-        tags = List<String>.from(jsonDecode(row['tags'] as String));
+        final decoded = jsonDecode(row['tags'] as String);
+        if (decoded is List) {
+          tags = List<String>.from(decoded);
+        }
       } catch (e) {
         // ignore parsing error
       }
@@ -189,6 +209,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       'id': row['id'],
       'recordId': row['record_id'],
       'encryptionKey': row['encryption_key'],
+      'thumbnailEncryptionKey': row['thumbnail_encryption_key'] ?? row['encryption_key'],
       'filePath': row['file_path'],
       'thumbnailPath': row['thumbnail_path'],
       'mimeType': row['mime_type'],
@@ -197,6 +218,10 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       'width': row['width'],
       'height': row['height'],
       'createdAt': DateTime.fromMillisecondsSinceEpoch(row['created_at_ms'] as int).toIso8601String(),
+      'hospitalName': row['hospital_name'],
+      'visitDate': row['visit_date_ms'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(row['visit_date_ms'] as int).toIso8601String() 
+          : null,
       'tagIds': tags,
     });
   }

@@ -230,5 +230,21 @@ final tagRepositoryProvider = Provider<ITagRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TagRepositoryRef = ProviderRef<ITagRepository>;
+String _$allTagsHash() => r'46b02f3841afc46071903c43af083c4496a3a281';
+
+/// See also [allTags].
+@ProviderFor(allTags)
+final allTagsProvider = AutoDisposeFutureProvider<List<Tag>>.internal(
+  allTags,
+  name: r'allTagsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$allTagsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AllTagsRef = AutoDisposeFutureProviderRef<List<Tag>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

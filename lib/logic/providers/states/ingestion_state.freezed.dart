@@ -17,6 +17,8 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$IngestionState {
   List<XFile> get rawImages => throw _privateConstructorUsedError;
+  List<int> get rotations =>
+      throw _privateConstructorUsedError; // 90, 180, 270 (degrees)
   DateTime? get visitDate => throw _privateConstructorUsedError;
   String? get hospitalName => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
@@ -39,6 +41,7 @@ abstract class $IngestionStateCopyWith<$Res> {
   @useResult
   $Res call(
       {List<XFile> rawImages,
+      List<int> rotations,
       DateTime? visitDate,
       String? hospitalName,
       String? notes,
@@ -63,6 +66,7 @@ class _$IngestionStateCopyWithImpl<$Res, $Val extends IngestionState>
   @override
   $Res call({
     Object? rawImages = null,
+    Object? rotations = null,
     Object? visitDate = freezed,
     Object? hospitalName = freezed,
     Object? notes = freezed,
@@ -75,6 +79,10 @@ class _$IngestionStateCopyWithImpl<$Res, $Val extends IngestionState>
           ? _value.rawImages
           : rawImages // ignore: cast_nullable_to_non_nullable
               as List<XFile>,
+      rotations: null == rotations
+          ? _value.rotations
+          : rotations // ignore: cast_nullable_to_non_nullable
+              as List<int>,
       visitDate: freezed == visitDate
           ? _value.visitDate
           : visitDate // ignore: cast_nullable_to_non_nullable
@@ -113,6 +121,7 @@ abstract class _$$IngestionStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {List<XFile> rawImages,
+      List<int> rotations,
       DateTime? visitDate,
       String? hospitalName,
       String? notes,
@@ -135,6 +144,7 @@ class __$$IngestionStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? rawImages = null,
+    Object? rotations = null,
     Object? visitDate = freezed,
     Object? hospitalName = freezed,
     Object? notes = freezed,
@@ -147,6 +157,10 @@ class __$$IngestionStateImplCopyWithImpl<$Res>
           ? _value._rawImages
           : rawImages // ignore: cast_nullable_to_non_nullable
               as List<XFile>,
+      rotations: null == rotations
+          ? _value._rotations
+          : rotations // ignore: cast_nullable_to_non_nullable
+              as List<int>,
       visitDate: freezed == visitDate
           ? _value.visitDate
           : visitDate // ignore: cast_nullable_to_non_nullable
@@ -180,6 +194,7 @@ class __$$IngestionStateImplCopyWithImpl<$Res>
 class _$IngestionStateImpl implements _IngestionState {
   const _$IngestionStateImpl(
       {final List<XFile> rawImages = const [],
+      final List<int> rotations = const [],
       this.visitDate,
       this.hospitalName,
       this.notes,
@@ -187,6 +202,7 @@ class _$IngestionStateImpl implements _IngestionState {
       this.errorMessage,
       final List<String> selectedTagIds = const []})
       : _rawImages = rawImages,
+        _rotations = rotations,
         _selectedTagIds = selectedTagIds;
 
   final List<XFile> _rawImages;
@@ -198,6 +214,16 @@ class _$IngestionStateImpl implements _IngestionState {
     return EqualUnmodifiableListView(_rawImages);
   }
 
+  final List<int> _rotations;
+  @override
+  @JsonKey()
+  List<int> get rotations {
+    if (_rotations is EqualUnmodifiableListView) return _rotations;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_rotations);
+  }
+
+// 90, 180, 270 (degrees)
   @override
   final DateTime? visitDate;
   @override
@@ -220,7 +246,7 @@ class _$IngestionStateImpl implements _IngestionState {
 
   @override
   String toString() {
-    return 'IngestionState(rawImages: $rawImages, visitDate: $visitDate, hospitalName: $hospitalName, notes: $notes, status: $status, errorMessage: $errorMessage, selectedTagIds: $selectedTagIds)';
+    return 'IngestionState(rawImages: $rawImages, rotations: $rotations, visitDate: $visitDate, hospitalName: $hospitalName, notes: $notes, status: $status, errorMessage: $errorMessage, selectedTagIds: $selectedTagIds)';
   }
 
   @override
@@ -230,6 +256,8 @@ class _$IngestionStateImpl implements _IngestionState {
             other is _$IngestionStateImpl &&
             const DeepCollectionEquality()
                 .equals(other._rawImages, _rawImages) &&
+            const DeepCollectionEquality()
+                .equals(other._rotations, _rotations) &&
             (identical(other.visitDate, visitDate) ||
                 other.visitDate == visitDate) &&
             (identical(other.hospitalName, hospitalName) ||
@@ -246,6 +274,7 @@ class _$IngestionStateImpl implements _IngestionState {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_rawImages),
+      const DeepCollectionEquality().hash(_rotations),
       visitDate,
       hospitalName,
       notes,
@@ -266,6 +295,7 @@ class _$IngestionStateImpl implements _IngestionState {
 abstract class _IngestionState implements IngestionState {
   const factory _IngestionState(
       {final List<XFile> rawImages,
+      final List<int> rotations,
       final DateTime? visitDate,
       final String? hospitalName,
       final String? notes,
@@ -275,6 +305,8 @@ abstract class _IngestionState implements IngestionState {
 
   @override
   List<XFile> get rawImages;
+  @override
+  List<int> get rotations; // 90, 180, 270 (degrees)
   @override
   DateTime? get visitDate;
   @override
