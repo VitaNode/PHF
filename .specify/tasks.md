@@ -200,3 +200,48 @@
 ---
 
 ## Phase 2: On-Device OCR & Intelligence (智能录入层)
+
+### T17: 基础设施与 Schema 升级 (Phase 2.1)
+- [ ] **Implement (T17.1)**: 在 `pubspec.yaml` 中添加 `google_mlkit_text_recognition`, `workmanager`, `sqflite_common_ffi` (用于 FTS5 测试) 等依赖。 (Complexity: Low)
+    - *Ref: Constitution#III. Intelligent Digitization (Offline dependencies)*
+- [ ] **Implement (T17.2)**: 更新 `Record` (增加 status) 和 `Image` (增加 ocr_data) 实体类，新建 `OCRQueueItem` 实体。运行 `build_runner`。 (Complexity: Low)
+    - *Ref: Constitution#VII. Coding Standards (Immutable Entities)*
+- [ ] **Implement (T17.3)**: 编写 SQL 迁移脚本 `migration_v2.sql`。
+    - 1. `ALTER TABLE records ADD COLUMN status TEXT DEFAULT 'archived'`.
+    - 2. `ALTER TABLE images ADD COLUMN ocr_text TEXT`. (以及其他字段)
+    - 3. `CREATE TABLE ocr_queue`.
+    - 4. `CREATE VIRTUAL TABLE ocr_search_index USING fts5`.
+    - *Ref: Constitution#VI. Security (SQLCipher Schema)* (Complexity: Medium)
+- [ ] **Implement (T17.4)**: 实现 `OCRQueueRepository` (入队/出队/状态更新) 及 `SearchRepository` (FTS5 查询)。 (Complexity: Medium)
+    - *Ref: Constitution#II. Architecture (Repository Pattern)*
+- [ ] **Test**: 编写单元测试验证 Schema 升级后的数据读写兼容性及 FTS5 搜索基础功能。 (Complexity: Medium)
+
+### T18: OCR 引擎集成 (Phase 2.2)
+- [ ] **Implement (T18.1)**: 定义 `IOCRService` 抽象接口及 `OCRResult` 数据结构 (包含 text, blocks, confidence)。 (Complexity: Low)
+    - *Ref: Constitution#II. Architecture (Facade Pattern)*
+- [ ] **Implement (T18.2 - Android)**: 实现 `AndroidOCRService`，集成 `google_mlkit_text_recognition`。配置 `android/build.gradle`。 (Complexity: Medium)
+    - *Ref: Constitution#II. Local-First (Offline ML Kit)*
+- [ ] **Implement (T18.3 - iOS)**: 实现 `IOSOCRService`。
+    - 编写 iOS 端 `OCRPlugin.swift` (利用 Vision Framework `VNRecognizeTextRequest`)。
+    - 实现 Flutter 端 MethodChannel 调用封装。
+    - *Ref: Constitution#II. Local-First (Native Vision Framework)* (Complexity: High)
+- [ ] **Test**: 分别在 Android/iOS 真机断网环境下验证图片文字识别准确率。 (Complexity: Medium)
+
+### T19: 业务逻辑与后台队列 (Phase 2.3)
+- [ ] **Implement (T19.1)**: 创建 `SmartExtractor` 工具类。实现日期 (`RegExp`) 和医院名称 (关键词/正则) 的提取策略。 (Complexity: Low)
+    - *Ref: Spec#FR-203 Intelligent Extraction*
+- [ ] **Implement (T19.2)**: 实现 `OCRProcessor` 核心服务。串联 `Queue -> OCR -> Extraction -> DB` 流程。包含置信度评分逻辑。 (Complexity: High)
+    - *Ref: Spec#FR-203 Confidence Strategy*
+- [ ] **Implement (T19.3 - Android)**: 配置 `WorkManager`。实现 `OCRWorker`，确保后台任务保活与执行。 (Complexity: Medium)
+- [ ] **Implement (T19.4 - iOS)**: 配置 `BGTaskScheduler`。在 `AppDelegate.swift` 中注册后台任务标识，处理后台执行时间窗口。 (Complexity: High)
+    - *Ref: Spec#FR-202 Async Queue*
+- [ ] **Test**: 模拟 App 切后台 5 分钟后，队列任务仍能自动执行并更新数据库。 (Complexity: High)
+
+### T20: UI 适配与交互闭环 (Phase 2.4)
+- [ ] **Implement (T20.1)**: 更新首页 `HomeState`，增加 `pendingCount` 统计。实现“待确认”顶部横幅组件。 (Complexity: Low)
+- [ ] **Implement (T20.2)**: 开发 `ReviewListPage` (待确认列表) 和 `ReviewEditPage` (OCR 结果校对页)。
+    - 实现 OCR 文本高亮层 `OCRHighlightView` (在原图上绘制识别框)。
+    - *Ref: Constitution#X. UI/UX (Teal/White Theme)* (Complexity: High)
+- [ ] **Implement (T20.3)**: 升级详情页。支持点击按钮查看完整 OCR 识别文本 (解密后展示)。 (Complexity: Medium)
+- [ ] **Implement (T20.4)**: 开发 `GlobalSearchPage`。连接 FTS5 搜索接口，展示高亮匹配结果。 (Complexity: Medium)
+- [ ] **Test**: 全链路测试“拍照 -> 后台识别 -> 首页提示 -> 校对归档”流程。 (Complexity: High)
