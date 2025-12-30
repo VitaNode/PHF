@@ -23,7 +23,7 @@
 
 ## 3. Implementation Phases & Tasks
 
-### Phase 1: Infrastructure & Security (基础设施层)
+### 3.1: Infrastructure & Security (基础设施层)
 **Goal**: 建立全应用的安全信任根基。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -35,7 +35,7 @@
 | **T1.5** | **安全设置引导 (Security Setup UI)** | 实现首次启动时的 Pin/Biometric 录入界面及逻辑。DoD: 验证未设置锁时无法跳过，设置后写入 app_meta。 | T1.1 |
 | **T1.6** | **目录管理与沙盒隔离** | 确保加密资源存储在应用私有沙盒目录下，文件权限正确。 | - |
 
-### Phase 2: Data & Persistence (数据访问层)
+### 3.2: Data & Persistence (数据访问层)
 **Goal**: 建立结构化数据模型与持久化方案。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -44,7 +44,7 @@
 | **T2.2** | **Repository 模式实现** | 实现 `RecordRepository` 和 `ImageRepository`。核心逻辑：更新 `image_tags` 时需自动同步更新 `records.tags_cache` 以供展示。 | T2.1, T1.4 |
 | **T2.3** | **种子数据初始化 (Seed Data)** | 应用首次启动时自动创建默认用户（"本人"）并插入定义的 4 个内置标签。DoD: 验证 `persons` 表中存在 `id='def_me'` 的且 `is_default=1` 的记录。 | T2.1 |
 
-### Phase 3: Business Logic & Utilities (业务逻辑层)
+### 3.3: Business Logic & Utilities (业务逻辑层)
 **Goal**: 实现图片处理引擎与业务状态管理。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -54,7 +54,7 @@
 | **T3.3** | **文件流式加密适配** | 处理大尺寸图片。DoD: 在 512MB 限制的模拟器中，连续加密写入 5 张 10MB 以上的大图，应用不崩溃且内存波动平稳。 | T1.4, T3.1 |
 | **T3.4** | **存取权与相册集成 (Media Access)** | 集成 `image_picker` 并处理跨平台权限（尤其是 iOS `NSPhotoLibraryUsageDescription`）。 | - |
 
-### Phase 4: UI Development (界面展示层)
+### 3.4: UI Development (界面展示层)
 **Goal**: 实现宪章风格的 UI Kit 与核心交互路径。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -65,20 +65,6 @@
 
 ---
 
-## 4. Verification Plan
+## Phase 2: On-Device OCR & Intelligent Ingestion (智能录入与识别)
 
-### Automated Tests
-- **Security Unit Tests**: `test/security/encryption_test.dart` (验证 AES-256-GCM 正确性)。
-- **Database Integration Tests**: `test/data/db_migration_test.dart` (验证 Schema 正确性)。
-- **Repository Tests**: `test/data/repository_test.dart` (验证存入加密数据后查询出的原文一致性)。
 
-### Manual Verification
-1.  **物理导出验证**: 手动从真机沙盒导出 `.db` 和 `.webp.enc` 文件，尝试用标准工具打开，确认不可读。
-2.  **离线性能检查**: 记录从按下“保存”到返回首页的耗时，通过控制台日志输出加密耗时。
-3.  **UI 走查**: 确认医疗数值（如日期、潜在的后期 OCR 数值）是否使用了 Inconsolata 等宽字体。
-
----
-
-## 5. Potential Constraints & Risks
-- **Performance**: 大量图片同时解密展示在 Timeline 时可能造成的滑动掉帧。*对策：严格使用缩略图并行解密，并限制单个 View 的内存缓存。*
-- **Key Loss**: 若主密钥丢失，数据理论上永久不可找回。*对策：Phase 1 需确保 KeyStore 的持久化可靠性。*

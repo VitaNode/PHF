@@ -30,7 +30,7 @@
 - [x] **Commit**: `feat(data): define core domain entities for records and images`
 
 ### T3: 业务契约 (Interfaces) 定义 [x]
-- [x] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口类。
+- [x] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口 类。
 - [x] **Document**: 为接口方法提供详尽的 `dartdoc` 以及预期行为说明。
 - [x] **Test**: 验证接口不暴露底层加密/SQL 实现细节。 (Ref: Constitution#II. Architecture)
 - [x] **Review**: 接口粒度是否符合单一职责原则。
@@ -97,8 +97,8 @@
 **Goal**: 处理媒体存取与隐私擦除。
 
 ### T10: 图片处理引擎与 Secure Wipe (T3.1) [x]
-- [x] **Implement**: 实现 `ImageProcessingService`。PNG 压缩 fallback + 200px 缩略图。**强制：** 处理完位图或中间临时文件后，立即调用 `File.delete()`。 (Ref: Constitution#I. Privacy#IV. Security)
-- [x] **Document**: `review_image_wipe.md` -> `review_T10_image_processing.md` - 说明如何在异步流中确保清理逻辑 100% 被执行。
+- [x] **Implement**: 实现 `ImageProcessingService`。PNG 压缩 fallback + 200px 缩略图。**强制：** 处理完位 图或中间临时文件后，立即调用 `File.delete()`。 (Ref: Constitution#I. Privacy#IV. Security)
+- [x] **Document**: `review_image_wipe.md` -> `review_T10_image_processing.md` - 说明如何在异步流中确保清 理逻辑 100% 被执行。
 - [x] **Test**: `image_processing_service_test.dart` 检查磁盘残留 (DoD-T3.1)。
 - [x] **Review**: 审查异常抛出后，临时文件是否依然能被清理。
 - [x] **Commit**: `feat(logic): implement image optimizer with reliable secure wipe`
@@ -147,7 +147,7 @@
 - [x] **Implement**: 封装 `SecureImage` 异步解密展示组件. 实现 `EventCard` 并集成 `SecureImage` 展示 Record 的首张缩略图，显示去重后的标签列表。 (Ref: Spec#4.1)
 - [x] **Document**: 记录 `tags_cache` 在 UI 层的解析示例。
 - [x] **Test**: 验证长标签列表下的布局稳定性.
-- [x] **Review**: 走查解密过程中的 UI 占位图效果.
+- [x] **Review**: 走走查解密过程中的 UI 占位图效果.
 - [x] **Commit**: `feat(ui): implement complex EventCard with decrypted thumbnail support`
 
 ### T14: 安全引导与应用锁界面 (T1.5) [x]
@@ -182,9 +182,9 @@
 
     - 优化数据查询，避免 N+1 性能问题。
 - [x] **Refactor Ingestion Flow**:
-    - 简化为：首页点击 "+" -> 原生相机/库选择 -> 进入 Preview 预览页 (支持裁剪/旋转/删除) -> 一键保存后返回首页。
+    - 简化为：首页点击 "+" -> 原生相机/库选择 -> 进入 Preview 预览页 (支持裁剪/旋转/删除) -> 一键保存后返 回首页。
 - [x] **Refactor Detail View**:
-    - [x] 实现“上下分屏”布局：顶部图片（支持左右切图同步更新下方信息），底部展示图片专有的“医院、日期、标签”。
+    - [x] 实现“上下分屏”布局：顶部图片（支持左右切图同步更新下方信息），底部展示图片专有的“医院、日期、标 签”。
         * [x] 单击图片放大（这个功能之前是有的，更新后没了）
         * [x] 左右切图的按钮 `<` 和 `>` 点击没反应
     - [x] 每张图下方增加针对当前图片的 “编辑” 与 “删除” 按钮。
@@ -198,3 +198,5 @@
 - [x] **Commit**: `refactor(ui): pivot to split-view details and streamlined ingestion workflow`
 
 ---
+
+## Phase 2: On-Device OCR & Intelligence (智能录入层)

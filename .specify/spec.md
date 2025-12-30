@@ -240,6 +240,81 @@ CREATE VIRTUAL TABLE ocr_search_index USING fts5(
 
 ---
 
+# Phase 2 Specification: On-Device OCR & Intelligent Ingestion
+
+**Status**: Draft  
+**Strategy**: Local OCR | Queue Management | Confidence-based Flow
+
+## 1. Product Goals (Phase 2)
+- **自动化元数据提取**: 利用本地 OCR 自动识别就诊日期、医院名称，减少手动录入成本。
+- **内容搜索化**: 实现全文索引 (FTS5)，允许用户通过病历中的具体文字内容搜索记录。
+- **容错与闭环**: 引入“待确认”机制，确保置信度较低时通过人工校验维持数据准确。
+
+## 2. User Flows (Phase 2)
+
+### A. 智能录入流 (Intelligent Ingestion)
+1.  **Entry**: 用户点击“拍照/导入”。
+2.  **Capture & Prep**: 拍摄/选择 -> 预览/编辑。
+3.  **Dispatch**: 点击「开始处理并归档」。
+    - **UI**: 返回首页，Toast “处理中…”。
+4.  **Background Processing**:
+    - 本地 OCR 扫描。
+    - 关键词匹配（日期、医院）。
+    - 置信度评估。
+5.  **Branching**:
+    - **高置信度 (>0.9)**: 自动归档，Timeline 追加。
+    - **低置信度 (≤0.9)**: 标记为 `review`，进入首页“待确认区”。
+
+### B. 待确认处理流 (Pending Review)
+1.  **Entry**: 首页点击“待确认[N]”。
+2.  **Resolution**: 选择记录 -> 详情页修正高亮字段 -> 保存。
+3.  **Result**: 记录移入 Timeline，`status` 设为 `archived`。
+
+### C. 查看与编辑 (Enhanced View)
+1.  **Detail**: 展示 OCR 全文内容。
+2.  **Action**: 支持“重新识别”（针对识别不佳的旧记录）。
+
+## 3. Functional Requirements
+
+### FR-201: 本地 OCR 引擎集成 (Platform Optimized)
+- **100% 离线**: 严禁调用任何云端 API。
+- **Android (方案 A)**: 使用 **Google ML Kit (Text Recognition)**。
+- **iOS (方案 B)**: 使用 **Apple Vision Framework**。
+    - **理由**: 零额外体积，iOS 系统级深度优化，对中英文识别精度极高。
+- **抽象层**: 在 Flutter 侧定义 `IOCRService` 接口，抹平底层实现差异，统一返回包含文本、坐标、置信度的标准 DTO。
+- **性能**: OCR 必须在 Isolate (Background Thread) 中运行。
+
+### FR-202: 平台差异化任务调度 (Task Scheduling)
+- **通用逻辑**: 在 SQLCipher 中维护 `ocr_tasks` 任务持久化队列。
+- **Android**: 集成 `workmanager` 插件。支持在应用退出后继续执行，可配置触发条件（如充电中）。
+- **iOS**: 
+    - **Short-term**: 利用 `beginBackgroundTask` 在用户退到后台后的 30s 内尽可能完成当前任务。
+    - **Long-term**: 注册 `BGProcessingTask` 由系统调度。
+    - **Foreground Sync**: 每次应用回到前台时，主动触发一个“补课”任务扫描并处理 `status = 'processing'` 的记录。
+
+### FR-203: 智能提取算法 (Common Logic)
+- **数据清洗**: 去除无效字符、处理繁简体。
+- **正则提取**: 识别 YYYY-MM-DD 等常见日期格式，根据位置加权（如化验单右上角通常是日期）。
+- **置信度计算**: 
+    - 若日期识别失败，置信度直接惩罚至 0.5 以下。
+    - 对比底层识别分值与关键词匹配度。
+
+### FR-204: 全文检索 (FTS5)
+- 启用 `ocr_search_index`。
+- 支持关键词实时搜索。
+
+## 4. Data Schema (Phase 2 Updates)
+- `records.status`: 启用 `'processing'`, `'review'`, `'archived'` 状态流转。
+- `images.ocr_text`: 存储扫描出的全文。
+- `images.ocr_confidence`: 记录该图片的整体识别置信度。
+
+## 5. Security Implementation (Phase 2)
+- **Local OCR**: 确保无网络数据外泄。
+- **Encrypted Content**: OCR 结果受 SQLCipher 保护。
+- **Temporary Data Wipe**: 处理过程中的临时 Bitmap 必须在完成后立即 `Secure Wipe`。
+
+---
+
 ## Appendix: Roadmap Snapshot
 - **Phase 2**: On-Device OCR & Queue System.
 - **Phase 3**: FTS5 Search, Tags & Timeline Refinement.
