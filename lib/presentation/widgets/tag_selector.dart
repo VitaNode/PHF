@@ -15,7 +15,8 @@
 /// ## Security & Privacy
 /// - **In-Memory Selection**: 标签选择状态在 UI 层即时响应，持久化由 Repository 层通过 SQLCipher 加密数据库处理。
 /// - **Data Integrity**: 通过 `TagRepository` 确保关联关系的原子性更新。
-///
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../logic/providers/core_providers.dart';
@@ -129,7 +130,7 @@ class TagSelector extends ConsumerWidget {
                           offset: const Offset(0, 4),
                         ),
                       ],
-                    ],
+                    ),
                     child: child,
                   ),
                 );
