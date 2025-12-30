@@ -1,7 +1,7 @@
 # Project Review Status Summary
 
 **Last Updated**: 2025-12-30
-**Coverage**: T0 - T14
+**Coverage**: T0 - T15
 
 ## 🟢 Approved Features (Highlights)
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
@@ -16,8 +16,11 @@
   - Foundation: `AppTheme` (Teal/Monospace) and atomic security components (T13.1).
   - Structure: Global `CustomTopBar` and `MainFab` (T13.2) with integrated security indicators.
   - Components: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
+- **Features**:
+  - **Timeline**: Full browsing flow (Timeline -> Detail -> Zoomable Fullscreen) (T15).
 
 ## 🟡 Pending Issues / Technical Debt
+- **Performance**: Timeline loading performs N+1 query for images. (Phase 2 Optimization)
 - **T13: Thumbnail Encryption**: Reusing main image key due to entity schema limitations (Phase 1 Workaround).
 - **T10: PNG Fallback**: Currently using PNG instead of WebP. (High Priority for P2)
 - **T8: Database Configuration**: Explicitly set `PRAGMA cipher_page_size = 4096`.

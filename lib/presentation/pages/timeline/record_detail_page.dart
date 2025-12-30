@@ -176,7 +176,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.bgGray.withOpacity(0.5),
+                  color: AppTheme.bgGray.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

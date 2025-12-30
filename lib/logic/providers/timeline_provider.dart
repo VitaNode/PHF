@@ -27,9 +27,18 @@ class TimelineController extends _$TimelineController {
   /// 内部获取当前用户的所有记录 (默认)
   Future<List<MedicalRecord>> _fetchRecords() async {
     final repo = ref.read(recordRepositoryProvider);
+    final imageRepo = ref.read(imageRepositoryProvider);
     // TODO: Phase 2 Get Person ID from User Session
     const currentPersonId = 'def_me'; 
-    return await repo.getRecordsByPerson(currentPersonId);
+    final records = await repo.getRecordsByPerson(currentPersonId);
+
+    // Enrich with images (Phase 1 N+1)
+    final List<MedicalRecord> enriched = [];
+    for (var rec in records) {
+      final images = await imageRepo.getImagesForRecord(rec.id);
+      enriched.add(rec.copyWith(images: images));
+    }
+    return enriched;
   }
 
   /// 刷新列表
@@ -43,12 +52,20 @@ class TimelineController extends _$TimelineController {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(recordRepositoryProvider);
+      final imageRepo = ref.read(imageRepositoryProvider);
       const currentPersonId = 'def_me';
-      return await repo.searchRecords(
+      final records = await repo.searchRecords(
         personId: currentPersonId,
         query: query,
         tags: tags,
       );
+
+      final List<MedicalRecord> enriched = [];
+      for (var rec in records) {
+        final images = await imageRepo.getImagesForRecord(rec.id);
+        enriched.add(rec.copyWith(images: images));
+      }
+      return enriched;
     });
   }
 
