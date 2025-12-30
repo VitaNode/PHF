@@ -134,8 +134,8 @@ CREATE TABLE images (
   -- OCR 结果缓存 (Phase 2)
   ocr_text        TEXT,                   -- 全文索引源数据
   ocr_raw_json    TEXT,                   -- 原始坐标数据
-  ocr_confidence  REAL,                   -- 置信度分数
-  
+  ocr_confidence  REAL,                   -- OCR 识别置信度 (0.0 - 1.0)
+  tags            TEXT,                   -- JSON Array (Integers) - IDs of assigned tags e.g. [1,5]
   created_at_ms   INTEGER NOT NULL
 );
 ```
@@ -174,8 +174,8 @@ const now = Date.now();
 db.executeSql(`
   INSERT INTO tags (id, name, is_custom, created_at_ms)
   VALUES ('tag_check_' + now, '检验', 0, ${now}),
-         ('tag_inspect_' + now + 1, '检查', 0, ${now + 1});
-         ('tag_medrecord_' + now + 2, '病历', 0, ${now + 2});
+         ('tag_inspect_' + now + 1, '检查', 0, ${now + 1}),
+         ('tag_medrecord_' + now + 2, '病历', 0, ${now + 2}),
          ('tag_prescription_' + now + 3, '处方', 0, ${now + 3});
 `);
 ```
