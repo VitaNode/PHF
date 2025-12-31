@@ -145,6 +145,16 @@ class MockIOCRQueueRepository extends _i1.Mock
         returnValue: _i6.Future<void>.value(),
         returnValueForMissingStub: _i6.Future<void>.value(),
       ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> deleteByImageId(String? imageId) => (super.noSuchMethod(
+        Invocation.method(
+          #deleteByImageId,
+          [imageId],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 }
 
 /// A class which mocks [IImageRepository].
@@ -312,6 +322,16 @@ class MockIRecordRepository extends _i1.Mock implements _i10.IRecordRepository {
       ) as _i6.Future<void>);
 
   @override
+  _i6.Future<void> hardDeleteRecord(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #hardDeleteRecord,
+          [id],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
   _i6.Future<List<_i11.MedicalRecord>> searchRecords({
     required String? personId,
     String? query,
@@ -402,6 +422,16 @@ class MockISearchRepository extends _i1.Mock implements _i12.ISearchRepository {
             recordId,
             content,
           ],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> syncRecordIndex(String? recordId) => (super.noSuchMethod(
+        Invocation.method(
+          #syncRecordIndex,
+          [recordId],
         ),
         returnValue: _i6.Future<void>.value(),
         returnValueForMissingStub: _i6.Future<void>.value(),

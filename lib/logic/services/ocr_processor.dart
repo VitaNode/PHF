@@ -18,9 +18,14 @@
 /// ## Security
 /// - 图片字节流仅在内存中处理，处理完毕立即置空或通过 GC 回收（局部变量退出作用域）。
 /// - 只有加密后的 OCR 结果才会被持久化。
+///
+/// ## Fix Record
+/// - **2025-12-31**: 
+///   1. 修改 `processNextItem` 调用 `ISearchRepository.syncRecordIndex` 以支持同 Record 下多图文本聚合搜索。
 library;
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:talker_flutter/talker_flutter.dart';
 import '../../data/models/ocr_queue_item.dart';
@@ -72,7 +77,7 @@ class OCRProcessor {
 
     final msg = 'Processing Task: ${item.id} for Image: ${item.imageId}';
     _talker?.info('[OCRProcessor] $msg');
-    if (_talker == null) print('[OCRProcessor] $msg');
+    if (_talker == null) log(msg, name: 'OCRProcessor');
 
     // Make local vars nullable to allow clearing
     Uint8List? decryptedBytes;
@@ -121,7 +126,7 @@ class OCRProcessor {
       
       final info = 'Extracted: date=${extracted.visitDate}, hospital=${extracted.hospitalName}, score=${extracted.confidenceScore}';
       _talker?.info('[OCRProcessor] $info');
-      if (_talker == null) print('[OCRProcessor] $info');
+      if (_talker == null) log(info, name: 'OCRProcessor');
 
       // 5. 持久化数据
       // 5.1 更新 Image OCR 数据
@@ -173,22 +178,19 @@ class OCRProcessor {
       }
 
       // 5.4 更新搜索索引 (Search Index)
-      // 写入 ocr_text 到 FTS 表
-      await _searchRepository.updateIndex(
-        image.recordId,
-        ocrResult.text
-      );
+      // 聚合整个 Record 的文本入库
+      await _searchRepository.syncRecordIndex(image.recordId);
 
       // 6. 标记任务完成
       await _queueRepository.updateStatus(item.id, OCRJobStatus.completed);
       
       _talker?.info('[OCRProcessor] Processing Completed: ${item.id}');
-      if (_talker == null) print('[OCRProcessor] Processing Completed: ${item.id}');
+      if (_talker == null) log('Processing Completed: ${item.id}', name: 'OCRProcessor');
       return true;
 
     } catch (e, stack) {
       _talker?.handle(e, stack, '[OCRProcessor] Processing Failed: ${item.id}');
-      if (_talker == null) print('[OCRProcessor] Processing Failed: ${item.id}. Error: $e');
+      if (_talker == null) log('Processing Failed: ${item.id}. Error: $e', name: 'OCRProcessor', error: e, stackTrace: stack);
       decryptedBytes = null; // Ensure clear on error
 
       await _queueRepository.updateStatus(

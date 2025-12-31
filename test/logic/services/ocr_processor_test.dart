@@ -82,13 +82,14 @@ void main() {
         status: RecordStatus.processing
       );
       final decryptedBytes = Uint8List(10);
-      final ocrResult = OCRResult(text: '2023-10-10\nHospital A', confidence: 0.95);
+      const ocrResult = OCRResult(text: '2023-10-10\nHospital A', confidence: 0.95);
 
       when(mockQueueRepo.dequeue()).thenAnswer((_) async => item);
       when(mockImageRepo.getImageById('img1')).thenAnswer((_) async => image);
       when(mockSecurityHelper.decryptDataFromFile(any, any)).thenAnswer((_) async => decryptedBytes);
       when(mockOcrService.recognizeText(any, mimeType: anyNamed('mimeType'))).thenAnswer((_) async => ocrResult);
       when(mockRecordRepo.getRecordById('rec1')).thenAnswer((_) async => record);
+      when(mockSearchRepo.syncRecordIndex(any)).thenAnswer((_) async {});
 
       final result = await processor.processNextItem();
 
@@ -106,7 +107,7 @@ void main() {
       verify(mockRecordRepo.updateStatus('rec1', RecordStatus.archived)).called(1);
 
       // Verify Search Index
-      verify(mockSearchRepo.updateIndex('rec1', any)).called(1);
+      verify(mockSearchRepo.syncRecordIndex('rec1')).called(1);
 
       // Verify Queue Completion
       verify(mockQueueRepo.updateStatus('1', OCRJobStatus.completed)).called(1);
@@ -126,13 +127,14 @@ void main() {
           createdAt: DateTime.now(), updatedAt: DateTime.now(),
           status: RecordStatus.processing
       );
-      final ocrResult = OCRResult(text: 'No Clear Data', confidence: 0.5);
+      const ocrResult = OCRResult(text: 'No Clear Data', confidence: 0.5);
 
       when(mockQueueRepo.dequeue()).thenAnswer((_) async => item);
       when(mockImageRepo.getImageById('img1')).thenAnswer((_) async => image);
       when(mockSecurityHelper.decryptDataFromFile(any, any)).thenAnswer((_) async => Uint8List(0));
       when(mockOcrService.recognizeText(any, mimeType: anyNamed('mimeType'))).thenAnswer((_) async => ocrResult);
       when(mockRecordRepo.getRecordById('rec1')).thenAnswer((_) async => record);
+      when(mockSearchRepo.syncRecordIndex(any)).thenAnswer((_) async {});
 
       await processor.processNextItem();
 
