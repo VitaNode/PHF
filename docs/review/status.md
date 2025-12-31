@@ -15,11 +15,12 @@
   - **Ingestion**: Streamlined "Capture -> Preview -> Save" flow.
   - **Detail View**: Split-view layout with per-image metadata (Hospital, Date, Tags) support and in-place editing. Fully enhanced Tag Selector with highlighting and drag-sort.
 - **Components**: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
-- **OCR (Phase 2)**: `IOCRService` (T18.1), `AndroidOCRService` (T18.2), and `IOSOCRService` (T18.3) fully implemented. `SmartExtractor` (T19.1) utility added. `OCRProcessor` (T19.2) core logic implemented with confidence scoring.
+- **OCR (Phase 2)**: `IOCRService` (T18.1), `AndroidOCRService` (T18.2), and `IOSOCRService` (T18.3) reviewed and refactored.
+- **Intelligence (Phase 2)**: `SmartExtractor` (T19.1) and `OCRProcessor` (T19.2) reviewed. Core extraction and background orchestration logic verified.
 
 ## 🟡 Pending Issues / Technical Debt
 - **T10: Physical Wiping**: Reliance on OS file deletion.
-- **Phase 2 OCR Integration**: Infrastructure and schema are ready (T17). OCR Engines (T18) ready. Background processing logic (T19) is pending.
+- **Phase 2 OCR Integration**: Background workers (T19.3/4) and UI (T20) are pending.
 
 ## 🔴 Blockers
 - None.

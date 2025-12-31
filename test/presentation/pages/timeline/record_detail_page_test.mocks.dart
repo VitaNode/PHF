@@ -213,6 +213,39 @@ class MockIImageRepository extends _i1.Mock implements _i7.IImageRepository {
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i8.MedicalImage?> getImageById(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #getImageById,
+          [id],
+        ),
+        returnValue: _i5.Future<_i8.MedicalImage?>.value(),
+        returnValueForMissingStub: _i5.Future<_i8.MedicalImage?>.value(),
+      ) as _i5.Future<_i8.MedicalImage?>);
+
+  @override
+  _i5.Future<void> updateOCRData(
+    String? imageId,
+    String? text, {
+    String? rawJson,
+    double? confidence = 0.0,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateOCRData,
+          [
+            imageId,
+            text,
+          ],
+          {
+            #rawJson: rawJson,
+            #confidence: confidence,
+          },
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
 }
 
 /// A class which mocks [FileSecurityHelper].

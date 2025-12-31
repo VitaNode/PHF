@@ -39,6 +39,7 @@ Map<String, dynamic> _$$MedicalRecordImplToJson(_$MedicalRecordImpl instance) =>
 
 const _$RecordStatusEnumMap = {
   RecordStatus.processing: 'processing',
+  RecordStatus.review: 'review',
   RecordStatus.archived: 'archived',
   RecordStatus.deleted: 'deleted',
 };

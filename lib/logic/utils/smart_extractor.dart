@@ -96,6 +96,12 @@ class SmartExtractor {
             year += 2000;
           }
 
+          // Year Sanity Check (1970 - Current+1)
+          final currentYear = DateTime.now().year;
+          if (year < 1970 || year > currentYear + 1) {
+            continue;
+          }
+
           if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
             return DateTime(year, month, day);
           }
@@ -131,9 +137,10 @@ class SmartExtractor {
 
   static String _sanitizeHospitalName(String name) {
     // 处理常见的 OCR 误识别前缀或特殊字符
-    final sanitized = name
-        .replaceAll(RegExp(r'^[:：.\s]+'), '')
-        .replaceAll(RegExp(r'[#*]$'), '');
+    // 去除开头的所有非汉字、非字母字符 (如 ": ", ". ", "* ")
+    var sanitized = name.replaceAll(RegExp(r'^[^a-zA-Z\u4e00-\u9fa5]+'), '');
+    // 去除结尾的特殊字符
+    sanitized = sanitized.replaceAll(RegExp(r'[#*：:.]+'), '');
     return sanitized.trim();
   }
 }
