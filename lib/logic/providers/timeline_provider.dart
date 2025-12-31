@@ -15,6 +15,7 @@ library;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/record.dart';
 import 'core_providers.dart';
+import 'logging_provider.dart';
 import 'states/home_state.dart';
 import 'ocr_status_provider.dart';
 
@@ -28,19 +29,13 @@ class TimelineController extends _$TimelineController {
 
     // 监听 OCR 任务状态
     ref.listen(ocrPendingCountProvider, (previous, next) {
+      // 只要 next 有值且与 previous 不同
       if (next.hasValue) {
         final nextCount = next.value!;
-        final prevCount = previous?.value ?? 0;
+        final prevCount = previous?.value ?? -1;
 
-        // 核心逻辑：
-        // 1. 任务数从 >0 变为 0 (全部处理完)
-        // 2. 任务数减少 (意味着至少处理完了一张图，需更新列表状态)
-        if ((prevCount > 0 && nextCount == 0) || (nextCount < prevCount)) {
-          talker.info('[TimelineController] OCR Progress detected ($prevCount -> $nextCount). Refreshing...');
-          refresh();
-        } else if (nextCount > prevCount) {
-          // 任务数增加，可能新入库了，刷新以显示 "Processing" 占位
-          talker.info('[TimelineController] New OCR tasks added ($prevCount -> $nextCount). Refreshing...');
+        if (nextCount != prevCount) {
+          talker.info('[TimelineController] OCR Status update: $prevCount -> $nextCount. Triggering refresh.');
           refresh();
         }
       }

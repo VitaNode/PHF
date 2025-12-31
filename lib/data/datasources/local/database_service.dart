@@ -114,6 +114,10 @@ class SQLCipherDatabaseService {
     // 启用外键约束
     await db.execute('PRAGMA foreign_keys = ON');
     
+    // 开启 WAL 模式 (重要：解决跨 Isolate 读写同步延迟)
+    await db.execute('PRAGMA journal_mode = WAL');
+    await db.execute('PRAGMA synchronous = NORMAL');
+
     // 显式设置安全参数 (SQLCipher 4 Defaults but made explicit for future-proofing)
     // 4096 bytes page size aligns with most filesystems
     await db.execute('PRAGMA cipher_page_size = 4096'); 

@@ -25,6 +25,7 @@ import '../../data/models/record.dart';
 import '../services/background_worker_service.dart';
 import '../utils/secure_wipe_helper.dart';
 import '../providers/logging_provider.dart';
+import 'ocr_status_provider.dart';
 import 'core_providers.dart';
 import 'states/ingestion_state.dart';
 import 'timeline_provider.dart';
@@ -243,10 +244,11 @@ class IngestionController extends _$IngestionController {
         talker: ref.read(talkerProvider),
       );
       
-      // 11. Refresh Timeline & Reset State
+      // 10. Refresh Timeline & Reset State
       ref.invalidate(timelineControllerProvider);
+      ref.invalidate(ocrPendingCountProvider); // 强制立即重新开始轮询探测
       
-      // Final cleanup (backup)
+      // 11. Secure Wipe raw images
       await _cleanup();
       
       state = const IngestionState(status: IngestionStatus.success);
