@@ -45,6 +45,29 @@ abstract class IImageService {
     required Uint8List data,
     required int angle,
   });
+
+  /// 全量处理：旋转 + 压缩 + 缩略图 (优化内存，仅解码一次)
+  Future<ImageProcessingResult> processFull({
+    required Uint8List data,
+    int? rotationAngle,
+    int quality = 80,
+    int thumbWidth = 200,
+  });
+}
+
+/// 图像处理结果聚合
+class ImageProcessingResult {
+  final Uint8List mainBytes;
+  final Uint8List thumbBytes;
+  final int width;
+  final int height;
+
+  ImageProcessingResult({
+    required this.mainBytes,
+    required this.thumbBytes,
+    required this.width,
+    required this.height,
+  });
 }
 
 /// 图像尺寸数据模型

@@ -68,6 +68,32 @@ void main() {
       expect(dimensions.height, 1);
     });
 
+    test('processFull handles all steps correctly', () async {
+      // 400x200 Image
+      final sourceImg = img.Image(width: 400, height: 200);
+      final sourceBytes = Uint8List.fromList(img.encodePng(sourceImg));
+
+      final result = await service.processFull(
+        data: sourceBytes,
+        rotationAngle: 90, // Should become 200x400
+        thumbWidth: 100,   // Should become 100x200
+      );
+
+      // Main image check (Rotated)
+      final mainDecoded = img.decodeJpg(result.mainBytes);
+      expect(mainDecoded!.width, 200);
+      expect(mainDecoded.height, 400);
+
+      // Thumbnail check
+      final thumbDecoded = img.decodeJpg(result.thumbBytes);
+      expect(thumbDecoded!.width, 100);
+      expect(thumbDecoded.height, 200);
+
+      // Result metadata
+      expect(result.width, 200);
+      expect(result.height, 400);
+    });
+
     test('secureWipe deletes file', () async {
       final tempDir = Directory.systemTemp;
       final tempFile = File('${tempDir.path}/test_wipe.tmp');

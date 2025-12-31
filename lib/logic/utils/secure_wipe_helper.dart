@@ -13,6 +13,9 @@
 /// ## Constraints
 /// - 在现代 SSD/闪存介质上，由于 Wear Leveling（磨损均衡）机制，软件层面的覆盖无法 100% 保证
 ///   原始物理扇区被擦除，但在应用层已是最高等级的防护措施。
+///
+/// ## Repair Logs
+/// - [2025-12-31] 优化：引入分块覆盖机制（64KB 缓冲区），修复处理大文件时可能导致的 OOM（内存溢出）隐患。
 library;
 
 import 'dart:io';
@@ -20,6 +23,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 class SecureWipeHelper {
+  static const int _bufferSize = 64 * 1024; // 64KB
+
   /// 异步安全擦除文件
   static Future<void> wipe(File file) async {
     try {
@@ -27,24 +32,30 @@ class SecureWipeHelper {
 
       final length = await file.length();
       if (length > 0) {
-        // 1. 生成随机数据进行覆盖 (单次覆盖)
         final random = Random.secure();
-        final buffer = Uint8List(length);
-        for (var i = 0; i < length; i++) {
-          buffer[i] = random.nextInt(256);
+        final raf = await file.open(mode: FileMode.write);
+        
+        final buffer = Uint8List(_bufferSize);
+        int written = 0;
+        
+        while (written < length) {
+          // 每次循环重新填充部分随机数据以增强安全性
+          for (var i = 0; i < min(_bufferSize, 1024); i++) {
+            buffer[i] = random.nextInt(256);
+          }
+          
+          final remaining = length - written;
+          final chunkSize = min(remaining, _bufferSize);
+          
+          await raf.writeFrom(buffer, 0, chunkSize);
+          written += chunkSize;
         }
 
-        // 2. 写入随机数据并强制刷入磁盘
-        final raf = await file.open(mode: FileMode.write);
-        await raf.writeFrom(buffer);
         await raf.flush();
-        
-        // 3. 截断文件
         await raf.truncate(0);
         await raf.close();
       }
 
-      // 4. 物理删除
       await file.delete();
     } catch (e) {
       // 降级处理：如果安全擦除失败（如权限问题），至少尝试直接删除
@@ -62,13 +73,23 @@ class SecureWipeHelper {
       final length = file.lengthSync();
       if (length > 0) {
         final random = Random.secure();
-        final buffer = Uint8List(length);
-        for (var i = 0; i < length; i++) {
-          buffer[i] = random.nextInt(256);
+        final raf = file.openSync(mode: FileMode.write);
+        
+        final buffer = Uint8List(_bufferSize);
+        int written = 0;
+        
+        while (written < length) {
+          for (var i = 0; i < min(_bufferSize, 1024); i++) {
+            buffer[i] = random.nextInt(256);
+          }
+          
+          final remaining = length - written;
+          final chunkSize = min(remaining, _bufferSize);
+          
+          raf.writeFromSync(buffer, 0, chunkSize);
+          written += chunkSize;
         }
 
-        final raf = file.openSync(mode: FileMode.write);
-        raf.writeFromSync(buffer);
         raf.flushSync();
         raf.truncateSync(0);
         raf.closeSync();
