@@ -116,13 +116,13 @@ class BackgroundWorkerService {
 
   /// 初始化 WorkManager
   Future<void> initialize() async {
-    // 仅在 Android 上初始化 (iOS tbd in T19.4)
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    // 仅在 Android/iOS 上初始化
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
       await Workmanager().initialize(
         callbackDispatcher,
         isInDebugMode: kDebugMode, // Debug shows notifications
       );
-      log('WorkManager Initialized', name: 'BackgroundWorkerService');
+      log('WorkManager Initialized for ${defaultTargetPlatform.name}', name: 'BackgroundWorkerService');
     }
   }
 
@@ -137,6 +137,17 @@ class BackgroundWorkerService {
           requiresBatteryNotLow: true,
         ),
         existingWorkPolicy: ExistingWorkPolicy.append, // Append new requests
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // iOS specific trigger
+      await Workmanager().registerOneOffTask(
+        '$_uniqueWorkName-${DateTime.now().millisecondsSinceEpoch}',
+        _ocrTaskName, // Must match BGTaskSchedulerPermittedIdentifiers in Info.plist
+        existingWorkPolicy: ExistingWorkPolicy.append,
+        constraints: Constraints(
+            networkType: NetworkType.not_required,
+            requiresBatteryNotLow: true
+        ), 
       );
     }
   }

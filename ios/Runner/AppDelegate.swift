@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import Vision
+import workmanager
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,6 +11,12 @@ import Vision
   ) -> Bool {
     
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+    
+    // Register Workmanager Plugin
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+        GeneratedPluginRegistrant.register(with: registry)
+    }
+    
     let ocrChannel = FlutterMethodChannel(name: "com.example.phf/ocr",
                                               binaryMessenger: controller.binaryMessenger)
     
