@@ -10,6 +10,9 @@
 ///
 /// ## Security
 /// - 仅读取任务计数，不涉及敏感明文。
+///
+/// ## Repair Logs
+/// - [2025-12-31] 优化：移除不必要的 keepAlive 以节省后台功耗；修复数据库错误时回退为 0 可能导致的 UI 误判；修正 Future.delayed 类型推导。
 library;
 
 import 'dart:async';
@@ -22,26 +25,24 @@ part 'ocr_status_provider.g.dart';
 Stream<int> ocrPendingCount(Ref ref) async* {
   final repo = ref.watch(ocrQueueRepositoryProvider);
   
-  // 用于手动触发刷新的控制
-  // ignore: unused_local_variable
-  final keepAlive = ref.keepAlive();
+  int lastCount = 0;
 
   while (true) {
-    int count = 0;
+    int currentCount = lastCount;
     try {
-      count = await repo.getPendingCount();
+      currentCount = await repo.getPendingCount();
+      lastCount = currentCount;
     } catch (e) {
-      // 数据库忙或锁定，暂报 0 并等待下一次
-      count = 0;
+      // 数据库忙或锁定，维持上一次的计数，避免 UI 误判为“处理完成”
     }
     
-    yield count;
+    yield currentCount;
 
     // 根据是否有任务调整轮询频率
-    if (count > 0) {
-      await Future.delayed(const Duration(seconds: 3));
+    if (currentCount > 0) {
+      await Future<void>.delayed(const Duration(seconds: 3));
     } else {
-      await Future.delayed(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(seconds: 10));
     }
   }
 }

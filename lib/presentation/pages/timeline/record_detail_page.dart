@@ -1,3 +1,12 @@
+/// # Record Detail Page
+/// 
+/// ## Description
+/// 展示病历详情，支持图片轮播、OCR 结果查看及编辑。
+/// 
+/// ## Repair Logs
+/// - [2025-12-31] 修复：自动刷新数据后，保持当前的图片索引（原先会跳回第 0 张）；优化 OCR 监听逻辑，支持中间任务状态更新刷新；修复 Future.delayed 类型推导。
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
@@ -66,9 +75,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           _record = record;
           _images = images;
           _isLoading = false;
-          // Sync controllers with first image or record
+          // Sync controllers with current image
           if (_images.isNotEmpty) {
-            _updateControllersForIndex(0);
+            final index = _currentIndex < _images.length ? _currentIndex : 0;
+            _updateControllersForIndex(index);
           }
         });
       }
@@ -202,7 +212,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       }
       
       // Wait a bit and reload to see if it finished (simple UX)
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -217,9 +227,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     // 监听 OCR 任务，如果当前图片正在被识别且识别完成，自动刷新数据
     ref.listen(ocrPendingCountProvider, (previous, next) {
       if (previous != null && next.hasValue && previous.hasValue) {
-         if (previous.value! > 0 && next.value == 0) {
-            _loadData();
-         }
+        final prevCount = previous.value!;
+        final nextCount = next.value!;
+        
+        // 任务处理完，或者有新结果入库（确保 UI 实时更新）
+        if ((prevCount > 0 && nextCount == 0) || (nextCount != prevCount)) {
+          _loadData();
+        }
       }
     });
 

@@ -8,6 +8,9 @@
 /// - **Pull to Refresh**: 下拉刷新列表。
 /// - **Navigation**: 点击卡片调整至详情页。
 /// - **Empty State**: 无记录时展示引导提示。
+/// 
+/// ## Repair Logs
+/// - [2025-12-31] 修复：修正 MaterialPageRoute 类型推导警告。
 library;
 
 import 'package:flutter/material.dart';
@@ -70,9 +73,9 @@ class TimelinePage extends ConsumerWidget {
                     child: PendingReviewBanner(
                       count: homeState.pendingCount,
                       onTap: () {
-                        Navigator.push(
+                        Navigator.push<void>(
                           context,
-                          MaterialPageRoute(builder: (_) => const ReviewListPage()),
+                          MaterialPageRoute<void>(builder: (_) => const ReviewListPage()),
                         );
                       },
                     ),
