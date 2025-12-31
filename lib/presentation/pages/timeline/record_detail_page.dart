@@ -5,6 +5,7 @@
 /// 
 /// ## Repair Logs
 /// - [2025-12-31] 修复：自动刷新数据后，保持当前的图片索引（原先会跳回第 0 张）；优化 OCR 监听逻辑，支持中间任务状态更新刷新；修复 Future.delayed 类型推导。
+/// - [2025-12-31] T21.4 详情页编辑闭环：优化保存逻辑，确保标签修改和元数据更新后立即同步 Timeline 状态；增加保存前的数据变更检查，避免无效更新。
 library;
 
 import 'package:flutter/material.dart';
@@ -106,6 +107,16 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     if (_images.isEmpty) return;
     
     final currentImage = _images[_currentIndex];
+    
+    // Check if anything actually changed
+    final bool hospitalChanged = _hospitalController.text != (currentImage.hospitalName ?? _record?.hospitalName ?? '');
+    final bool dateChanged = _visitDate != (currentImage.visitDate ?? _record?.notedAt);
+    
+    if (!hospitalChanged && !dateChanged) {
+      setState(() => _isEditing = false);
+      return;
+    }
+
     final imageRepo = ref.read(imageRepositoryProvider);
     final recordRepo = ref.read(recordRepositoryProvider);
     
@@ -132,7 +143,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       });
 
       // Notify Timeline to refresh
-      ref.invalidate(timelineControllerProvider);
+      await ref.read(timelineControllerProvider.notifier).refresh();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
@@ -567,33 +578,58 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         const SizedBox(height: 12),
         TagSelector(
           selectedTagIds: _images[_currentIndex].tagIds,
-          onToggle: (tid) {
+          onToggle: (tid) async {
             final currentIds = [..._images[_currentIndex].tagIds];
             if (currentIds.contains(tid)) {
               currentIds.remove(tid);
             } else {
               currentIds.add(tid);
             }
+            final oldIds = _images[_currentIndex].tagIds;
             setState(() {
               _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds);
             });
-            ref.read(imageRepositoryProvider).updateImageTags(
-              _images[_currentIndex].id, 
-              currentIds
-            );
+            try {
+              await ref.read(imageRepositoryProvider).updateImageTags(
+                _images[_currentIndex].id, 
+                currentIds
+              );
+              // Notify Timeline (async)
+              ref.read(timelineControllerProvider.notifier).refresh();
+            } catch (e) {
+              setState(() {
+                _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: oldIds);
+              });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('更新标签失败: $e')));
+              }
+            }
           },
-          onReorder: (oldIdx, newIdx) {
-            final currentIds = [..._images[_currentIndex].tagIds];
+          onReorder: (oldIdx, newIdx) async {
+            final originalIds = [..._images[_currentIndex].tagIds];
+            final currentIds = [...originalIds];
             if (oldIdx < newIdx) newIdx -= 1;
             final item = currentIds.removeAt(oldIdx);
             currentIds.insert(newIdx, item);
+            
             setState(() {
               _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds);
             });
-            ref.read(imageRepositoryProvider).updateImageTags(
-              _images[_currentIndex].id, 
-              currentIds
-            );
+            try {
+              await ref.read(imageRepositoryProvider).updateImageTags(
+                _images[_currentIndex].id, 
+                currentIds
+              );
+              // Notify Timeline (async)
+              ref.read(timelineControllerProvider.notifier).refresh();
+            } catch (e) {
+              setState(() {
+                _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: originalIds);
+              });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('重排标签失败: $e')));
+              }
+            }
           },
         ),
         const SizedBox(height: 32),
