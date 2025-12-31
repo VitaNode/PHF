@@ -217,7 +217,7 @@
 - [x] **Test**: 编写单元测试验证 Schema 升级后的数据读写兼容性及 FTS5 搜索基础功能。 (Complexity: Medium)
 
 ### T18: OCR 引擎集成 (Phase 2.2)
-- [ ] **Implement (T18.1)**: 定义 `IOCRService` 抽象接口及 `OCRResult` 数据结构 (包含 text, blocks, confidence)。 (Complexity: Low)
+- [x] **Implement (T18.1)**: 定义 `IOCRService` 抽象接口及 `OCRResult` 数据结构 (包含 text, blocks, confidence)。 (Complexity: Low)
     - *Ref: Constitution#II. Architecture (Facade Pattern)*
 - [ ] **Implement (T18.2 - Android)**: 实现 `AndroidOCRService`，集成 `google_mlkit_text_recognition`。配置 `android/build.gradle`。 (Complexity: Medium)
     - *Ref: Constitution#II. Local-First (Offline ML Kit)*
