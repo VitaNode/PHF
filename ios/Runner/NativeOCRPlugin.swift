@@ -107,18 +107,27 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
             fullText += candidate.string + "\n"
             totalConfidence += candidate.confidence
             
-            // Vision BoundingBox: origin is bottom-left (0,0).
-            // Flutter Canvas: origin is top-left (0,0).
-            // Need to flip Y: fixedTop = 1.0 - bottomY - height
+            // Vision BoundingBox: origin is bottom-left (0,0). Normalized (0-1).
+            // Flutter Canvas: origin is top-left (0,0). Absolute pixels.
+            // Need to flip Y and denormalize.
+            
+            let width = Double(cgImage.width)
+            let height = Double(cgImage.height)
+            
             let box = observation.boundingBox
-            let fixedTop = 1.0 - box.origin.y - box.height
+            
+            // Vision Y is from bottom. 
+            // y_top = 1.0 - y_bottom - height_norm
+            let yBottom = box.origin.y
+            let hNorm = box.height
+            let yTopNorm = 1.0 - yBottom - hNorm
             
             blocks.append([
                 "text": candidate.string,
-                "left": box.origin.x,
-                "top": fixedTop, 
-                "width": box.width,
-                "height": box.height
+                "left": box.origin.x * width,
+                "top": yTopNorm * height, 
+                "width": box.width * width,
+                "height": box.height * height
             ])
         }
         

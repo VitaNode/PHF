@@ -75,7 +75,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     OCRResult? ocrResult;
     if (currentImage.ocrRawJson != null) {
       try {
-        ocrResult = OCRResult.fromJson(jsonDecode(currentImage.ocrRawJson!));
+        ocrResult = OCRResult.fromJson(jsonDecode(currentImage.ocrRawJson!) as Map<String, dynamic>);
       } catch (_) {}
     }
 

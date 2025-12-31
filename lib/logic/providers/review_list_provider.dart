@@ -15,7 +15,7 @@ class ReviewListController extends _$ReviewListController {
     final repo = ref.read(recordRepositoryProvider);
     // TODO: Phase 2 Get Person ID from User Session
     const currentPersonId = 'def_me';
-    return await repo.getReviewRecords(currentPersonId);
+    return repo.getReviewRecords(currentPersonId);
   }
 
   Future<void> refresh() async {

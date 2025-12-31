@@ -7,7 +7,7 @@ part of 'review_list_provider.dart';
 // **************************************************************************
 
 String _$reviewListControllerHash() =>
-    r'e26d36f8d66a707953cbb81934f8cd2d1ca725a0';
+    r'5b4d50992c52f6c6c2ae1b670992930300879d3f';
 
 /// See also [ReviewListController].
 @ProviderFor(ReviewListController)

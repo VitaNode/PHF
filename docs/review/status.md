@@ -20,10 +20,11 @@
 - **Intelligence (Phase 2)**: `SmartExtractor` (T19.1) and `OCRProcessor` (T19.2) reviewed. Core extraction and background orchestration logic verified.
 - **Background (Phase 2)**: `BackgroundWorkerService` (T19.3 - Android) implemented and verified.
 - **Background (Phase 2)**: iOS `BGTaskScheduler` & Headless Plugin Registry (T19.4) implemented and verified.
+- **UI (Phase 2)**: `PendingReviewBanner` (T20.1) and Review Flow (T20.2) implemented. OCR coordinates standardized across platforms.
 
 ## 🟡 Pending Issues / Technical Debt
 - **T10: Physical Wiping**: Reliance on OS file deletion.
-- **Phase 2 OCR Integration**: Search UI (T20.4) pending.
+- **Phase 2 OCR Integration**: `GlobalSearchPage` (T20.4) and `DetailView` OCR Button (T20.3) pending.
 
 ## 🔴 Blockers
 - None.

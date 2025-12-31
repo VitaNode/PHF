@@ -111,6 +111,29 @@ class MockIRecordRepository extends _i1.Mock implements _i2.IRecordRepository {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getPendingCount(String? personId) => (super.noSuchMethod(
+        Invocation.method(
+          #getPendingCount,
+          [personId],
+        ),
+        returnValue: _i3.Future<int>.value(0),
+        returnValueForMissingStub: _i3.Future<int>.value(0),
+      ) as _i3.Future<int>);
+
+  @override
+  _i3.Future<List<_i4.MedicalRecord>> getReviewRecords(String? personId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getReviewRecords,
+          [personId],
+        ),
+        returnValue:
+            _i3.Future<List<_i4.MedicalRecord>>.value(<_i4.MedicalRecord>[]),
+        returnValueForMissingStub:
+            _i3.Future<List<_i4.MedicalRecord>>.value(<_i4.MedicalRecord>[]),
+      ) as _i3.Future<List<_i4.MedicalRecord>>);
 }
 
 /// A class which mocks [IImageRepository].

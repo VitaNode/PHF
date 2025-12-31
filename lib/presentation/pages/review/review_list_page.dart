@@ -48,7 +48,7 @@ class ReviewListPage extends ConsumerWidget {
                      MaterialPageRoute<bool>(builder: (_) => ReviewEditPage(record: record)),
                    );
                    if (result == true) {
-                      ref.read(timelineControllerProvider.notifier).refresh();
+                      await ref.read(timelineControllerProvider.notifier).refresh();
                    }
                 },
               );
