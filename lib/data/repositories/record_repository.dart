@@ -131,6 +131,12 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
   }
 
   @override
+  Future<void> hardDeleteRecord(String id) async {
+    final db = await dbService.database;
+    await db.delete('records', where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
   Future<List<MedicalRecord>> searchRecords({
     required String personId,
     String? query,

@@ -100,4 +100,10 @@ class OCRQueueRepository extends BaseRepository implements IOCRQueueRepository {
     final db = await dbService.database;
     await db.delete('ocr_queue', where: 'id = ?', whereArgs: [id]);
   }
+
+  @override
+  Future<void> deleteByImageId(String imageId) async {
+    final db = await dbService.database;
+    await db.delete('ocr_queue', where: 'image_id = ?', whereArgs: [imageId]);
+  }
 }

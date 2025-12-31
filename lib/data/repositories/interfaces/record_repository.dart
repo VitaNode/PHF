@@ -30,6 +30,9 @@ abstract class IRecordRepository {
   /// 修改记录状态 (例如: 标记为已删除)
   Future<void> updateStatus(String id, RecordStatus status);
 
+  /// 彻底删除记录实体（通常用于清理空记录）
+  Future<void> hardDeleteRecord(String id);
+
   /// 全文检索或标签过滤后的记录查询
   Future<List<MedicalRecord>> searchRecords({
     required String personId,

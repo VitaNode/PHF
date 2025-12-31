@@ -6,6 +6,7 @@
 
 ## Approved Features (Highlights)
 - [x] **T20.4**: 全局搜索 (FTS5 + Highlight).
+- [x] **T21.2**: 级联删除逻辑 (当图片全删时自动清理 Record 及其 OCR 任务).
 - [x] **T20.6**: 修复 iOS 后台 OCR 调度及延迟 bug.
 - [x] **T21**: 修复图片删除崩溃并集成 `talker` 日志系统.
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).

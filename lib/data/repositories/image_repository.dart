@@ -112,10 +112,29 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     final String recordId = maps.first['record_id'] as String;
 
     await db.transaction((txn) async {
+      // 1. Delete OCR Task for this image
+      await txn.delete('ocr_queue', where: 'image_id = ?', whereArgs: [imageId]);
+      
+      // 2. Delete image and its tags
       await txn.delete('images', where: 'id = ?', whereArgs: [imageId]);
       await txn.delete('image_tags', where: 'image_id = ?', whereArgs: [imageId]);
-      await _syncRecordTagsCache(txn, recordId);
-      await _syncRecordMetadataCache(txn, recordId);
+
+      // 3. Check remaining images for this record
+      final List<Map<String, dynamic>> remaining = await txn.rawQuery(
+        'SELECT COUNT(*) as count FROM images WHERE record_id = ?',
+        [recordId]
+      );
+      final int count = Sqflite.firstIntValue(remaining) ?? 0;
+
+      if (count == 0) {
+        // 4. No images left, delete the entire Record and its search index
+        await txn.delete('records', where: 'id = ?', whereArgs: [recordId]);
+        await txn.delete('ocr_search_index', where: 'record_id = ?', whereArgs: [recordId]);
+      } else {
+        // 5. Still has images, sync caches
+        await _syncRecordTagsCache(txn, recordId);
+        await _syncRecordMetadataCache(txn, recordId);
+      }
     });
   }
 

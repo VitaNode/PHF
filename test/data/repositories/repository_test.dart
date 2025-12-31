@@ -38,7 +38,9 @@ void main() {
     await db.execute('CREATE TABLE records (id TEXT PRIMARY KEY, person_id TEXT, status TEXT, visit_date_ms INTEGER, visit_date_iso TEXT, hospital_name TEXT, notes TEXT, tags_cache TEXT, visit_end_date_ms INTEGER, created_at_ms INTEGER, updated_at_ms INTEGER)');
     await db.execute('CREATE TABLE images (id TEXT PRIMARY KEY, record_id TEXT, file_path TEXT, thumbnail_path TEXT, encryption_key TEXT, thumbnail_encryption_key TEXT, width INTEGER, height INTEGER, hospital_name TEXT, visit_date_ms INTEGER, mime_type TEXT, file_size INTEGER, page_index INTEGER, ocr_text TEXT, ocr_raw_json TEXT, ocr_confidence REAL, tags TEXT, created_at_ms INTEGER)');
     await db.execute('CREATE TABLE tags (id TEXT PRIMARY KEY, name TEXT UNIQUE, color TEXT, order_index INTEGER, person_id TEXT, is_custom INTEGER, created_at_ms INTEGER)');
-    await db.execute('CREATE TABLE image_tags (image_id TEXT, tag_id TEXT, PRIMARY KEY (image_id, tag_id))');
+    await db.execute('CREATE TABLE image_tags (image_id TEXT REFERENCES images(id) ON DELETE CASCADE, tag_id TEXT REFERENCES tags(id) ON DELETE CASCADE, PRIMARY KEY (image_id, tag_id))');
+    await db.execute('CREATE TABLE ocr_queue (id TEXT PRIMARY KEY, image_id TEXT REFERENCES images(id) ON DELETE CASCADE, status TEXT, retry_count INTEGER, last_error TEXT, created_at_ms INTEGER, updated_at_ms INTEGER)');
+    await db.execute('CREATE VIRTUAL TABLE ocr_search_index USING fts5(record_id UNINDEXED, content)');
     
     // Basic Data
     await db.execute("INSERT INTO persons (id, nickname, created_at_ms) VALUES ('p1', 'Tester', 12345)");
@@ -132,6 +134,16 @@ void main() {
             'thumbnail_encryption_key': 'tk',
             'created_at_ms': 1
           });
+          // Add another image so the record isn't deleted when i2 is removed
+          await db.insert('images', {
+            'id': 'i2_placeholder', 
+            'record_id': 'r2', 
+            'file_path': 'p2', 
+            'thumbnail_path': 't2', 
+            'encryption_key': 'k2', 
+            'thumbnail_encryption_key': 'tk2',
+            'created_at_ms': 2
+          });
          await db.insert('image_tags', {'image_id': 'i2', 'tag_id': 't1'});
          
          // Pre-sync manually or assume state
@@ -140,14 +152,65 @@ void main() {
          // Action: Delete Image
          await imageRepo.deleteImage('i2');
          
-         // Verify: Image gone
-         final images = await imageRepo.getImagesForRecord('r2');
-         expect(images, isEmpty);
+         // Verify: Image i2 is gone
+         final imageCheck = await db.query('images', where: 'id = ?', whereArgs: ['i2']);
+         expect(imageCheck, isEmpty);
          
-         // Verify: Record tags_cache cleared (since only image was deleted)
+         // Verify: Record tags_cache cleared (since the only image with tags was deleted)
          final fetchedRecord = await recordRepo.getRecordById('r2');
          final List<dynamic> tags = jsonDecode(fetchedRecord!.tagsCache!) as List<dynamic>;
          expect(tags, isEmpty);
+    });
+
+    test('Deleting the last image of a record deletes the Record entity and OCR tasks', () async {
+      // 1. Setup Record with 1 Image and OCR data
+      await db.insert('records', {
+        'id': 'r3', 
+        'person_id': 'p1', 
+        'status': 'archived',
+        'visit_date_ms': 12345,
+        'created_at_ms': 1, 
+        'updated_at_ms': 1
+      });
+      await db.insert('images', {
+        'id': 'i3', 
+        'record_id': 'r3', 
+        'file_path': 'p', 
+        'thumbnail_path': 't', 
+        'encryption_key': 'k', 
+        'thumbnail_encryption_key': 'tk',
+        'created_at_ms': 1
+      });
+      await db.insert('ocr_queue', {
+        'id': 'q1', 
+        'image_id': 'i3', 
+        'status': 'pending', 
+        'created_at_ms': 1, 
+        'updated_at_ms': 1
+      });
+      await db.insert('ocr_search_index', {
+        'record_id': 'r3', 
+        'content': 'Hospital report content'
+      });
+
+      // 2. Action: Delete the only image
+      await imageRepo.deleteImage('i3');
+
+      // 3. Verify: Image is gone
+      final imageCheck = await db.query('images', where: 'id = ?', whereArgs: ['i3']);
+      expect(imageCheck, isEmpty);
+
+      // 4. Verify: Record is gone (Cascaded/Manual cleanup)
+      final recordCheck = await db.query('records', where: 'id = ?', whereArgs: ['r3']);
+      expect(recordCheck, isEmpty);
+
+      // 5. Verify: OCR Queue is gone
+      final queueCheck = await db.query('ocr_queue', where: 'image_id = ?', whereArgs: ['i3']);
+      expect(queueCheck, isEmpty);
+
+      // 6. Verify: Search Index is gone
+      final searchCheck = await db.query('ocr_search_index', where: 'record_id = ?', whereArgs: ['r3']);
+      expect(searchCheck, isEmpty);
     });
   });
 }

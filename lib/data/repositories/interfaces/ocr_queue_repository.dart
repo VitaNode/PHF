@@ -30,4 +30,7 @@ abstract interface class IOCRQueueRepository {
 
   /// 删除任务
   Future<void> deleteJob(String id);
+
+  /// 根据图片 ID 删除关联的任务
+  Future<void> deleteByImageId(String imageId);
 }
