@@ -17,6 +17,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart';
+import '../utils/secure_wipe_helper.dart';
 import 'interfaces/crypto_service.dart';
 
 class CryptoService implements ICryptoService {
@@ -97,7 +98,7 @@ class CryptoService implements ICryptoService {
 
     // Ensure output doesn't exist or overwrite
     if (await outputFile.exists()) {
-      await outputFile.delete();
+      await SecureWipeHelper.wipe(outputFile);
     }
     
     final outputSink = outputFile.openWrite();
@@ -154,7 +155,7 @@ class CryptoService implements ICryptoService {
     final secretKey = SecretKey(key);
 
     if (await outputFile.exists()) {
-      await outputFile.delete();
+      await SecureWipeHelper.wipe(outputFile);
     }
 
     final outputSink = outputFile.openWrite();

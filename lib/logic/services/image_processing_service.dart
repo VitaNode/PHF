@@ -12,6 +12,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart';
+import '../utils/secure_wipe_helper.dart';
 import 'interfaces/image_service.dart';
 
 class ImageProcessingService implements IImageService {
@@ -90,10 +91,7 @@ class ImageProcessingService implements IImageService {
 
   @override
   Future<void> secureWipe(String filePath) async {
-    final file = File(filePath);
-    if (await file.exists()) {
-      await file.delete();
-    }
+    await SecureWipeHelper.wipe(File(filePath));
   }
 
   @override

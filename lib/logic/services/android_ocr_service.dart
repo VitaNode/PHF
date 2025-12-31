@@ -21,6 +21,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../utils/secure_wipe_helper.dart';
 import '../../data/models/ocr_result.dart';
 import 'interfaces/ocr_service.dart';
 
@@ -56,8 +57,8 @@ class AndroidOCRService implements IOCRService {
       throw Exception('OCR Logic Error: $e');
     } finally {
       // 5. Secure Wipe (Crucial)
-      if (tempFile != null && await tempFile.exists()) {
-        await tempFile.delete();
+      if (tempFile != null) {
+        await SecureWipeHelper.wipe(tempFile);
         log('Secure wipe of temp OCR file completed.', name: 'AndroidOCRService');
       }
     }

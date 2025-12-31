@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../utils/secure_wipe_helper.dart';
 import '../../data/models/ocr_result.dart';
 import 'interfaces/ocr_service.dart';
 
@@ -59,8 +60,8 @@ class IOSOCRService implements IOCRService {
       throw Exception('iOS OCR Logic Error: $e');
     } finally {
       // 4. Secure Wipe (Crucial)
-      if (tempFile != null && await tempFile.exists()) {
-        await tempFile.delete();
+      if (tempFile != null) {
+        await SecureWipeHelper.wipe(tempFile);
         log('Secure wipe of temp iOS OCR file completed.', name: 'IOSOCRService');
       }
     }

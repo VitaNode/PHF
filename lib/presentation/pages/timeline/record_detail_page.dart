@@ -595,7 +595,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 currentIds
               );
               // Notify Timeline (async)
-              ref.read(timelineControllerProvider.notifier).refresh();
+              await ref.read(timelineControllerProvider.notifier).refresh();
             } catch (e) {
               setState(() {
                 _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: oldIds);
@@ -621,7 +621,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 currentIds
               );
               // Notify Timeline (async)
-              ref.read(timelineControllerProvider.notifier).refresh();
+              await ref.read(timelineControllerProvider.notifier).refresh();
             } catch (e) {
               setState(() {
                 _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: originalIds);

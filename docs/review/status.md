@@ -10,6 +10,7 @@
 - [x] **T21.3**: OCR 质量补强与“重新识别”功能.
 - [x] **T21.4**: 详情页与校对页编辑闭环 (确保同步更新 Timeline).
 - [x] **T21.1**: 自动刷新机制 (监听 OCR 队列状态并自动更新 UI).
+- [x] **T21.5**: 物理擦除优化 (实现随机覆盖 + Flush 的安全删除逻辑).
 - [x] **T20.6**: 修复 iOS 后台 OCR 调度及延迟 bug.
 - [x] **T21**: 修复图片删除崩溃并集成 `talker` 日志系统.
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
@@ -39,7 +40,7 @@ All Phase 2 tasks (T17-T20) are implemented and verified. The system now support
 - Full UI Integration (Review Flow, Search, Details).
 
 ## 🟡 Pending Issues / Technical Debt
-- **T10: Physical Wiping**: Reliance on OS file deletion.
+- None.
 
 ## 🔴 Blockers
 - None.

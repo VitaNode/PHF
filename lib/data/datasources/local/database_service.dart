@@ -57,7 +57,8 @@ class SQLCipherDatabaseService {
   ///
   /// 如果尚未初始化，将触发初始化流程。
   Future<Database> get database async {
-    if (_database != null) return _database!;
+    final db = _database;
+    if (db != null) return db;
     
     // 如果已经在初始化中，等待同一个 Future
     if (_initFuture != null) return _initFuture!;
@@ -88,7 +89,7 @@ class SQLCipherDatabaseService {
     final password = base64Encode(rawKey);
 
     if (_dbFactory != null) {
-      return _dbFactory!.openDatabase(
+      return _dbFactory.openDatabase(
         dbPath,
         options: OpenDatabaseOptions(
           version: _dbVersion,

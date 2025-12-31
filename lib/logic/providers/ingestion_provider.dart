@@ -12,12 +12,14 @@
 ///    4. 触发 Timeline 刷新。
 library;
 
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/image.dart';
 import '../../data/models/record.dart';
 import '../services/background_worker_service.dart';
+import '../utils/secure_wipe_helper.dart';
 import '../providers/logging_provider.dart';
 import 'core_providers.dart';
 import 'states/ingestion_state.dart';
@@ -231,10 +233,27 @@ class IngestionController extends _$IngestionController {
       
       // 10. Refresh Timeline & Reset State
       ref.invalidate(timelineControllerProvider);
+      
+      // 11. Secure Wipe raw images
+      await _cleanup();
+      
       state = const IngestionState(status: IngestionStatus.success);
       
     } catch (e) {
       state = state.copyWith(status: IngestionStatus.error, errorMessage: e.toString());
+      // Cleanup even on error
+      await _cleanup();
+    }
+  }
+
+  /// 物理擦除所有已加载的原始临时图片
+  Future<void> _cleanup() async {
+    for (final xFile in state.rawImages) {
+      try {
+        await SecureWipeHelper.wipe(File(xFile.path));
+      } catch (_) {
+        // 忽略清理阶段的错误
+      }
     }
   }
 }
