@@ -8,6 +8,8 @@ import '../../../data/models/record.dart';
 import '../../../data/models/tag.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/timeline_provider.dart';
+import '../../../logic/providers/logging_provider.dart';
+import '../../../logic/services/background_worker_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/secure_image.dart';
 import '../../widgets/tag_selector.dart';
@@ -168,6 +170,44 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败: $e')));
       }
+    }
+  }
+
+  Future<void> _retriggerOCR() async {
+    if (_images.isEmpty) return;
+    final currentImage = _images[_currentIndex];
+    
+    setState(() => _isLoading = true);
+    try {
+      final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider);
+      
+      // 1. Enqueue
+      await ocrQueueRepo.enqueue(currentImage.id);
+      
+      // 2. Trigger Background Worker
+      await BackgroundWorkerService().triggerProcessing();
+      
+      // 3. Start foreground processing (Immediate feedback)
+      // ignore: unawaited_futures
+      BackgroundWorkerService().startForegroundProcessing(
+        talker: ref.read(talkerProvider),
+      );
+      
+      // We don't wait for completion here, but we should inform the user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已重新加入识别队列，请稍候...'))
+        );
+      }
+      
+      // Wait a bit and reload to see if it finished (simple UX)
+      await Future.delayed(const Duration(seconds: 2));
+      await _loadData();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
+      }
+      setState(() => _isLoading = false);
     }
   }
 
@@ -348,16 +388,29 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: _deleteCurrentImage,
-                icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('删除此页'),
+                onPressed: _retriggerOCR,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('重新识别'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.errorRed,
-                  side: const BorderSide(color: AppTheme.errorRed),
+                  foregroundColor: AppTheme.primaryTeal,
+                  side: const BorderSide(color: AppTheme.primaryTeal),
                 ),
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _deleteCurrentImage,
+            icon: const Icon(Icons.delete_outline, size: 18),
+            label: const Text('删除此页'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.errorRed,
+              side: const BorderSide(color: AppTheme.errorRed),
+            ),
+          ),
         ),
         const SizedBox(height: 24),
       ],

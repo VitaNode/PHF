@@ -24,13 +24,39 @@ class OCRQueueRepository extends BaseRepository implements IOCRQueueRepository {
     final db = await dbService.database;
     final now = DateTime.now().millisecondsSinceEpoch;
     
-    await db.insert('ocr_queue', {
-      'id': const Uuid().v4(),
-      'image_id': imageId,
-      'status': OCRJobStatus.pending.name,
-      'retry_count': 0,
-      'created_at_ms': now,
-      'updated_at_ms': now,
+    await db.transaction((txn) async {
+      // Check if a job already exists for this image
+      final existing = await txn.query(
+        'ocr_queue',
+        where: 'image_id = ?',
+        whereArgs: [imageId],
+        limit: 1,
+      );
+
+      if (existing.isNotEmpty) {
+        // Reset existing job to pending
+        await txn.update(
+          'ocr_queue',
+          {
+            'status': OCRJobStatus.pending.name,
+            'retry_count': 0,
+            'last_error': null,
+            'updated_at_ms': now,
+          },
+          where: 'image_id = ?',
+          whereArgs: [imageId],
+        );
+      } else {
+        // Create new job
+        await txn.insert('ocr_queue', {
+          'id': const Uuid().v4(),
+          'image_id': imageId,
+          'status': OCRJobStatus.pending.name,
+          'retry_count': 0,
+          'created_at_ms': now,
+          'updated_at_ms': now,
+        });
+      }
     });
   }
 

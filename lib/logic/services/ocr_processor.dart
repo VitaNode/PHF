@@ -105,8 +105,19 @@ class OCRProcessor {
       // 立即释放原始解密数据
       decryptedBytes = null; 
 
+      // 3.1 预处理 OCR 结果 (防止因接口返回 text 为空但 blocks 有数据的情况)
+      String fullText = ocrResult.text.trim();
+      if (fullText.isEmpty && ocrResult.blocks.isNotEmpty) {
+        fullText = ocrResult.blocks.map((b) => b.text).join('\n').trim();
+        _talker?.warning('[OCRProcessor] OCR text was empty but blocks exist. Joined blocks.');
+      }
+
+      if (fullText.isEmpty) {
+        _talker?.warning('[OCRProcessor] OCR result for Image ${image.id} is completely empty.');
+      }
+
       // 4. 智能提取 (FR-203)
-      final extracted = SmartExtractor.extract(ocrResult.text, ocrResult.confidence);
+      final extracted = SmartExtractor.extract(fullText, ocrResult.confidence);
       
       final info = 'Extracted: date=${extracted.visitDate}, hospital=${extracted.hospitalName}, score=${extracted.confidenceScore}';
       _talker?.info('[OCRProcessor] $info');
@@ -116,14 +127,13 @@ class OCRProcessor {
       // 5.1 更新 Image OCR 数据
       await _imageRepository.updateOCRData(
         image.id, 
-        ocrResult.text,
+        fullText,
         rawJson: jsonEncode(ocrResult.toJson()),
         confidence: extracted.confidenceScore
       );
 
       // 5.2 更新 Image 业务元数据 (如果有新发现)
       // 仅当提取到有效值且当前 Image 对应字段为空时，或者我们选择覆盖？
-      // Spec: "减少手动录入成本"。通常OCR结果应该填入。
       if (extracted.visitDate != null || extracted.hospitalName != null) {
         await _imageRepository.updateImageMetadata(
           image.id,
