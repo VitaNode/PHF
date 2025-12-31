@@ -1,7 +1,7 @@
 # Project Review Status Summary
 
 **Last Updated**: 2025-12-31
-**Coverage**: T0 - T19.2 (OCR Processor Service)
+**Coverage**: T0 - T19.3 (Android Background Worker)
 
 ## �� Approved Features (Highlights)
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
@@ -20,7 +20,7 @@
 
 ## 🟡 Pending Issues / Technical Debt
 - **T10: Physical Wiping**: Reliance on OS file deletion.
-- **Phase 2 OCR Integration**: Background workers (T19.3/4) and UI (T20) are pending.
+- **Phase 2 OCR Integration**: iOS Background logic(T19.4) and UI(T20) are pending. `WorkManager` (T19.3) implemented for Android.
 
 ## 🔴 Blockers
 - None.
