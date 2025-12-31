@@ -66,7 +66,7 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
                 }
             }
         } else {
-            result(FlutterNotImplemented)
+            result(FlutterMethodNotImplemented)
         }
     }
     
@@ -84,6 +84,9 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
             return
         }
         
+        let width = Double(cgImage.width)
+        let height = Double(cgImage.height)
+        
         // 2. Setup Request
         let request = VNRecognizeTextRequest { (request, error) in
             // Vision completion handler calls back on an arbitrary queue
@@ -94,7 +97,7 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
                 return
             }
             
-            self.handleDetectionResults(results: request.results) { result in
+            self.handleDetectionResults(results: request.results, width: width, height: height) { result in
                 DispatchQueue.main.async {
                     completion(result)
                 }
@@ -120,7 +123,7 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func handleDetectionResults(results: [Any]?, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+    private func handleDetectionResults(results: [Any]?, width: Double, height: Double, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         guard let observations = results as? [VNRecognizedTextObservation] else {
             completion(.success(["text": "", "blocks": []]))
             return
@@ -140,9 +143,6 @@ public class NativeOCRPlugin: NSObject, FlutterPlugin {
             // Vision BoundingBox: origin is bottom-left (0,0). Normalized (0-1).
             // Flutter Canvas: origin is top-left (0,0). Absolute pixels.
             // Need to flip Y and denormalize.
-            
-            let width = Double(cgImage.width)
-            let height = Double(cgImage.height)
             
             let box = observation.boundingBox
             
