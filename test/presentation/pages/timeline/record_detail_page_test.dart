@@ -111,4 +111,45 @@ void main() {
 
     expect(find.text('记录不存在'), findsOneWidget);
   });
+
+  testWidgets('RecordDetailPage allows viewing OCR text', (tester) async {
+    const recordId = 'r1';
+    final record = MedicalRecord(
+      id: recordId,
+      personId: 'p1',
+      notedAt: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      status: RecordStatus.archived,
+    );
+
+    final image = MedicalImage(
+      id: 'i1',
+      recordId: recordId,
+      encryptionKey: 'key',
+      thumbnailEncryptionKey: 'thumb_key',
+      filePath: 'path/to/img.enc',
+      thumbnailPath: 'path/to/thumb.enc',
+      createdAt: DateTime.now(),
+      ocrText: 'Recognized Text Content',
+    );
+
+    when(mockRecordRepo.getRecordById(recordId))
+        .thenAnswer((_) async => record);
+    when(mockImageRepo.getImagesForRecord(recordId))
+        .thenAnswer((_) async => [image]);
+
+    await tester.pumpWidget(createSubject(recordId));
+    await tester.pumpAndSettle();
+
+    // Find OCR button and tap
+    final ocrButton = find.byTooltip('查看识别文本');
+    expect(ocrButton, findsOneWidget);
+    await tester.tap(ocrButton);
+    await tester.pumpAndSettle();
+
+    // Verify Bottom Sheet content
+    expect(find.text('OCR 识别结果'), findsOneWidget);
+    expect(find.text('Recognized Text Content'), findsOneWidget);
+  });
 }

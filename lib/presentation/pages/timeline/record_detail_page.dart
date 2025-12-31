@@ -114,9 +114,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       // Notify Timeline to refresh
       ref.invalidate(timelineControllerProvider);
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+      }
     }
   }
 
@@ -148,7 +152,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
       // If it was the last image, go back
       if (_images.length == 1) {
-        Navigator.pop(context);
+        if (mounted) Navigator.pop(context);
         return;
       }
 
@@ -161,7 +165,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         _currentIndex = _images.length - 1;
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+      }
     }
   }
 
