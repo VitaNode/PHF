@@ -24,14 +24,23 @@ part 'timeline_provider.g.dart';
 class TimelineController extends _$TimelineController {
   @override
   FutureOr<HomeState> build() async {
-    // 监听 OCR 任务状态，当所有任务处理完（从 >0 到 0）时，自动刷新
+    final talker = ref.watch(talkerProvider);
+
+    // 监听 OCR 任务状态
     ref.listen(ocrPendingCountProvider, (previous, next) {
-      if (previous != null && next.hasValue && previous.hasValue) {
-        final prevCount = previous.value!;
+      if (next.hasValue) {
         final nextCount = next.value!;
-        
-        // 任务处理完，或者有新结果入库（针对待确认横幅的实时性）
-        if ((prevCount > 0 && nextCount == 0) || (nextCount != prevCount)) {
+        final prevCount = previous?.value ?? 0;
+
+        // 核心逻辑：
+        // 1. 任务数从 >0 变为 0 (全部处理完)
+        // 2. 任务数减少 (意味着至少处理完了一张图，需更新列表状态)
+        if ((prevCount > 0 && nextCount == 0) || (nextCount < prevCount)) {
+          talker.info('[TimelineController] OCR Progress detected ($prevCount -> $nextCount). Refreshing...');
+          refresh();
+        } else if (nextCount > prevCount) {
+          // 任务数增加，可能新入库了，刷新以显示 "Processing" 占位
+          talker.info('[TimelineController] New OCR tasks added ($prevCount -> $nextCount). Refreshing...');
           refresh();
         }
       }

@@ -242,16 +242,17 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 监听 OCR 任务，如果当前图片正在被识别且识别完成，自动刷新数据
+    // 监听 OCR 任务，如果识别进度有更新，自动刷新数据
     ref.listen(ocrPendingCountProvider, (previous, next) {
-      if (previous != null && next.hasValue && previous.hasValue) {
-        final prevCount = previous.value!;
-        final nextCount = next.value!;
-        
-        // 任务处理完，或者有新结果入库（确保 UI 实时更新）
-        if ((prevCount > 0 && nextCount == 0) || (nextCount != prevCount)) {
-          _loadData();
-        }
+      if (next.hasValue) {
+         final prevCount = previous?.value ?? 0;
+         final nextCount = next.value!;
+         
+         // 只要任务在减少（哪怕没归零，也可能当前看的那张图好了）
+         if (nextCount < prevCount || (prevCount > 0 && nextCount == 0)) {
+            ref.read(talkerProvider).info('[RecordDetailPage] OCR update detected. Reloading data.');
+            _loadData();
+         }
       }
     });
 

@@ -10,39 +10,62 @@
 ///
 /// ## Security
 /// - 仅读取任务计数，不涉及敏感明文。
-///
-/// ## Repair Logs
-/// - [2025-12-31] 优化：移除不必要的 keepAlive 以节省后台功耗；修复数据库错误时回退为 0 可能导致的 UI 误判；修正 Future.delayed 类型推导。
 library;
 
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'core_providers.dart';
+import 'logging_provider.dart';
 
 part 'ocr_status_provider.g.dart';
 
 @riverpod
 Stream<int> ocrPendingCount(Ref ref) async* {
   final repo = ref.watch(ocrQueueRepositoryProvider);
+  final talker = ref.watch(talkerProvider);
   
-  int lastCount = 0;
+  // 保持 Provider 活跃，直到没有订阅者
+  final link = ref.keepAlive();
+  Timer? timer;
 
-  while (true) {
-    int currentCount = lastCount;
+  // 使用 StreamController 来管理手动控制的轮询
+  final controller = StreamController<int>();
+
+  Future<void> poll() async {
     try {
-      currentCount = await repo.getPendingCount();
-      lastCount = currentCount;
-    } catch (e) {
-      // 数据库忙或锁定，维持上一次的计数，避免 UI 误判为“处理完成”
-    }
-    
-    yield currentCount;
-
-    // 根据是否有任务调整轮询频率
-    if (currentCount > 0) {
-      await Future<void>.delayed(const Duration(seconds: 3));
-    } else {
-      await Future<void>.delayed(const Duration(seconds: 10));
+      final count = await repo.getPendingCount();
+      if (!controller.isClosed) {
+        controller.add(count);
+      }
+    } catch (e, st) {
+      talker.error('[OCRStatusProvider] Polling failed', e, st);
+      if (!controller.isClosed) controller.add(0);
     }
   }
+
+  // 初始执行一次
+  await poll();
+
+  // 动态调整频率的定时器
+  void scheduleNext(int currentCount) {
+    timer?.cancel();
+    final delay = currentCount > 0 ? const Duration(seconds: 2) : const Duration(seconds: 10);
+    timer = Timer(delay, () async {
+      await poll();
+    });
+  }
+
+  // 监听 controller 自身的数据以决定下次轮询时间
+  final subscription = controller.stream.listen((count) {
+    scheduleNext(count);
+  });
+
+  ref.onDispose(() {
+    timer?.cancel();
+    subscription.cancel();
+    controller.close();
+    link.close();
+  });
+
+  yield* controller.stream;
 }
