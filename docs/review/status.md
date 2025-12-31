@@ -1,7 +1,7 @@
 # Project Review Status Summary
 
 **Last Updated**: 2025-12-31
-**Coverage**: T0 - T18.2 (Android OCR)
+**Coverage**: T0 - T18.3 (iOS OCR)
 
 ## �� Approved Features (Highlights)
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
@@ -15,11 +15,11 @@
   - **Ingestion**: Streamlined "Capture -> Preview -> Save" flow.
   - **Detail View**: Split-view layout with per-image metadata (Hospital, Date, Tags) support and in-place editing. Fully enhanced Tag Selector with highlighting and drag-sort.
 - **Components**: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
-- **OCR (Phase 2)**: `IOCRService` (T18.1) and `AndroidOCRService` (T18.2) reviewed and hardened (logging, serialization fixes).
+- **OCR (Phase 2)**: `IOCRService` (T18.1), `AndroidOCRService` (T18.2), and `IOSOCRService` (T18.3) fully implemented with Native/ML Kit integration.
 
 ## 🟡 Pending Issues / Technical Debt
 - **T10: Physical Wiping**: Reliance on OS file deletion.
-- **Phase 2 OCR Integration**: Infrastructure and schema are ready (T17). iOS implementation (T18.3) and background logic (T19) are pending.
+- **Phase 2 OCR Integration**: Infrastructure and schema are ready (T17). OCR Engines (T18) ready. Background processing logic (T19) is pending.
 
 ## 🔴 Blockers
 - None.

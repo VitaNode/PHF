@@ -221,8 +221,8 @@
     - *Ref: Constitution#II. Architecture (Facade Pattern)*
 - [x] **Implement (T18.2 - Android)**: 实现 `AndroidOCRService`，集成 `google_mlkit_text_recognition`。配置 `android/build.gradle`。 (Complexity: Medium)
     - *Ref: Constitution#II. Local-First (Offline ML Kit)*
-- [ ] **Implement (T18.3 - iOS)**: 实现 `IOSOCRService`。
-    - 编写 iOS 端 `OCRPlugin.swift` (利用 Vision Framework `VNRecognizeTextRequest`)。
+- [x] **Implement (T18.3 - iOS)**: 实现 `IOSOCRService`。
+    - 编写 iOS 端 `NativeOCRPlugin` 和 `AppDelegate` 集成 (利用 Vision Framework `VNRecognizeTextRequest`)。
     - 实现 Flutter 端 MethodChannel 调用封装。
     - *Ref: Constitution#II. Local-First (Native Vision Framework)* (Complexity: High)
 - [ ] **Test**: 分别在 Android/iOS 真机断网环境下验证图片文字识别准确率。 (Complexity: Medium)
