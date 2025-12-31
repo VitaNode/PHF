@@ -230,6 +230,23 @@ final tagRepositoryProvider = Provider<ITagRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TagRepositoryRef = ProviderRef<ITagRepository>;
+String _$searchRepositoryHash() => r'487f804056fb249f1e8fe9c60b4e7064ceed9b46';
+
+/// See also [searchRepository].
+@ProviderFor(searchRepository)
+final searchRepositoryProvider = Provider<ISearchRepository>.internal(
+  searchRepository,
+  name: r'searchRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$searchRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SearchRepositoryRef = ProviderRef<ISearchRepository>;
 String _$allTagsHash() => r'2da877478590ccc47192cb22afe601e3bda15acf';
 
 /// See also [allTags].

@@ -11,28 +11,36 @@ library;
 import '../models/record.dart';
 import 'base_repository.dart';
 import 'interfaces/search_repository.dart';
+import '../models/search_result.dart';
 
 class SearchRepository extends BaseRepository implements ISearchRepository {
   SearchRepository(super.dbService);
 
   @override
-  Future<List<MedicalRecord>> search(String query, String personId) async {
+  Future<List<SearchResult>> search(String query, String personId) async {
     final db = await dbService.database;
     
     // 执行 FTS5 全文搜索
     // JOIN records 表以获取元数据，并过滤 personId
+    // snippet(index_name, column_index, start_tag, end_tag, ellipsis, max_tokens)
     final sql = '''
-      SELECT r.* 
+      SELECT r.*, snippet(ocr_search_index, 0, '<b>', '</b>', '...', 16) as snippet
       FROM records r
       JOIN ocr_search_index fts ON r.id = fts.record_id
       WHERE r.person_id = ? AND r.status != 'deleted' AND fts.content MATCH ?
       ORDER BY r.visit_date_ms DESC
+      LIMIT 100
     ''';
     
+    // FTS5 MATCH query syntax: simple words or phrases.
+    // Ideally we should sanitize or prepare the query. 
+    // SQLCipher FTS5 standard query.
+    // If query is empty, this SQL might fail or return nothing. Caller should handle empty query check.
+
     final List<Map<String, dynamic>> maps = await db.rawQuery(sql, [personId, query]);
     
     return maps.map((m) {
-      return MedicalRecord(
+      final record = MedicalRecord(
         id: m['id'] as String,
         personId: m['person_id'] as String,
         hospitalName: m['hospital_name'] as String?,
@@ -45,6 +53,11 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
         updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updated_at_ms'] as int),
         status: RecordStatus.values.firstWhere((e) => e.name == m['status']),
         tagsCache: m['tags_cache'] as String?,
+      );
+
+      return SearchResult(
+        record: record,
+        snippet: m['snippet'] as String? ?? '',
       );
     }).toList();
   }

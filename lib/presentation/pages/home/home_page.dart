@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../timeline/timeline_page.dart';
 import '../ingestion/ingestion_page.dart';
+import '../search/global_search_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -33,6 +34,15 @@ class HomePage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const GlobalSearchPage()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {

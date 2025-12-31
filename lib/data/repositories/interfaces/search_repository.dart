@@ -9,12 +9,12 @@
 /// - `updateIndex`: 更新搜索索引.
 library;
 
-import '../../models/record.dart';
+import '../../models/search_result.dart';
 
 abstract interface class ISearchRepository {
   /// 执行全文搜索
-  /// 返回符合条件的 MedicalRecord 列表（不带完整图片元数据）
-  Future<List<MedicalRecord>> search(String query, String personId);
+  /// 返回符合条件的 SearchResult 列表（包含片段高亮）
+  Future<List<SearchResult>> search(String query, String personId);
 
   /// 更新或插入 OCR 索引
   Future<void> updateIndex(String recordId, String content);

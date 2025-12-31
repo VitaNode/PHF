@@ -18,6 +18,8 @@ import '../../data/repositories/record_repository.dart';
 import '../../data/repositories/app_meta_repository.dart';
 import '../../data/repositories/interfaces/tag_repository.dart';
 import '../../data/repositories/tag_repository.dart';
+import '../../data/repositories/interfaces/search_repository.dart';
+import '../../data/repositories/search_repository.dart';
 import '../../data/models/tag.dart';
 import '../services/crypto_service.dart';
 import '../services/security_service.dart';
@@ -109,6 +111,12 @@ SecurityService securityService(SecurityServiceRef ref) {
 ITagRepository tagRepository(TagRepositoryRef ref) {
   final db = ref.watch(databaseServiceProvider);
   return TagRepository(db);
+}
+
+@Riverpod(keepAlive: true)
+ISearchRepository searchRepository(SearchRepositoryRef ref) {
+  final db = ref.watch(databaseServiceProvider);
+  return SearchRepository(db);
 }
 
 @riverpod
