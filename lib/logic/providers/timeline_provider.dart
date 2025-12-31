@@ -15,23 +15,25 @@ library;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/record.dart';
 import 'core_providers.dart';
+import 'states/home_state.dart';
 
 part 'timeline_provider.g.dart';
 
 @riverpod
 class TimelineController extends _$TimelineController {
   @override
-  FutureOr<List<MedicalRecord>> build() async {
+  FutureOr<HomeState> build() async {
     return _fetchRecords();
   }
 
   /// 内部获取当前用户的所有记录 (默认)
-  Future<List<MedicalRecord>> _fetchRecords() async {
+  Future<HomeState> _fetchRecords() async {
     final repo = ref.read(recordRepositoryProvider);
     final imageRepo = ref.read(imageRepositoryProvider);
     // TODO: Phase 2 Get Person ID from User Session
     const currentPersonId = 'def_me'; 
     final records = await repo.getRecordsByPerson(currentPersonId);
+    final pendingCount = await repo.getPendingCount(currentPersonId);
 
     // Enrich with images (Phase 1 N+1)
     final List<MedicalRecord> enriched = [];
@@ -39,7 +41,11 @@ class TimelineController extends _$TimelineController {
       final images = await imageRepo.getImagesForRecord(rec.id);
       enriched.add(rec.copyWith(images: images));
     }
-    return enriched;
+    
+    return HomeState(
+      records: enriched,
+      pendingCount: pendingCount,
+    );
   }
 
   /// 刷新列表
@@ -55,18 +61,24 @@ class TimelineController extends _$TimelineController {
       final repo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
       const currentPersonId = 'def_me';
+      
       final records = await repo.searchRecords(
         personId: currentPersonId,
         query: query,
         tags: tags,
       );
+      final pendingCount = await repo.getPendingCount(currentPersonId);
 
       final List<MedicalRecord> enriched = [];
       for (var rec in records) {
         final images = await imageRepo.getImagesForRecord(rec.id);
         enriched.add(rec.copyWith(images: images));
       }
-      return enriched;
+      
+      return HomeState(
+        records: enriched,
+        pendingCount: pendingCount,
+      );
     });
   }
 

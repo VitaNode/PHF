@@ -7,12 +7,12 @@ part of 'timeline_provider.dart';
 // **************************************************************************
 
 String _$timelineControllerHash() =>
-    r'e8b718f594526dc03d5427b86a0c6c22dcd8ac76';
+    r'247a72c38d0b18de679b960a75e2ad4c3f5500b4';
 
 /// See also [TimelineController].
 @ProviderFor(TimelineController)
-final timelineControllerProvider = AutoDisposeAsyncNotifierProvider<
-    TimelineController, List<MedicalRecord>>.internal(
+final timelineControllerProvider =
+    AutoDisposeAsyncNotifierProvider<TimelineController, HomeState>.internal(
   TimelineController.new,
   name: r'timelineControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,6 +22,6 @@ final timelineControllerProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$TimelineController = AutoDisposeAsyncNotifier<List<MedicalRecord>>;
+typedef _$TimelineController = AutoDisposeAsyncNotifier<HomeState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

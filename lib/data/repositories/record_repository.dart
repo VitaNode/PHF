@@ -234,6 +234,16 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     }
   }
 
+  @override
+  Future<int> getPendingCount(String personId) async {
+    final db = await dbService.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM records WHERE person_id = ? AND status = ?',
+      [personId, 'review'],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
   // --- Helpers ---
 
   MedicalRecord _mapToRecord(Map<String, dynamic> row, List<MedicalImage> images) {

@@ -39,4 +39,7 @@ abstract class IRecordRepository {
 
   /// 汇总 Image 数据并同步到 Record 缓存字段
   Future<void> syncRecordMetadata(String recordId);
+
+  /// 获取待确认（review 状态）的记录数量
+  Future<int> getPendingCount(String personId);
 }

@@ -16,6 +16,7 @@ import 'package:phf/data/models/record.dart';
 import 'package:phf/logic/providers/timeline_provider.dart';
 import 'package:phf/presentation/theme/app_theme.dart';
 import 'package:phf/presentation/widgets/event_card.dart';
+import 'widgets/pending_review_banner.dart';
 import 'record_detail_page.dart';
 
 class TimelinePage extends ConsumerWidget {
@@ -23,19 +24,21 @@ class TimelinePage extends ConsumerWidget {
 
   void _navigateToDetail(BuildContext context, WidgetRef ref, MedicalRecord record) async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RecordDetailPage(recordId: record.id)),
+      MaterialPageRoute<void>(builder: (_) => RecordDetailPage(recordId: record.id)),
     );
     // Refresh after return (in case of edits/deletes)
-    ref.read(timelineControllerProvider.notifier).refresh();
+    await ref.read(timelineControllerProvider.notifier).refresh();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncRecords = ref.watch(timelineControllerProvider);
+    final asyncHomeState = ref.watch(timelineControllerProvider);
 
-    return asyncRecords.when(
-      data: (records) {
-        if (records.isEmpty) {
+    return asyncHomeState.when(
+      data: (homeState) {
+        final records = homeState.records;
+        
+        if (records.isEmpty && homeState.pendingCount == 0) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -57,20 +60,45 @@ class TimelinePage extends ConsumerWidget {
 
         return RefreshIndicator(
           onRefresh: () => ref.read(timelineControllerProvider.notifier).refresh(),
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: records.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final record = records[index];
-              final firstImage = record.images.isNotEmpty ? record.images.first : null;
-              
-              return EventCard(
-                record: record,
-                firstImage: firstImage,
-                onTap: () => _navigateToDetail(context, ref, record),
-              );
-            },
+          child: CustomScrollView(
+            slivers: [
+              if (homeState.pendingCount > 0)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: PendingReviewBanner(
+                      count: homeState.pendingCount,
+                      onTap: () {
+                        // TODO: Navigate to ReviewListPage in T20.2
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('跳转至待确认列表 (T20.2 待实现)')),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final record = records[index];
+                      final firstImage = record.images.isNotEmpty ? record.images.first : null;
+                      
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: EventCard(
+                          record: record,
+                          firstImage: firstImage,
+                          onTap: () => _navigateToDetail(context, ref, record),
+                        ),
+                      );
+                    },
+                    childCount: records.length,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

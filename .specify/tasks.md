@@ -238,7 +238,7 @@
 - [ ] **Test**: 模拟 App 切后台 5 分钟后，队列任务仍能自动执行并更新数据库。 (Complexity: High)
 
 ### T20: UI 适配与交互闭环 (Phase 2.4)
-- [ ] **Implement (T20.1)**: 更新首页 `HomeState`，增加 `pendingCount` 统计。实现“待确认”顶部横幅组件。 (Complexity: Low)
+- [x] **Implement (T20.1)**: 更新首页 `HomeState`，增加 `pendingCount` 统计。实现“待确认”顶部横幅组件。 (Complexity: Low)
 - [ ] **Implement (T20.2)**: 开发 `ReviewListPage` (待确认列表) 和 `ReviewEditPage` (OCR 结果校对页)。
     - 实现 OCR 文本高亮层 `OCRHighlightView` (在原图上绘制识别框)。
     - *Ref: Constitution#X. UI/UX (Teal/White Theme)* (Complexity: High)

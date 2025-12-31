@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
 
   void _onFabPressed(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const IngestionPage()),
+      MaterialPageRoute<void>(builder: (_) => const IngestionPage()),
     );
   }
 
