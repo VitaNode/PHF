@@ -17,6 +17,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/image.dart';
 import '../../data/models/record.dart';
+import '../services/background_worker_service.dart';
 import 'core_providers.dart';
 import 'states/ingestion_state.dart';
 import 'timeline_provider.dart';
@@ -133,6 +134,7 @@ class IngestionController extends _$IngestionController {
       final recordId = const Uuid().v4();
       final recordRepo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
+      final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider); // T17.4
       final fileSecurity = ref.read(fileSecurityHelperProvider);
       final cryptoService = ref.read(cryptoServiceProvider);
       final imageProcessing = ref.read(imageProcessingServiceProvider);
@@ -203,18 +205,26 @@ class IngestionController extends _$IngestionController {
         notedAt: defaultDate,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        status: RecordStatus.archived,
-        // images: medicalImages, // Not persisted here
+        // Phase 2 Change: Default status is processing
+        status: RecordStatus.processing, 
       );
       
       // 6. Transactional Save
       await recordRepo.saveRecord(record);
       await imageRepo.saveImages(medicalImages);
       
-      // 7. Sync Aggregated Metadata (New Phase 2 Requirement)
+      // 7. Sync Aggregated Metadata
       await recordRepo.syncRecordMetadata(recordId);
+
+      // 8. Phase 2: Enqueue OCR Jobs
+      for (final img in medicalImages) {
+        await ocrQueueRepo.enqueue(img.id);
+      }
+
+      // 9. Phase 2: Trigger Background Worker
+      await BackgroundWorkerService().triggerProcessing();
       
-      // 8. Refresh Timeline & Reset State
+      // 10. Refresh Timeline & Reset State
       ref.invalidate(timelineControllerProvider);
       state = const IngestionState(status: IngestionStatus.success);
       
