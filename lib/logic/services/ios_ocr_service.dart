@@ -15,6 +15,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -31,6 +32,8 @@ class IOSOCRService implements IOCRService {
   Future<OCRResult> recognizeText(Uint8List imageBytes, {String? mimeType}) async {
     File? tempFile;
     try {
+      log('Starting iOS OCR for image size: ${imageBytes.length} bytes', name: 'IOSOCRService');
+
       // 1. Create secure temp file
       final tempDir = await getTemporaryDirectory();
       final uuid = const Uuid().v4();
@@ -47,13 +50,18 @@ class IOSOCRService implements IOCRService {
       final dynamic decoded = jsonDecode(jsonResult);
       final Map<String, dynamic> resultMap = decoded as Map<String, dynamic>;
       
-      return OCRResult.fromJson(resultMap);
-    } catch (e) {
+      final ocrResult = OCRResult.fromJson(resultMap);
+      log('iOS OCR completed. Found ${ocrResult.blocks.length} blocks.', name: 'IOSOCRService');
+      
+      return ocrResult;
+    } catch (e, stack) {
+      log('iOS OCR Failed: $e', name: 'IOSOCRService', error: e, stackTrace: stack);
       throw Exception('iOS OCR Logic Error: $e');
     } finally {
       // 4. Secure Wipe (Crucial)
       if (tempFile != null && await tempFile.exists()) {
         await tempFile.delete();
+        log('Secure wipe of temp iOS OCR file completed.', name: 'IOSOCRService');
       }
     }
   }
