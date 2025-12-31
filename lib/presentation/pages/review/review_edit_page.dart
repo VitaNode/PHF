@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/record.dart';
 import '../../../data/models/ocr_result.dart';
+import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/review_list_provider.dart';
+import '../../../logic/providers/timeline_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/secure_image.dart';
 import 'widgets/ocr_highlight_view.dart';
@@ -37,32 +39,30 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   }
 
   Future<void> _approve() async {
-     // 1. Update Record fields (if changed, need a Repo method for metadata update - T12 covers syncRecordMetadata but that's from Images.
-     // We need to update the Record ITSELF or its images.
-     // Strategy: Update all images to match this record metadata? Or just update Record?
-     // Spec says: "User confirms correctness". Usually this means updating the fields.
-     // Since T12/T19 architecture relies on Images being source of truth for sync, we should update the images metadata too?
-     // Or just update the Record directly. Let's update Record via sync mechanism or direct update.
-     // Actually, `IRecordRepository.saveRecord` can update specific fields.
-     
-     // 简单起见，且符合 Sync 逻辑：
-     // 如果用户修改了 Hospital/Date，我们应该应用到这一批次的所有图片（或者 Record 本身）。
-     // 这里我们只更新 Record 状态为 archived。如果修改了表单，则保存表单数据。
-     
-     final repo = ref.read(reviewListControllerProvider.notifier);
-     // TODO: Update Record Metadata if changed (Requires Repo.saveRecord or similar)
-     // For now, simpler implementation: Just Approve status.
-     // Ideally: Update Record -> then Approve.
-     
-     // Let's assume user edited Hospital Name.
-     // We need to save that. Since `ReviewListController` doesn't expose `updateRecord`, we might need to use `RecordRepository`.
-     // But `ReviewEditPage` is consumer.
-     
-     // Temporary: Just approve. (Enhancement: Save changes)
-     await repo.approveRecord(widget.record.id);
-     
-     if (mounted) {
-       Navigator.pop(context, true);
+     try {
+       final recordRepo = ref.read(recordRepositoryProvider);
+       final reviewNotifier = ref.read(reviewListControllerProvider.notifier);
+
+       // 1. Save changes if any
+       await recordRepo.updateRecordMetadata(
+         widget.record.id,
+         hospitalName: _hospitalController.text,
+         visitDate: _visitDate,
+       );
+
+       // 2. Approve status
+       await reviewNotifier.approveRecord(widget.record.id);
+       
+       // 3. Refresh timeline
+       ref.invalidate(timelineControllerProvider);
+
+       if (mounted) {
+         Navigator.pop(context, true);
+       }
+     } catch (e) {
+       if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('归档失败: $e')));
+       }
      }
   }
 

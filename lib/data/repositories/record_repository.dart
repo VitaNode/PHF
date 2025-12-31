@@ -131,6 +131,26 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
   }
 
   @override
+  Future<void> updateRecordMetadata(String id, {String? hospitalName, DateTime? visitDate, String? notes}) async {
+    final db = await dbService.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.update(
+      'records',
+      {
+        if (hospitalName != null) 'hospital_name': hospitalName,
+        if (visitDate != null) ...{
+          'visit_date_ms': visitDate.millisecondsSinceEpoch,
+          'visit_date_iso': visitDate.toIso8601String(),
+        },
+        if (notes != null) 'notes': notes,
+        'updated_at_ms': now,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  @override
   Future<void> hardDeleteRecord(String id) async {
     final db = await dbService.database;
     await db.delete('records', where: 'id = ?', whereArgs: [id]);

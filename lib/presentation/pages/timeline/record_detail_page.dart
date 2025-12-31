@@ -107,20 +107,27 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     
     final currentImage = _images[_currentIndex];
     final imageRepo = ref.read(imageRepositoryProvider);
+    final recordRepo = ref.read(recordRepositoryProvider);
     
     try {
+      // 1. Update Image specific metadata
       await imageRepo.updateImageMetadata(
         currentImage.id,
         hospitalName: _hospitalController.text,
         visitDate: _visitDate,
       );
+
+      // 2. Also update Record metadata (User might expect global change)
+      await recordRepo.updateRecordMetadata(
+        widget.recordId,
+        hospitalName: _hospitalController.text,
+        visitDate: _visitDate,
+      );
       
-      // Update local state
+      // 3. Reload everything to ensure consistency
+      await _loadData();
+      
       setState(() {
-        _images[_currentIndex] = currentImage.copyWith(
-          hospitalName: _hospitalController.text,
-          visitDate: _visitDate,
-        );
         _isEditing = false;
       });
 
