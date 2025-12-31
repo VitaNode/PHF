@@ -160,8 +160,9 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                          child: Center(
                            child: Container(
                              decoration: BoxDecoration(
-                               color: Colors.black.withValues(alpha: 0.3),
+                               color: Colors.black.withValues(alpha: 0.6),
                                shape: BoxShape.circle,
+                               border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                              ),
                              child: IconButton(
                                icon: const Icon(Icons.chevron_left, color: Colors.white, size: 28),
@@ -176,8 +177,9 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                          child: Center(
                            child: Container(
                              decoration: BoxDecoration(
-                               color: Colors.black.withValues(alpha: 0.3),
+                               color: Colors.black.withValues(alpha: 0.6),
                                shape: BoxShape.circle,
+                               border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
                              ),
                              child: IconButton(
                                icon: const Icon(Icons.chevron_right, color: Colors.white, size: 28),
