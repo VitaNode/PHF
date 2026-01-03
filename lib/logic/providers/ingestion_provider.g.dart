@@ -42,7 +42,7 @@ final class IngestionControllerProvider
 }
 
 String _$ingestionControllerHash() =>
-    r'43fa2f98c11ccd196336c80243a5e5bfffc32846';
+    r'40a4a44451158ae126ca19b297f5a02b24a9a537';
 
 abstract class _$IngestionController extends $Notifier<IngestionState> {
   IngestionState build();

@@ -32,7 +32,11 @@ jobs:
       - name: 🛠️ Verify Generated Code
         run: |
           dart run build_runner build --delete-conflicting-outputs
+          # Ignore changes in .flutter-plugins-dependencies as they are environment-specific
+          git checkout .flutter-plugins-dependencies
+          # If there are still changes (e.g. in .g.dart files), the next line will fail the CI
           git diff --exit-code
+        # This step ensures that all core generated logic is committed.
 
       - name: 🎨 Check Formatting
         run: dart format --set-exit-if-changed .
@@ -61,8 +65,8 @@ jobs:
       - name: 🛠️ Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript # CodeQL supports JS/TS, Python, Go, etc. 
-          # Note: Dart/Flutter support in CodeQL is currently limited but can analyze underlying native code.
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
 
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
