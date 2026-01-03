@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,182 +9,122 @@ part of 'image.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
-MedicalImage _$MedicalImageFromJson(Map<String, dynamic> json) {
-  return _MedicalImage.fromJson(json);
-}
 
 /// @nodoc
 mixin _$MedicalImage {
-  String get id => throw _privateConstructorUsedError;
-  String get recordId => throw _privateConstructorUsedError;
-  String get encryptionKey => throw _privateConstructorUsedError;
-  String get thumbnailEncryptionKey => throw _privateConstructorUsedError;
-  String get filePath => throw _privateConstructorUsedError;
-  String get thumbnailPath => throw _privateConstructorUsedError;
-  String get mimeType => throw _privateConstructorUsedError;
-  int get fileSize => throw _privateConstructorUsedError;
-  int get displayOrder => throw _privateConstructorUsedError;
-  int? get width => throw _privateConstructorUsedError;
-  int? get height => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  String? get hospitalName => throw _privateConstructorUsedError;
-  DateTime? get visitDate => throw _privateConstructorUsedError;
+  String get id;
+  String get recordId;
+  String get encryptionKey;
+  String get thumbnailEncryptionKey;
+  String get filePath;
+  String get thumbnailPath;
+  String get mimeType;
+  int get fileSize;
+  int get displayOrder;
+  int? get width;
+  int? get height; // OCR Results
+  String? get ocrText;
+  String? get ocrRawJson;
+  double? get ocrConfidence;
+  DateTime get createdAt;
+  String? get hospitalName;
+  DateTime? get visitDate;
 
   /// 数据库存储的 Tag IDs (JSON List from DB)
-  List<String> get tagIds => throw _privateConstructorUsedError;
+  List<String> get tagIds;
 
   /// 内存关联字段，不直接参与数据库简单序列化
   @JsonKey(includeFromJson: false, includeToJson: false)
-  List<Tag> get tags => throw _privateConstructorUsedError;
-
-  /// Serializes this MedicalImage to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  List<Tag> get tags;
 
   /// Create a copy of MedicalImage
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $MedicalImageCopyWith<MedicalImage> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $MedicalImageCopyWith<$Res> {
-  factory $MedicalImageCopyWith(
-          MedicalImage value, $Res Function(MedicalImage) then) =
-      _$MedicalImageCopyWithImpl<$Res, MedicalImage>;
-  @useResult
-  $Res call(
-      {String id,
-      String recordId,
-      String encryptionKey,
-      String thumbnailEncryptionKey,
-      String filePath,
-      String thumbnailPath,
-      String mimeType,
-      int fileSize,
-      int displayOrder,
-      int? width,
-      int? height,
-      DateTime createdAt,
-      String? hospitalName,
-      DateTime? visitDate,
-      List<String> tagIds,
-      @JsonKey(includeFromJson: false, includeToJson: false) List<Tag> tags});
-}
-
-/// @nodoc
-class _$MedicalImageCopyWithImpl<$Res, $Val extends MedicalImage>
-    implements $MedicalImageCopyWith<$Res> {
-  _$MedicalImageCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of MedicalImage
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $MedicalImageCopyWith<MedicalImage> get copyWith =>
+      _$MedicalImageCopyWithImpl<MedicalImage>(
+          this as MedicalImage, _$identity);
+
+  /// Serializes this MedicalImage to a JSON map.
+  Map<String, dynamic> toJson();
+
   @override
-  $Res call({
-    Object? id = null,
-    Object? recordId = null,
-    Object? encryptionKey = null,
-    Object? thumbnailEncryptionKey = null,
-    Object? filePath = null,
-    Object? thumbnailPath = null,
-    Object? mimeType = null,
-    Object? fileSize = null,
-    Object? displayOrder = null,
-    Object? width = freezed,
-    Object? height = freezed,
-    Object? createdAt = null,
-    Object? hospitalName = freezed,
-    Object? visitDate = freezed,
-    Object? tagIds = null,
-    Object? tags = null,
-  }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      recordId: null == recordId
-          ? _value.recordId
-          : recordId // ignore: cast_nullable_to_non_nullable
-              as String,
-      encryptionKey: null == encryptionKey
-          ? _value.encryptionKey
-          : encryptionKey // ignore: cast_nullable_to_non_nullable
-              as String,
-      thumbnailEncryptionKey: null == thumbnailEncryptionKey
-          ? _value.thumbnailEncryptionKey
-          : thumbnailEncryptionKey // ignore: cast_nullable_to_non_nullable
-              as String,
-      filePath: null == filePath
-          ? _value.filePath
-          : filePath // ignore: cast_nullable_to_non_nullable
-              as String,
-      thumbnailPath: null == thumbnailPath
-          ? _value.thumbnailPath
-          : thumbnailPath // ignore: cast_nullable_to_non_nullable
-              as String,
-      mimeType: null == mimeType
-          ? _value.mimeType
-          : mimeType // ignore: cast_nullable_to_non_nullable
-              as String,
-      fileSize: null == fileSize
-          ? _value.fileSize
-          : fileSize // ignore: cast_nullable_to_non_nullable
-              as int,
-      displayOrder: null == displayOrder
-          ? _value.displayOrder
-          : displayOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      width: freezed == width
-          ? _value.width
-          : width // ignore: cast_nullable_to_non_nullable
-              as int?,
-      height: freezed == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as int?,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      hospitalName: freezed == hospitalName
-          ? _value.hospitalName
-          : hospitalName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      visitDate: freezed == visitDate
-          ? _value.visitDate
-          : visitDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      tagIds: null == tagIds
-          ? _value.tagIds
-          : tagIds // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      tags: null == tags
-          ? _value.tags
-          : tags // ignore: cast_nullable_to_non_nullable
-              as List<Tag>,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is MedicalImage &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.recordId, recordId) ||
+                other.recordId == recordId) &&
+            (identical(other.encryptionKey, encryptionKey) ||
+                other.encryptionKey == encryptionKey) &&
+            (identical(other.thumbnailEncryptionKey, thumbnailEncryptionKey) ||
+                other.thumbnailEncryptionKey == thumbnailEncryptionKey) &&
+            (identical(other.filePath, filePath) ||
+                other.filePath == filePath) &&
+            (identical(other.thumbnailPath, thumbnailPath) ||
+                other.thumbnailPath == thumbnailPath) &&
+            (identical(other.mimeType, mimeType) ||
+                other.mimeType == mimeType) &&
+            (identical(other.fileSize, fileSize) ||
+                other.fileSize == fileSize) &&
+            (identical(other.displayOrder, displayOrder) ||
+                other.displayOrder == displayOrder) &&
+            (identical(other.width, width) || other.width == width) &&
+            (identical(other.height, height) || other.height == height) &&
+            (identical(other.ocrText, ocrText) || other.ocrText == ocrText) &&
+            (identical(other.ocrRawJson, ocrRawJson) ||
+                other.ocrRawJson == ocrRawJson) &&
+            (identical(other.ocrConfidence, ocrConfidence) ||
+                other.ocrConfidence == ocrConfidence) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.hospitalName, hospitalName) ||
+                other.hospitalName == hospitalName) &&
+            (identical(other.visitDate, visitDate) ||
+                other.visitDate == visitDate) &&
+            const DeepCollectionEquality().equals(other.tagIds, tagIds) &&
+            const DeepCollectionEquality().equals(other.tags, tags));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        recordId,
+        encryptionKey,
+        thumbnailEncryptionKey,
+        filePath,
+        thumbnailPath,
+        mimeType,
+        fileSize,
+        displayOrder,
+        width,
+        height,
+        ocrText,
+        ocrRawJson,
+        ocrConfidence,
+        createdAt,
+        hospitalName,
+        visitDate,
+        const DeepCollectionEquality().hash(tagIds),
+        const DeepCollectionEquality().hash(tags)
+      ]);
+
+  @override
+  String toString() {
+    return 'MedicalImage(id: $id, recordId: $recordId, encryptionKey: $encryptionKey, thumbnailEncryptionKey: $thumbnailEncryptionKey, filePath: $filePath, thumbnailPath: $thumbnailPath, mimeType: $mimeType, fileSize: $fileSize, displayOrder: $displayOrder, width: $width, height: $height, ocrText: $ocrText, ocrRawJson: $ocrRawJson, ocrConfidence: $ocrConfidence, createdAt: $createdAt, hospitalName: $hospitalName, visitDate: $visitDate, tagIds: $tagIds, tags: $tags)';
   }
 }
 
 /// @nodoc
-abstract class _$$MedicalImageImplCopyWith<$Res>
-    implements $MedicalImageCopyWith<$Res> {
-  factory _$$MedicalImageImplCopyWith(
-          _$MedicalImageImpl value, $Res Function(_$MedicalImageImpl) then) =
-      __$$MedicalImageImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $MedicalImageCopyWith<$Res> {
+  factory $MedicalImageCopyWith(
+          MedicalImage value, $Res Function(MedicalImage) _then) =
+      _$MedicalImageCopyWithImpl;
   @useResult
   $Res call(
       {String id,
@@ -198,6 +138,9 @@ abstract class _$$MedicalImageImplCopyWith<$Res>
       int displayOrder,
       int? width,
       int? height,
+      String? ocrText,
+      String? ocrRawJson,
+      double? ocrConfidence,
       DateTime createdAt,
       String? hospitalName,
       DateTime? visitDate,
@@ -206,12 +149,11 @@ abstract class _$$MedicalImageImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$MedicalImageImplCopyWithImpl<$Res>
-    extends _$MedicalImageCopyWithImpl<$Res, _$MedicalImageImpl>
-    implements _$$MedicalImageImplCopyWith<$Res> {
-  __$$MedicalImageImplCopyWithImpl(
-      _$MedicalImageImpl _value, $Res Function(_$MedicalImageImpl) _then)
-      : super(_value, _then);
+class _$MedicalImageCopyWithImpl<$Res> implements $MedicalImageCopyWith<$Res> {
+  _$MedicalImageCopyWithImpl(this._self, this._then);
+
+  final MedicalImage _self;
+  final $Res Function(MedicalImage) _then;
 
   /// Create a copy of MedicalImage
   /// with the given fields replaced by the non-null parameter values.
@@ -229,85 +171,377 @@ class __$$MedicalImageImplCopyWithImpl<$Res>
     Object? displayOrder = null,
     Object? width = freezed,
     Object? height = freezed,
+    Object? ocrText = freezed,
+    Object? ocrRawJson = freezed,
+    Object? ocrConfidence = freezed,
     Object? createdAt = null,
     Object? hospitalName = freezed,
     Object? visitDate = freezed,
     Object? tagIds = null,
     Object? tags = null,
   }) {
-    return _then(_$MedicalImageImpl(
+    return _then(_self.copyWith(
       id: null == id
-          ? _value.id
+          ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
       recordId: null == recordId
-          ? _value.recordId
+          ? _self.recordId
           : recordId // ignore: cast_nullable_to_non_nullable
               as String,
       encryptionKey: null == encryptionKey
-          ? _value.encryptionKey
+          ? _self.encryptionKey
           : encryptionKey // ignore: cast_nullable_to_non_nullable
               as String,
       thumbnailEncryptionKey: null == thumbnailEncryptionKey
-          ? _value.thumbnailEncryptionKey
+          ? _self.thumbnailEncryptionKey
           : thumbnailEncryptionKey // ignore: cast_nullable_to_non_nullable
               as String,
       filePath: null == filePath
-          ? _value.filePath
+          ? _self.filePath
           : filePath // ignore: cast_nullable_to_non_nullable
               as String,
       thumbnailPath: null == thumbnailPath
-          ? _value.thumbnailPath
+          ? _self.thumbnailPath
           : thumbnailPath // ignore: cast_nullable_to_non_nullable
               as String,
       mimeType: null == mimeType
-          ? _value.mimeType
+          ? _self.mimeType
           : mimeType // ignore: cast_nullable_to_non_nullable
               as String,
       fileSize: null == fileSize
-          ? _value.fileSize
+          ? _self.fileSize
           : fileSize // ignore: cast_nullable_to_non_nullable
               as int,
       displayOrder: null == displayOrder
-          ? _value.displayOrder
+          ? _self.displayOrder
           : displayOrder // ignore: cast_nullable_to_non_nullable
               as int,
       width: freezed == width
-          ? _value.width
+          ? _self.width
           : width // ignore: cast_nullable_to_non_nullable
               as int?,
       height: freezed == height
-          ? _value.height
+          ? _self.height
           : height // ignore: cast_nullable_to_non_nullable
               as int?,
+      ocrText: freezed == ocrText
+          ? _self.ocrText
+          : ocrText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ocrRawJson: freezed == ocrRawJson
+          ? _self.ocrRawJson
+          : ocrRawJson // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ocrConfidence: freezed == ocrConfidence
+          ? _self.ocrConfidence
+          : ocrConfidence // ignore: cast_nullable_to_non_nullable
+              as double?,
       createdAt: null == createdAt
-          ? _value.createdAt
+          ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
       hospitalName: freezed == hospitalName
-          ? _value.hospitalName
+          ? _self.hospitalName
           : hospitalName // ignore: cast_nullable_to_non_nullable
               as String?,
       visitDate: freezed == visitDate
-          ? _value.visitDate
+          ? _self.visitDate
           : visitDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       tagIds: null == tagIds
-          ? _value._tagIds
+          ? _self.tagIds
           : tagIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
       tags: null == tags
-          ? _value._tags
+          ? _self.tags
           : tags // ignore: cast_nullable_to_non_nullable
               as List<Tag>,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [MedicalImage].
+extension MedicalImagePatterns on MedicalImage {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MedicalImage value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_MedicalImage value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MedicalImage value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String recordId,
+            String encryptionKey,
+            String thumbnailEncryptionKey,
+            String filePath,
+            String thumbnailPath,
+            String mimeType,
+            int fileSize,
+            int displayOrder,
+            int? width,
+            int? height,
+            String? ocrText,
+            String? ocrRawJson,
+            double? ocrConfidence,
+            DateTime createdAt,
+            String? hospitalName,
+            DateTime? visitDate,
+            List<String> tagIds,
+            @JsonKey(includeFromJson: false, includeToJson: false)
+            List<Tag> tags)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage() when $default != null:
+        return $default(
+            _that.id,
+            _that.recordId,
+            _that.encryptionKey,
+            _that.thumbnailEncryptionKey,
+            _that.filePath,
+            _that.thumbnailPath,
+            _that.mimeType,
+            _that.fileSize,
+            _that.displayOrder,
+            _that.width,
+            _that.height,
+            _that.ocrText,
+            _that.ocrRawJson,
+            _that.ocrConfidence,
+            _that.createdAt,
+            _that.hospitalName,
+            _that.visitDate,
+            _that.tagIds,
+            _that.tags);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String recordId,
+            String encryptionKey,
+            String thumbnailEncryptionKey,
+            String filePath,
+            String thumbnailPath,
+            String mimeType,
+            int fileSize,
+            int displayOrder,
+            int? width,
+            int? height,
+            String? ocrText,
+            String? ocrRawJson,
+            double? ocrConfidence,
+            DateTime createdAt,
+            String? hospitalName,
+            DateTime? visitDate,
+            List<String> tagIds,
+            @JsonKey(includeFromJson: false, includeToJson: false)
+            List<Tag> tags)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage():
+        return $default(
+            _that.id,
+            _that.recordId,
+            _that.encryptionKey,
+            _that.thumbnailEncryptionKey,
+            _that.filePath,
+            _that.thumbnailPath,
+            _that.mimeType,
+            _that.fileSize,
+            _that.displayOrder,
+            _that.width,
+            _that.height,
+            _that.ocrText,
+            _that.ocrRawJson,
+            _that.ocrConfidence,
+            _that.createdAt,
+            _that.hospitalName,
+            _that.visitDate,
+            _that.tagIds,
+            _that.tags);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String id,
+            String recordId,
+            String encryptionKey,
+            String thumbnailEncryptionKey,
+            String filePath,
+            String thumbnailPath,
+            String mimeType,
+            int fileSize,
+            int displayOrder,
+            int? width,
+            int? height,
+            String? ocrText,
+            String? ocrRawJson,
+            double? ocrConfidence,
+            DateTime createdAt,
+            String? hospitalName,
+            DateTime? visitDate,
+            List<String> tagIds,
+            @JsonKey(includeFromJson: false, includeToJson: false)
+            List<Tag> tags)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _MedicalImage() when $default != null:
+        return $default(
+            _that.id,
+            _that.recordId,
+            _that.encryptionKey,
+            _that.thumbnailEncryptionKey,
+            _that.filePath,
+            _that.thumbnailPath,
+            _that.mimeType,
+            _that.fileSize,
+            _that.displayOrder,
+            _that.width,
+            _that.height,
+            _that.ocrText,
+            _that.ocrRawJson,
+            _that.ocrConfidence,
+            _that.createdAt,
+            _that.hospitalName,
+            _that.visitDate,
+            _that.tagIds,
+            _that.tags);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 @JsonSerializable()
-class _$MedicalImageImpl implements _MedicalImage {
-  const _$MedicalImageImpl(
+class _MedicalImage implements MedicalImage {
+  const _MedicalImage(
       {required this.id,
       required this.recordId,
       required this.encryptionKey,
@@ -319,6 +553,9 @@ class _$MedicalImageImpl implements _MedicalImage {
       this.displayOrder = 0,
       this.width,
       this.height,
+      this.ocrText,
+      this.ocrRawJson,
+      this.ocrConfidence,
       required this.createdAt,
       this.hospitalName,
       this.visitDate,
@@ -327,9 +564,8 @@ class _$MedicalImageImpl implements _MedicalImage {
       final List<Tag> tags = const []})
       : _tagIds = tagIds,
         _tags = tags;
-
-  factory _$MedicalImageImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MedicalImageImplFromJson(json);
+  factory _MedicalImage.fromJson(Map<String, dynamic> json) =>
+      _$MedicalImageFromJson(json);
 
   @override
   final String id;
@@ -356,6 +592,13 @@ class _$MedicalImageImpl implements _MedicalImage {
   final int? width;
   @override
   final int? height;
+// OCR Results
+  @override
+  final String? ocrText;
+  @override
+  final String? ocrRawJson;
+  @override
+  final double? ocrConfidence;
   @override
   final DateTime createdAt;
   @override
@@ -387,16 +630,26 @@ class _$MedicalImageImpl implements _MedicalImage {
     return EqualUnmodifiableListView(_tags);
   }
 
+  /// Create a copy of MedicalImage
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'MedicalImage(id: $id, recordId: $recordId, encryptionKey: $encryptionKey, thumbnailEncryptionKey: $thumbnailEncryptionKey, filePath: $filePath, thumbnailPath: $thumbnailPath, mimeType: $mimeType, fileSize: $fileSize, displayOrder: $displayOrder, width: $width, height: $height, createdAt: $createdAt, hospitalName: $hospitalName, visitDate: $visitDate, tagIds: $tagIds, tags: $tags)';
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MedicalImageCopyWith<_MedicalImage> get copyWith =>
+      __$MedicalImageCopyWithImpl<_MedicalImage>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$MedicalImageToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MedicalImageImpl &&
+            other is _MedicalImage &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.recordId, recordId) ||
                 other.recordId == recordId) &&
@@ -416,6 +669,11 @@ class _$MedicalImageImpl implements _MedicalImage {
                 other.displayOrder == displayOrder) &&
             (identical(other.width, width) || other.width == width) &&
             (identical(other.height, height) || other.height == height) &&
+            (identical(other.ocrText, ocrText) || other.ocrText == ocrText) &&
+            (identical(other.ocrRawJson, ocrRawJson) ||
+                other.ocrRawJson == ocrRawJson) &&
+            (identical(other.ocrConfidence, ocrConfidence) ||
+                other.ocrConfidence == ocrConfidence) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.hospitalName, hospitalName) ||
@@ -428,106 +686,177 @@ class _$MedicalImageImpl implements _MedicalImage {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      recordId,
-      encryptionKey,
-      thumbnailEncryptionKey,
-      filePath,
-      thumbnailPath,
-      mimeType,
-      fileSize,
-      displayOrder,
-      width,
-      height,
-      createdAt,
-      hospitalName,
-      visitDate,
-      const DeepCollectionEquality().hash(_tagIds),
-      const DeepCollectionEquality().hash(_tags));
-
-  /// Create a copy of MedicalImage
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MedicalImageImplCopyWith<_$MedicalImageImpl> get copyWith =>
-      __$$MedicalImageImplCopyWithImpl<_$MedicalImageImpl>(this, _$identity);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        recordId,
+        encryptionKey,
+        thumbnailEncryptionKey,
+        filePath,
+        thumbnailPath,
+        mimeType,
+        fileSize,
+        displayOrder,
+        width,
+        height,
+        ocrText,
+        ocrRawJson,
+        ocrConfidence,
+        createdAt,
+        hospitalName,
+        visitDate,
+        const DeepCollectionEquality().hash(_tagIds),
+        const DeepCollectionEquality().hash(_tags)
+      ]);
 
   @override
-  Map<String, dynamic> toJson() {
-    return _$$MedicalImageImplToJson(
-      this,
-    );
+  String toString() {
+    return 'MedicalImage(id: $id, recordId: $recordId, encryptionKey: $encryptionKey, thumbnailEncryptionKey: $thumbnailEncryptionKey, filePath: $filePath, thumbnailPath: $thumbnailPath, mimeType: $mimeType, fileSize: $fileSize, displayOrder: $displayOrder, width: $width, height: $height, ocrText: $ocrText, ocrRawJson: $ocrRawJson, ocrConfidence: $ocrConfidence, createdAt: $createdAt, hospitalName: $hospitalName, visitDate: $visitDate, tagIds: $tagIds, tags: $tags)';
   }
 }
 
-abstract class _MedicalImage implements MedicalImage {
-  const factory _MedicalImage(
-      {required final String id,
-      required final String recordId,
-      required final String encryptionKey,
-      required final String thumbnailEncryptionKey,
-      required final String filePath,
-      required final String thumbnailPath,
-      final String mimeType,
-      final int fileSize,
-      final int displayOrder,
-      final int? width,
-      final int? height,
-      required final DateTime createdAt,
-      final String? hospitalName,
-      final DateTime? visitDate,
-      final List<String> tagIds,
-      @JsonKey(includeFromJson: false, includeToJson: false)
-      final List<Tag> tags}) = _$MedicalImageImpl;
+/// @nodoc
+abstract mixin class _$MedicalImageCopyWith<$Res>
+    implements $MedicalImageCopyWith<$Res> {
+  factory _$MedicalImageCopyWith(
+          _MedicalImage value, $Res Function(_MedicalImage) _then) =
+      __$MedicalImageCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String recordId,
+      String encryptionKey,
+      String thumbnailEncryptionKey,
+      String filePath,
+      String thumbnailPath,
+      String mimeType,
+      int fileSize,
+      int displayOrder,
+      int? width,
+      int? height,
+      String? ocrText,
+      String? ocrRawJson,
+      double? ocrConfidence,
+      DateTime createdAt,
+      String? hospitalName,
+      DateTime? visitDate,
+      List<String> tagIds,
+      @JsonKey(includeFromJson: false, includeToJson: false) List<Tag> tags});
+}
 
-  factory _MedicalImage.fromJson(Map<String, dynamic> json) =
-      _$MedicalImageImpl.fromJson;
+/// @nodoc
+class __$MedicalImageCopyWithImpl<$Res>
+    implements _$MedicalImageCopyWith<$Res> {
+  __$MedicalImageCopyWithImpl(this._self, this._then);
 
-  @override
-  String get id;
-  @override
-  String get recordId;
-  @override
-  String get encryptionKey;
-  @override
-  String get thumbnailEncryptionKey;
-  @override
-  String get filePath;
-  @override
-  String get thumbnailPath;
-  @override
-  String get mimeType;
-  @override
-  int get fileSize;
-  @override
-  int get displayOrder;
-  @override
-  int? get width;
-  @override
-  int? get height;
-  @override
-  DateTime get createdAt;
-  @override
-  String? get hospitalName;
-  @override
-  DateTime? get visitDate;
-
-  /// 数据库存储的 Tag IDs (JSON List from DB)
-  @override
-  List<String> get tagIds;
-
-  /// 内存关联字段，不直接参与数据库简单序列化
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  List<Tag> get tags;
+  final _MedicalImage _self;
+  final $Res Function(_MedicalImage) _then;
 
   /// Create a copy of MedicalImage
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MedicalImageImplCopyWith<_$MedicalImageImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? recordId = null,
+    Object? encryptionKey = null,
+    Object? thumbnailEncryptionKey = null,
+    Object? filePath = null,
+    Object? thumbnailPath = null,
+    Object? mimeType = null,
+    Object? fileSize = null,
+    Object? displayOrder = null,
+    Object? width = freezed,
+    Object? height = freezed,
+    Object? ocrText = freezed,
+    Object? ocrRawJson = freezed,
+    Object? ocrConfidence = freezed,
+    Object? createdAt = null,
+    Object? hospitalName = freezed,
+    Object? visitDate = freezed,
+    Object? tagIds = null,
+    Object? tags = null,
+  }) {
+    return _then(_MedicalImage(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      recordId: null == recordId
+          ? _self.recordId
+          : recordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      encryptionKey: null == encryptionKey
+          ? _self.encryptionKey
+          : encryptionKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      thumbnailEncryptionKey: null == thumbnailEncryptionKey
+          ? _self.thumbnailEncryptionKey
+          : thumbnailEncryptionKey // ignore: cast_nullable_to_non_nullable
+              as String,
+      filePath: null == filePath
+          ? _self.filePath
+          : filePath // ignore: cast_nullable_to_non_nullable
+              as String,
+      thumbnailPath: null == thumbnailPath
+          ? _self.thumbnailPath
+          : thumbnailPath // ignore: cast_nullable_to_non_nullable
+              as String,
+      mimeType: null == mimeType
+          ? _self.mimeType
+          : mimeType // ignore: cast_nullable_to_non_nullable
+              as String,
+      fileSize: null == fileSize
+          ? _self.fileSize
+          : fileSize // ignore: cast_nullable_to_non_nullable
+              as int,
+      displayOrder: null == displayOrder
+          ? _self.displayOrder
+          : displayOrder // ignore: cast_nullable_to_non_nullable
+              as int,
+      width: freezed == width
+          ? _self.width
+          : width // ignore: cast_nullable_to_non_nullable
+              as int?,
+      height: freezed == height
+          ? _self.height
+          : height // ignore: cast_nullable_to_non_nullable
+              as int?,
+      ocrText: freezed == ocrText
+          ? _self.ocrText
+          : ocrText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ocrRawJson: freezed == ocrRawJson
+          ? _self.ocrRawJson
+          : ocrRawJson // ignore: cast_nullable_to_non_nullable
+              as String?,
+      ocrConfidence: freezed == ocrConfidence
+          ? _self.ocrConfidence
+          : ocrConfidence // ignore: cast_nullable_to_non_nullable
+              as double?,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      hospitalName: freezed == hospitalName
+          ? _self.hospitalName
+          : hospitalName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      visitDate: freezed == visitDate
+          ? _self.visitDate
+          : visitDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      tagIds: null == tagIds
+          ? _self._tagIds
+          : tagIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      tags: null == tags
+          ? _self._tags
+          : tags // ignore: cast_nullable_to_non_nullable
+              as List<Tag>,
+    ));
+  }
 }
+
+// dart format on

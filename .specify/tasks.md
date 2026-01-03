@@ -30,7 +30,7 @@
 - [x] **Commit**: `feat(data): define core domain entities for records and images`
 
 ### T3: 业务契约 (Interfaces) 定义 [x]
-- [x] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口类。
+- [x] **Implement**: 定义 `IRecordRepository`, `IImageRepository`, `ICryptoService`, `IImageService` 接口 类。
 - [x] **Document**: 为接口方法提供详尽的 `dartdoc` 以及预期行为说明。
 - [x] **Test**: 验证接口不暴露底层加密/SQL 实现细节。 (Ref: Constitution#II. Architecture)
 - [x] **Review**: 接口粒度是否符合单一职责原则。
@@ -97,8 +97,8 @@
 **Goal**: 处理媒体存取与隐私擦除。
 
 ### T10: 图片处理引擎与 Secure Wipe (T3.1) [x]
-- [x] **Implement**: 实现 `ImageProcessingService`。PNG 压缩 fallback + 200px 缩略图。**强制：** 处理完位图或中间临时文件后，立即调用 `File.delete()`。 (Ref: Constitution#I. Privacy#IV. Security)
-- [x] **Document**: `review_image_wipe.md` -> `review_T10_image_processing.md` - 说明如何在异步流中确保清理逻辑 100% 被执行。
+- [x] **Implement**: 实现 `ImageProcessingService`。PNG 压缩 fallback + 200px 缩略图。**强制：** 处理完位 图或中间临时文件后，立即调用 `File.delete()`。 (Ref: Constitution#I. Privacy#IV. Security)
+- [x] **Document**: `review_image_wipe.md` -> `review_T10_image_processing.md` - 说明如何在异步流中确保清 理逻辑 100% 被执行。
 - [x] **Test**: `image_processing_service_test.dart` 检查磁盘残留 (DoD-T3.1)。
 - [x] **Review**: 审查异常抛出后，临时文件是否依然能被清理。
 - [x] **Commit**: `feat(logic): implement image optimizer with reliable secure wipe`
@@ -147,7 +147,7 @@
 - [x] **Implement**: 封装 `SecureImage` 异步解密展示组件. 实现 `EventCard` 并集成 `SecureImage` 展示 Record 的首张缩略图，显示去重后的标签列表。 (Ref: Spec#4.1)
 - [x] **Document**: 记录 `tags_cache` 在 UI 层的解析示例。
 - [x] **Test**: 验证长标签列表下的布局稳定性.
-- [x] **Review**: 走查解密过程中的 UI 占位图效果.
+- [x] **Review**: 走走查解密过程中的 UI 占位图效果.
 - [x] **Commit**: `feat(ui): implement complex EventCard with decrypted thumbnail support`
 
 ### T14: 安全引导与应用锁界面 (T1.5) [x]
@@ -182,9 +182,9 @@
 
     - 优化数据查询，避免 N+1 性能问题。
 - [x] **Refactor Ingestion Flow**:
-    - 简化为：首页点击 "+" -> 原生相机/库选择 -> 进入 Preview 预览页 (支持裁剪/旋转/删除) -> 一键保存后返回首页。
+    - 简化为：首页点击 "+" -> 原生相机/库选择 -> 进入 Preview 预览页 (支持裁剪/旋转/删除) -> 一键保存后返 回首页。
 - [x] **Refactor Detail View**:
-    - [x] 实现“上下分屏”布局：顶部图片（支持左右切图同步更新下方信息），底部展示图片专有的“医院、日期、标签”。
+    - [x] 实现“上下分屏”布局：顶部图片（支持左右切图同步更新下方信息），底部展示图片专有的“医院、日期、标 签”。
         * [x] 单击图片放大（这个功能之前是有的，更新后没了）
         * [x] 左右切图的按钮 `<` 和 `>` 点击没反应
     - [x] 每张图下方增加针对当前图片的 “编辑” 与 “删除” 按钮。
@@ -198,3 +198,65 @@
 - [x] **Commit**: `refactor(ui): pivot to split-view details and streamlined ingestion workflow`
 
 ---
+
+## Phase 2: On-Device OCR & Intelligence (智能录入层)
+
+### T17: 基础设施与 Schema 升级 (Phase 2.1) [x]
+- [x] **Implement (T17.1)**: 在 `pubspec.yaml` 中添加 `google_mlkit_text_recognition`, `workmanager`, `sqflite_common_ffi` (用于 FTS5 测试) 等依赖。 (Complexity: Low)
+    - *Ref: Constitution#III. Intelligent Digitization (Offline dependencies)*
+- [x] **Implement (T17.2)**: 更新 `Image` (增加 ocr_data) 实体类，新建 `OCRQueueItem` 实体. 运行 `build_runner`。 (Complexity: Low)
+    - *Ref: Constitution#VII. Coding Standards (Immutable Entities)*
+- [x] **Implement (T17.3)**: 编写 SQL 迁移脚本 `migration_v2.sql`。
+    - 1. `ALTER TABLE records ALTER COLUMN status SET DEFAULT 'processing'`.
+    - 2. `ALTER TABLE images ADD COLUMN ocr_text TEXT`. (以及其他字段)
+    - 3. `CREATE TABLE ocr_queue`.
+    - 4. `CREATE VIRTUAL TABLE ocr_search_index USING fts5`.
+    - *Ref: Constitution#VI. Security (SQLCipher Schema)* (Complexity: Medium)
+- [x] **Implement (T17.4)**: 实现 `OCRQueueRepository` (入队/出队/状态更新) 及 `SearchRepository` (FTS5 查询)。 (Complexity: Medium)
+    - *Ref: Constitution#II. Architecture (Repository Pattern)*
+- [x] **Test**: 编写单元测试验证 Schema 升级后的数据读写兼容性及 FTS5 搜索基础功能。 (Complexity: Medium)
+
+### T18: OCR 引擎集成 (Phase 2.2)
+- [x] **Implement (T18.1)**: 定义 `IOCRService` 抽象接口及 `OCRResult` 数据结构 (包含 text, blocks, confidence)。 (Complexity: Low)
+    - *Ref: Constitution#II. Architecture (Facade Pattern)*
+- [x] **Implement (T18.2 - Android)**: 实现 `AndroidOCRService`，集成 `google_mlkit_text_recognition`。配置 `android/build.gradle`。 (Complexity: Medium)
+    - *Ref: Constitution#II. Local-First (Offline ML Kit)*
+- [x] **Implement (T18.3 - iOS)**: 实现 `IOSOCRService`。
+    - 编写 iOS 端 `NativeOCRPlugin` 和 `AppDelegate` 集成 (利用 Vision Framework `VNRecognizeTextRequest`)。
+    - 实现 Flutter 端 MethodChannel 调用封装。
+    - *Ref: Constitution#II. Local-First (Native Vision Framework)* (Complexity: High)
+- [ ] **Test**: 分别在 Android/iOS 真机断网环境下验证图片文字识别准确率。 (Complexity: Medium)
+
+### T19: 业务逻辑与后台队列 (Phase 2.3)
+- [x] **Implement (T19.1)**: 创建 `SmartExtractor` 工具类。实现日期 (`RegExp`) 和医院名称 (关键词/正则) 的提取策略。 (Complexity: Low)
+    - *Ref: Spec#FR-203 Intelligent Extraction*
+- [x] **Implement (T19.2)**: 实现 `OCRProcessor` 核心服务。串联 `Queue -> OCR -> Extraction -> DB` 流程。包含置信度评分逻辑。 (Complexity: High)
+    - *Ref: Spec#FR-203 Confidence Strategy*
+- [x] **Implement (T19.3 - Android)**: 配置 `WorkManager`。实现 `OCRWorker`，确保后台任务保活与执行。 (Complexity: Medium)
+- [x] **Implement (T19.4 - iOS)**: 配置 `BGTaskScheduler`。在 `AppDelegate.swift` 中注册后台任务标识，处理后台执行时间窗口。 (Complexity: High)
+    - *Ref: Spec#FR-202 Async Queue*
+- [ ] **Test**: 模拟 App 切后台 5 分钟后，队列任务仍能自动执行并更新数据库。 (Complexity: High)
+
+### T20: UI 适配与交互闭环 (Phase 2.4)
+- [x] **Implement (T20.1)**: 更新首页 `HomeState`，增加 `pendingCount` 统计。实现“待确认”顶部横幅组件。 (Complexity: Low)
+- [x] **Implement (T20.2)**: 开发 `ReviewListPage` (待确认列表) 和 `ReviewEditPage` (OCR 结果校对页)。
+    - 实现 OCR 文本高亮层 `OCRHighlightView` (在原图上绘制识别框)。
+    - *Ref: Constitution#X. UI/UX (Teal/White Theme)* (Complexity: High)
+- [x] **Implement (T20.3)**: 升级详情页。支持点击按钮查看完整 OCR 识别文本 (解密后展示)。 (Complexity: Medium)
+- [x] **Implement (T20.4)**: 开发 `GlobalSearchPage`。连接 FTS5 搜索接口，展示高亮匹配结果。 (Complexity: Medium)
+- [ ] **Test**: 全链路测试“拍照 -> 后台识别 -> 首页提示 -> 校对归档”流程。 (Complexity: High)
+
+### T21: Phase 2 体验补完与逻辑优化
+- [x] **Implement (T21.1) 自动刷新机制**:
+    - 在首页与详情页实现对 OCR 队列状态的监听。当后台任务完成时，自动刷新 UI 状态（如隐藏“处理中”动画、显示“待确认”状态）。
+- [x] **Implement (T21.2) 级联删除逻辑**:
+    - 优化删除逻辑：当一个 Record 下的所有图片被用户手动删除后，自动删除该 Record 实体及其关联的 OCR 队列任务。
+- [x] **Implement (T21.3) OCR 质量与重新识别**:
+    - 修复 OCR 结果可能出现空白的问题，增强异常捕获向。
+    - 在详情页增加“重新识别”功能入口，允许手动触发 OCR 流程。
+- [x] **Implement (T21.4) 详情页编辑闭环**:
+    - 优化字段编辑（医院、日期）后的保存逻辑，确保 Timeline 立即同步更新。
+- [x] **Implement (T21.5) 物理擦除优化 (Technical Debt)**:
+    - 针对 T10 遗留问题，优化图片临时文件的物理擦除逻辑。
+
+

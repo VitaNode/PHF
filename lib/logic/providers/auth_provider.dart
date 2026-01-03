@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'auth_provider.g.dart';
 
 @Riverpod(keepAlive: true)
-Future<bool> hasLock(HasLockRef ref) async {
+Future<bool> hasLock(Ref ref) async {
   final repo = ref.watch(appMetaRepositoryProvider);
   return repo.hasLock();
 }

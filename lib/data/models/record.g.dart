@@ -6,8 +6,8 @@ part of 'record.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MedicalRecordImpl _$$MedicalRecordImplFromJson(Map<String, dynamic> json) =>
-    _$MedicalRecordImpl(
+_MedicalRecord _$MedicalRecordFromJson(Map<String, dynamic> json) =>
+    _MedicalRecord(
       id: json['id'] as String,
       personId: json['personId'] as String,
       hospitalName: json['hospitalName'] as String?,
@@ -19,11 +19,11 @@ _$MedicalRecordImpl _$$MedicalRecordImplFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       status: $enumDecodeNullable(_$RecordStatusEnumMap, json['status']) ??
-          RecordStatus.archived,
+          RecordStatus.processing,
       tagsCache: json['tagsCache'] as String?,
     );
 
-Map<String, dynamic> _$$MedicalRecordImplToJson(_$MedicalRecordImpl instance) =>
+Map<String, dynamic> _$MedicalRecordToJson(_MedicalRecord instance) =>
     <String, dynamic>{
       'id': instance.id,
       'personId': instance.personId,
@@ -38,6 +38,8 @@ Map<String, dynamic> _$$MedicalRecordImplToJson(_$MedicalRecordImpl instance) =>
     };
 
 const _$RecordStatusEnumMap = {
+  RecordStatus.processing: 'processing',
+  RecordStatus.review: 'review',
   RecordStatus.archived: 'archived',
   RecordStatus.deleted: 'deleted',
 };

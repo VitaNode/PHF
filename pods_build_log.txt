@@ -1,0 +1,16 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace ios/Runner.xcworkspace -scheme Pods-Runner -configuration Debug -destination "platform=iOS Simulator,name=iPhone 16" build
+
+2026-01-01 23:07:12.671 xcodebuild[54233:1581081] Writing error result bundle to /var/folders/5_/ggyg87gs0jsfj43vz0wm5jqr0000gn/T/ResultBundle_2026-01-01_23-07-0012.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ platform:iOS Simulator, OS:latest, name:iPhone 16 }
+
+	Available destinations for the "Pods-Runner" scheme:
+		{ platform:macOS, arch:arm64, variant:Mac Catalyst, id:00008103-001461362262001E, name:My Mac }
+		{ platform:macOS, arch:x86_64, variant:Mac Catalyst, id:00008103-001461362262001E, name:My Mac }
+		{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00008103-001461362262001E, name:My Mac }
+		{ platform:iOS, arch:arm64, id:00008140-000429C83AF0801C, name:lanzf16 }
+		{ platform:iOS, arch:arm64, id:00008027-001610C63E87002E, name:lanzfPro }
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+		{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+		{ platform:macOS, variant:Mac Catalyst, name:Any Mac }

@@ -12,6 +12,8 @@ import 'package:mockito/src/dummies.dart' as _i8;
 import 'package:phf/core/security/encrypted_file_result.dart' as _i2;
 import 'package:phf/core/security/file_security_helper.dart' as _i4;
 import 'package:phf/core/services/path_provider_service.dart' as _i7;
+import 'package:phf/data/models/tag.dart' as _i10;
+import 'package:phf/data/repositories/interfaces/tag_repository.dart' as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -26,6 +28,7 @@ import 'package:phf/core/services/path_provider_service.dart' as _i7;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeEncryptedFileResult_0 extends _i1.SmartFake
     implements _i2.EncryptedFileResult {
@@ -303,4 +306,20 @@ class MockPathProviderService extends _i1.Mock
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+}
+
+/// A class which mocks [ITagRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockITagRepository extends _i1.Mock implements _i9.ITagRepository {
+  @override
+  _i5.Future<List<_i10.Tag>> getAllTags() => (super.noSuchMethod(
+        Invocation.method(
+          #getAllTags,
+          [],
+        ),
+        returnValue: _i5.Future<List<_i10.Tag>>.value(<_i10.Tag>[]),
+        returnValueForMissingStub:
+            _i5.Future<List<_i10.Tag>>.value(<_i10.Tag>[]),
+      ) as _i5.Future<List<_i10.Tag>>);
 }

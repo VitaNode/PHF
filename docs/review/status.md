@@ -1,24 +1,46 @@
+```
 # Project Review Status Summary
 
 **Last Updated**: 2025-12-31
-**Coverage**: T0 - T16
+**Coverage**: T0 - T20.2 (OCR Review UI)
 
-## �� Approved Features (Highlights)
+## Approved Features (Highlights)
+- [x] **T20.4**: 全局搜索 (FTS5 + Highlight).
+- [x] **T21.2**: 级联删除逻辑 (当图片全删时自动清理 Record 及其 OCR 任务).
+- [x] **T21.3**: OCR 质量补强与“重新识别”功能.
+- [x] **T21.4**: 详情页与校对页编辑闭环 (确保同步更新 Timeline).
+- [x] **T21.1**: 自动刷新机制 (监听 OCR 队列状态并自动更新 UI).
+- [x] **T21.5**: 物理擦除优化 (实现随机覆盖 + Flush 的安全删除逻辑).
+- [x] **T20.6**: 修复 iOS 后台 OCR 调度及延迟 bug.
+- [x] **T21**: 修复图片删除崩溃并集成 `talker` 日志系统.
 - **Security Core**: AES-256-GCM encryption (T5), secure key management (T4), and random IV/path management (T6).
 - **Hardening (T16)**: Mandatory app lock on re-entry, independent thumbnail encryption keys, and optimized database configuration (Page Size = 4096).
 - **Onboarding & Auth**: Security Onboarding (T14) with PIN setup (SHA-256) and optional biometric authentication.
 - **Data Persistence**: Encrypted SQLCipher database (T8) with FTS5. Initial Schema and Seed Data (T9) deployed.
-- **Repository Layer**: Type-safe `RecordRepository` and `ImageRepository` (T12) with automated tag cache synchronization. Optimized batch querying for images (T16).
+- **Repository Layer**: Type-safe `RecordRepository`, `ImageRepository` (T12), `OCRQueueRepository`, and `SearchRepository` (T17). Automated tag cache synchronization and OCR task management.
 - **Image Handling**: WebP compression (T16), basic processing (T10), and Gallery/Camera integration (T11).
 - **UI & UX (T16 Overhaul)**: 
   - **Timeline**: Simplified navigation (AppBar-only settings), 4-6 image grid preview, and optimized data loading.
   - **Ingestion**: Streamlined "Capture -> Preview -> Save" flow.
   - **Detail View**: Split-view layout with per-image metadata (Hospital, Date, Tags) support and in-place editing. Fully enhanced Tag Selector with highlighting and drag-sort.
+  - **OCR Integration (T20)**: "Pending Review" banner, `ReviewListPage` for batch processing, and `ReviewEditPage` with **OCR Text Highlighting**.
 - **Components**: `EventCard` and `SecureImage` (T13.3) for secure in-memory media rendering.
+- **OCR (Phase 2)**: `IOCRService` (T18.1), `AndroidOCRService` (T18.2), and `IOSOCRService` (T18.3) reviewed and refactored.
+- **Intelligence (Phase 2)**: `SmartExtractor` (T19.1) and `OCRProcessor` (T19.2) reviewed. Core extraction and background orchestration logic verified.
+- **Background (Phase 2)**: `BackgroundWorkerService` (T19.3 - Android) implemented and verified.
+- **Background (Phase 2)**: iOS `BGTaskScheduler` & Headless Plugin Registry (T19.4) implemented and verified.
+- **UI (Phase 2)**: Detail View OCR Viewer (T20.3) implemented and robust.
+- **UI (Phase 2)**: `GlobalSearchPage` (T20.4) implemented with FTS5 highlighting.
+
+## 🟢 Phase 2 Complete
+All Phase 2 tasks (T17-T20) are implemented and verified. The system now supports:
+- Offline OCR (Android/iOS).
+- Intelligent Extraction (Date/Hospital).
+- Background Queue Processing.
+- Full UI Integration (Review Flow, Search, Details).
 
 ## 🟡 Pending Issues / Technical Debt
-- **T10: Physical Wiping**: Reliance on OS file deletion.
-- **Phase 2 OCR Integration**: Ingestion flow is ready, but background processing logic is pending.
+- None.
 
 ## 🔴 Blockers
 - None.

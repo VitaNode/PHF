@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,115 +9,70 @@ part of 'ingestion_state.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$IngestionState {
-  List<XFile> get rawImages => throw _privateConstructorUsedError;
-  List<int> get rotations =>
-      throw _privateConstructorUsedError; // 90, 180, 270 (degrees)
-  DateTime? get visitDate => throw _privateConstructorUsedError;
-  String? get hospitalName => throw _privateConstructorUsedError;
-  String? get notes => throw _privateConstructorUsedError;
-  IngestionStatus get status => throw _privateConstructorUsedError;
-  String? get errorMessage => throw _privateConstructorUsedError;
-  List<String> get selectedTagIds => throw _privateConstructorUsedError;
+  List<XFile> get rawImages;
+  List<int> get rotations; // 90, 180, 270 (degrees)
+  DateTime? get visitDate;
+  String? get hospitalName;
+  String? get notes;
+  IngestionStatus get status;
+  String? get errorMessage;
+  List<String> get selectedTagIds;
 
   /// Create a copy of IngestionState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $IngestionStateCopyWith<IngestionState> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $IngestionStateCopyWith<$Res> {
-  factory $IngestionStateCopyWith(
-          IngestionState value, $Res Function(IngestionState) then) =
-      _$IngestionStateCopyWithImpl<$Res, IngestionState>;
-  @useResult
-  $Res call(
-      {List<XFile> rawImages,
-      List<int> rotations,
-      DateTime? visitDate,
-      String? hospitalName,
-      String? notes,
-      IngestionStatus status,
-      String? errorMessage,
-      List<String> selectedTagIds});
-}
-
-/// @nodoc
-class _$IngestionStateCopyWithImpl<$Res, $Val extends IngestionState>
-    implements $IngestionStateCopyWith<$Res> {
-  _$IngestionStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of IngestionState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $IngestionStateCopyWith<IngestionState> get copyWith =>
+      _$IngestionStateCopyWithImpl<IngestionState>(
+          this as IngestionState, _$identity);
+
   @override
-  $Res call({
-    Object? rawImages = null,
-    Object? rotations = null,
-    Object? visitDate = freezed,
-    Object? hospitalName = freezed,
-    Object? notes = freezed,
-    Object? status = null,
-    Object? errorMessage = freezed,
-    Object? selectedTagIds = null,
-  }) {
-    return _then(_value.copyWith(
-      rawImages: null == rawImages
-          ? _value.rawImages
-          : rawImages // ignore: cast_nullable_to_non_nullable
-              as List<XFile>,
-      rotations: null == rotations
-          ? _value.rotations
-          : rotations // ignore: cast_nullable_to_non_nullable
-              as List<int>,
-      visitDate: freezed == visitDate
-          ? _value.visitDate
-          : visitDate // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      hospitalName: freezed == hospitalName
-          ? _value.hospitalName
-          : hospitalName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      notes: freezed == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as String?,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as IngestionStatus,
-      errorMessage: freezed == errorMessage
-          ? _value.errorMessage
-          : errorMessage // ignore: cast_nullable_to_non_nullable
-              as String?,
-      selectedTagIds: null == selectedTagIds
-          ? _value.selectedTagIds
-          : selectedTagIds // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is IngestionState &&
+            const DeepCollectionEquality().equals(other.rawImages, rawImages) &&
+            const DeepCollectionEquality().equals(other.rotations, rotations) &&
+            (identical(other.visitDate, visitDate) ||
+                other.visitDate == visitDate) &&
+            (identical(other.hospitalName, hospitalName) ||
+                other.hospitalName == hospitalName) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.errorMessage, errorMessage) ||
+                other.errorMessage == errorMessage) &&
+            const DeepCollectionEquality()
+                .equals(other.selectedTagIds, selectedTagIds));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(rawImages),
+      const DeepCollectionEquality().hash(rotations),
+      visitDate,
+      hospitalName,
+      notes,
+      status,
+      errorMessage,
+      const DeepCollectionEquality().hash(selectedTagIds));
+
+  @override
+  String toString() {
+    return 'IngestionState(rawImages: $rawImages, rotations: $rotations, visitDate: $visitDate, hospitalName: $hospitalName, notes: $notes, status: $status, errorMessage: $errorMessage, selectedTagIds: $selectedTagIds)';
   }
 }
 
 /// @nodoc
-abstract class _$$IngestionStateImplCopyWith<$Res>
-    implements $IngestionStateCopyWith<$Res> {
-  factory _$$IngestionStateImplCopyWith(_$IngestionStateImpl value,
-          $Res Function(_$IngestionStateImpl) then) =
-      __$$IngestionStateImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $IngestionStateCopyWith<$Res> {
+  factory $IngestionStateCopyWith(
+          IngestionState value, $Res Function(IngestionState) _then) =
+      _$IngestionStateCopyWithImpl;
   @useResult
   $Res call(
       {List<XFile> rawImages,
@@ -131,12 +86,12 @@ abstract class _$$IngestionStateImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$IngestionStateImplCopyWithImpl<$Res>
-    extends _$IngestionStateCopyWithImpl<$Res, _$IngestionStateImpl>
-    implements _$$IngestionStateImplCopyWith<$Res> {
-  __$$IngestionStateImplCopyWithImpl(
-      _$IngestionStateImpl _value, $Res Function(_$IngestionStateImpl) _then)
-      : super(_value, _then);
+class _$IngestionStateCopyWithImpl<$Res>
+    implements $IngestionStateCopyWith<$Res> {
+  _$IngestionStateCopyWithImpl(this._self, this._then);
+
+  final IngestionState _self;
+  final $Res Function(IngestionState) _then;
 
   /// Create a copy of IngestionState
   /// with the given fields replaced by the non-null parameter values.
@@ -152,47 +107,255 @@ class __$$IngestionStateImplCopyWithImpl<$Res>
     Object? errorMessage = freezed,
     Object? selectedTagIds = null,
   }) {
-    return _then(_$IngestionStateImpl(
+    return _then(_self.copyWith(
       rawImages: null == rawImages
-          ? _value._rawImages
+          ? _self.rawImages
           : rawImages // ignore: cast_nullable_to_non_nullable
               as List<XFile>,
       rotations: null == rotations
-          ? _value._rotations
+          ? _self.rotations
           : rotations // ignore: cast_nullable_to_non_nullable
               as List<int>,
       visitDate: freezed == visitDate
-          ? _value.visitDate
+          ? _self.visitDate
           : visitDate // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       hospitalName: freezed == hospitalName
-          ? _value.hospitalName
+          ? _self.hospitalName
           : hospitalName // ignore: cast_nullable_to_non_nullable
               as String?,
       notes: freezed == notes
-          ? _value.notes
+          ? _self.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as String?,
       status: null == status
-          ? _value.status
+          ? _self.status
           : status // ignore: cast_nullable_to_non_nullable
               as IngestionStatus,
       errorMessage: freezed == errorMessage
-          ? _value.errorMessage
+          ? _self.errorMessage
           : errorMessage // ignore: cast_nullable_to_non_nullable
               as String?,
       selectedTagIds: null == selectedTagIds
-          ? _value._selectedTagIds
+          ? _self.selectedTagIds
           : selectedTagIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [IngestionState].
+extension IngestionStatePatterns on IngestionState {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_IngestionState value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_IngestionState value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_IngestionState value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            List<XFile> rawImages,
+            List<int> rotations,
+            DateTime? visitDate,
+            String? hospitalName,
+            String? notes,
+            IngestionStatus status,
+            String? errorMessage,
+            List<String> selectedTagIds)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState() when $default != null:
+        return $default(
+            _that.rawImages,
+            _that.rotations,
+            _that.visitDate,
+            _that.hospitalName,
+            _that.notes,
+            _that.status,
+            _that.errorMessage,
+            _that.selectedTagIds);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            List<XFile> rawImages,
+            List<int> rotations,
+            DateTime? visitDate,
+            String? hospitalName,
+            String? notes,
+            IngestionStatus status,
+            String? errorMessage,
+            List<String> selectedTagIds)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState():
+        return $default(
+            _that.rawImages,
+            _that.rotations,
+            _that.visitDate,
+            _that.hospitalName,
+            _that.notes,
+            _that.status,
+            _that.errorMessage,
+            _that.selectedTagIds);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            List<XFile> rawImages,
+            List<int> rotations,
+            DateTime? visitDate,
+            String? hospitalName,
+            String? notes,
+            IngestionStatus status,
+            String? errorMessage,
+            List<String> selectedTagIds)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _IngestionState() when $default != null:
+        return $default(
+            _that.rawImages,
+            _that.rotations,
+            _that.visitDate,
+            _that.hospitalName,
+            _that.notes,
+            _that.status,
+            _that.errorMessage,
+            _that.selectedTagIds);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 
-class _$IngestionStateImpl implements _IngestionState {
-  const _$IngestionStateImpl(
+class _IngestionState implements IngestionState {
+  const _IngestionState(
       {final List<XFile> rawImages = const [],
       final List<int> rotations = const [],
       this.visitDate,
@@ -244,16 +407,19 @@ class _$IngestionStateImpl implements _IngestionState {
     return EqualUnmodifiableListView(_selectedTagIds);
   }
 
+  /// Create a copy of IngestionState
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'IngestionState(rawImages: $rawImages, rotations: $rotations, visitDate: $visitDate, hospitalName: $hospitalName, notes: $notes, status: $status, errorMessage: $errorMessage, selectedTagIds: $selectedTagIds)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$IngestionStateCopyWith<_IngestionState> get copyWith =>
+      __$IngestionStateCopyWithImpl<_IngestionState>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$IngestionStateImpl &&
+            other is _IngestionState &&
             const DeepCollectionEquality()
                 .equals(other._rawImages, _rawImages) &&
             const DeepCollectionEquality()
@@ -282,48 +448,88 @@ class _$IngestionStateImpl implements _IngestionState {
       errorMessage,
       const DeepCollectionEquality().hash(_selectedTagIds));
 
+  @override
+  String toString() {
+    return 'IngestionState(rawImages: $rawImages, rotations: $rotations, visitDate: $visitDate, hospitalName: $hospitalName, notes: $notes, status: $status, errorMessage: $errorMessage, selectedTagIds: $selectedTagIds)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$IngestionStateCopyWith<$Res>
+    implements $IngestionStateCopyWith<$Res> {
+  factory _$IngestionStateCopyWith(
+          _IngestionState value, $Res Function(_IngestionState) _then) =
+      __$IngestionStateCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {List<XFile> rawImages,
+      List<int> rotations,
+      DateTime? visitDate,
+      String? hospitalName,
+      String? notes,
+      IngestionStatus status,
+      String? errorMessage,
+      List<String> selectedTagIds});
+}
+
+/// @nodoc
+class __$IngestionStateCopyWithImpl<$Res>
+    implements _$IngestionStateCopyWith<$Res> {
+  __$IngestionStateCopyWithImpl(this._self, this._then);
+
+  final _IngestionState _self;
+  final $Res Function(_IngestionState) _then;
+
   /// Create a copy of IngestionState
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$IngestionStateImplCopyWith<_$IngestionStateImpl> get copyWith =>
-      __$$IngestionStateImplCopyWithImpl<_$IngestionStateImpl>(
-          this, _$identity);
+  $Res call({
+    Object? rawImages = null,
+    Object? rotations = null,
+    Object? visitDate = freezed,
+    Object? hospitalName = freezed,
+    Object? notes = freezed,
+    Object? status = null,
+    Object? errorMessage = freezed,
+    Object? selectedTagIds = null,
+  }) {
+    return _then(_IngestionState(
+      rawImages: null == rawImages
+          ? _self._rawImages
+          : rawImages // ignore: cast_nullable_to_non_nullable
+              as List<XFile>,
+      rotations: null == rotations
+          ? _self._rotations
+          : rotations // ignore: cast_nullable_to_non_nullable
+              as List<int>,
+      visitDate: freezed == visitDate
+          ? _self.visitDate
+          : visitDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      hospitalName: freezed == hospitalName
+          ? _self.hospitalName
+          : hospitalName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _self.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      status: null == status
+          ? _self.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as IngestionStatus,
+      errorMessage: freezed == errorMessage
+          ? _self.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      selectedTagIds: null == selectedTagIds
+          ? _self._selectedTagIds
+          : selectedTagIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
+  }
 }
 
-abstract class _IngestionState implements IngestionState {
-  const factory _IngestionState(
-      {final List<XFile> rawImages,
-      final List<int> rotations,
-      final DateTime? visitDate,
-      final String? hospitalName,
-      final String? notes,
-      final IngestionStatus status,
-      final String? errorMessage,
-      final List<String> selectedTagIds}) = _$IngestionStateImpl;
-
-  @override
-  List<XFile> get rawImages;
-  @override
-  List<int> get rotations; // 90, 180, 270 (degrees)
-  @override
-  DateTime? get visitDate;
-  @override
-  String? get hospitalName;
-  @override
-  String? get notes;
-  @override
-  IngestionStatus get status;
-  @override
-  String? get errorMessage;
-  @override
-  List<String> get selectedTagIds;
-
-  /// Create a copy of IngestionState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$IngestionStateImplCopyWith<_$IngestionStateImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

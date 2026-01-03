@@ -24,6 +24,7 @@ import 'package:phf/data/repositories/interfaces/record_repository.dart' as _i2;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 /// A class which mocks [IRecordRepository].
 ///
@@ -81,6 +82,37 @@ class MockIRecordRepository extends _i1.Mock implements _i2.IRecordRepository {
       ) as _i3.Future<void>);
 
   @override
+  _i3.Future<void> updateRecordMetadata(
+    String? id, {
+    String? hospitalName,
+    DateTime? visitDate,
+    String? notes,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateRecordMetadata,
+          [id],
+          {
+            #hospitalName: hospitalName,
+            #visitDate: visitDate,
+            #notes: notes,
+          },
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> hardDeleteRecord(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #hardDeleteRecord,
+          [id],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<List<_i4.MedicalRecord>> searchRecords({
     required String? personId,
     String? query,
@@ -111,6 +143,29 @@ class MockIRecordRepository extends _i1.Mock implements _i2.IRecordRepository {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getPendingCount(String? personId) => (super.noSuchMethod(
+        Invocation.method(
+          #getPendingCount,
+          [personId],
+        ),
+        returnValue: _i3.Future<int>.value(0),
+        returnValueForMissingStub: _i3.Future<int>.value(0),
+      ) as _i3.Future<int>);
+
+  @override
+  _i3.Future<List<_i4.MedicalRecord>> getReviewRecords(String? personId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getReviewRecords,
+          [personId],
+        ),
+        returnValue:
+            _i3.Future<List<_i4.MedicalRecord>>.value(<_i4.MedicalRecord>[]),
+        returnValueForMissingStub:
+            _i3.Future<List<_i4.MedicalRecord>>.value(<_i4.MedicalRecord>[]),
+      ) as _i3.Future<List<_i4.MedicalRecord>>);
 }
 
 /// A class which mocks [IImageRepository].
@@ -181,6 +236,39 @@ class MockIImageRepository extends _i1.Mock implements _i5.IImageRepository {
           {
             #hospitalName: hospitalName,
             #visitDate: visitDate,
+          },
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<_i6.MedicalImage?> getImageById(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #getImageById,
+          [id],
+        ),
+        returnValue: _i3.Future<_i6.MedicalImage?>.value(),
+        returnValueForMissingStub: _i3.Future<_i6.MedicalImage?>.value(),
+      ) as _i3.Future<_i6.MedicalImage?>);
+
+  @override
+  _i3.Future<void> updateOCRData(
+    String? imageId,
+    String? text, {
+    String? rawJson,
+    double? confidence = 0.0,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateOCRData,
+          [
+            imageId,
+            text,
+          ],
+          {
+            #rawJson: rawJson,
+            #confidence: confidence,
           },
         ),
         returnValue: _i3.Future<void>.value(),

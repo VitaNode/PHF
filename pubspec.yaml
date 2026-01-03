@@ -12,22 +12,23 @@ dependencies:
 
   # Security & Privacy
   sqflite_sqlcipher: ^3.0.0
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.0.0
   crypto: ^3.0.3
 
   # Architecture & State Management
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 
   # Media & IO
   image: ^4.2.0
   image_picker: ^1.1.2
   path_provider: ^2.1.3
+  workmanager: ^0.9.0+3
   
   # Utils
   uuid: ^4.4.0
   json_annotation: ^4.9.0
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^3.1.0
   cryptography: ^2.9.0
   permission_handler: ^12.0.1
   device_info_plus: ^12.3.0
@@ -35,17 +36,20 @@ dependencies:
   local_auth: ^3.0.0
 
   path: any
+  talker_flutter: ^5.1.9
+  talker_riverpod_logger: ^5.1.9
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   
   # Code Generation
-  build_runner: ^2.4.11
-  freezed: ^2.5.2
-  riverpod_generator: ^2.4.0
-  json_serializable: ^6.8.0
-  mockito: ^5.4.6
+  build_runner: ^2.10.4
+  freezed: ^3.2.3
+  riverpod_generator: ^4.0.0+1
+  json_serializable: ^6.9.0
+  mockito: ^5.6.1
   sqflite_common_ffi: ^2.4.0+1
 
   path_provider_platform_interface: any
@@ -56,6 +60,7 @@ dev_dependencies:
   local_auth_windows: any
   image_picker_platform_interface: any
   sqflite_common: any
+
 flutter:
   uses-material-design: true
   fonts:

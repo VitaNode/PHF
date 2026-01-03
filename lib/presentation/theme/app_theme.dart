@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // --- Colors ---
   static const Color primaryTeal = Color(0xFF008080);
+  static const Color secondaryTeal = Color(0xFF4DB6AC); // Teal 300
   static const Color warningOrange = Color(0xFFFF9900);
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color errorRed = Color(0xFFD32F2F);

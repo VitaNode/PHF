@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,185 +9,32 @@ part of 'person.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
-Person _$PersonFromJson(Map<String, dynamic> json) {
-  return _Person.fromJson(json);
-}
 
 /// @nodoc
 mixin _$Person {
-  String get id => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
-  String? get avatarPath => throw _privateConstructorUsedError;
-  bool get isDefault => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-
-  /// Serializes this Person to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  String get id;
+  String get nickname;
+  String? get avatarPath;
+  bool get isDefault;
+  DateTime get createdAt;
 
   /// Create a copy of Person
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $PersonCopyWith<Person> get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $PersonCopyWith<$Res> {
-  factory $PersonCopyWith(Person value, $Res Function(Person) then) =
-      _$PersonCopyWithImpl<$Res, Person>;
-  @useResult
-  $Res call(
-      {String id,
-      String nickname,
-      String? avatarPath,
-      bool isDefault,
-      DateTime createdAt});
-}
-
-/// @nodoc
-class _$PersonCopyWithImpl<$Res, $Val extends Person>
-    implements $PersonCopyWith<$Res> {
-  _$PersonCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of Person
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? nickname = null,
-    Object? avatarPath = freezed,
-    Object? isDefault = null,
-    Object? createdAt = null,
-  }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      nickname: null == nickname
-          ? _value.nickname
-          : nickname // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarPath: freezed == avatarPath
-          ? _value.avatarPath
-          : avatarPath // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isDefault: null == isDefault
-          ? _value.isDefault
-          : isDefault // ignore: cast_nullable_to_non_nullable
-              as bool,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-    ) as $Val);
-  }
-}
+  $PersonCopyWith<Person> get copyWith =>
+      _$PersonCopyWithImpl<Person>(this as Person, _$identity);
 
-/// @nodoc
-abstract class _$$PersonImplCopyWith<$Res> implements $PersonCopyWith<$Res> {
-  factory _$$PersonImplCopyWith(
-          _$PersonImpl value, $Res Function(_$PersonImpl) then) =
-      __$$PersonImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {String id,
-      String nickname,
-      String? avatarPath,
-      bool isDefault,
-      DateTime createdAt});
-}
-
-/// @nodoc
-class __$$PersonImplCopyWithImpl<$Res>
-    extends _$PersonCopyWithImpl<$Res, _$PersonImpl>
-    implements _$$PersonImplCopyWith<$Res> {
-  __$$PersonImplCopyWithImpl(
-      _$PersonImpl _value, $Res Function(_$PersonImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of Person
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? nickname = null,
-    Object? avatarPath = freezed,
-    Object? isDefault = null,
-    Object? createdAt = null,
-  }) {
-    return _then(_$PersonImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      nickname: null == nickname
-          ? _value.nickname
-          : nickname // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarPath: freezed == avatarPath
-          ? _value.avatarPath
-          : avatarPath // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isDefault: null == isDefault
-          ? _value.isDefault
-          : isDefault // ignore: cast_nullable_to_non_nullable
-              as bool,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$PersonImpl implements _Person {
-  const _$PersonImpl(
-      {required this.id,
-      required this.nickname,
-      this.avatarPath,
-      this.isDefault = false,
-      required this.createdAt});
-
-  factory _$PersonImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PersonImplFromJson(json);
-
-  @override
-  final String id;
-  @override
-  final String nickname;
-  @override
-  final String? avatarPath;
-  @override
-  @JsonKey()
-  final bool isDefault;
-  @override
-  final DateTime createdAt;
-
-  @override
-  String toString() {
-    return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, createdAt: $createdAt)';
-  }
+  /// Serializes this Person to a JSON map.
+  Map<String, dynamic> toJson();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$PersonImpl &&
+            other is Person &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nickname, nickname) ||
                 other.nickname == nickname) &&
@@ -204,47 +51,354 @@ class _$PersonImpl implements _Person {
   int get hashCode =>
       Object.hash(runtimeType, id, nickname, avatarPath, isDefault, createdAt);
 
-  /// Create a copy of Person
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  @pragma('vm:prefer-inline')
-  _$$PersonImplCopyWith<_$PersonImpl> get copyWith =>
-      __$$PersonImplCopyWithImpl<_$PersonImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PersonImplToJson(
-      this,
-    );
+  String toString() {
+    return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, createdAt: $createdAt)';
   }
 }
 
-abstract class _Person implements Person {
-  const factory _Person(
-      {required final String id,
-      required final String nickname,
-      final String? avatarPath,
-      final bool isDefault,
-      required final DateTime createdAt}) = _$PersonImpl;
+/// @nodoc
+abstract mixin class $PersonCopyWith<$Res> {
+  factory $PersonCopyWith(Person value, $Res Function(Person) _then) =
+      _$PersonCopyWithImpl;
+  @useResult
+  $Res call(
+      {String id,
+      String nickname,
+      String? avatarPath,
+      bool isDefault,
+      DateTime createdAt});
+}
 
-  factory _Person.fromJson(Map<String, dynamic> json) = _$PersonImpl.fromJson;
+/// @nodoc
+class _$PersonCopyWithImpl<$Res> implements $PersonCopyWith<$Res> {
+  _$PersonCopyWithImpl(this._self, this._then);
+
+  final Person _self;
+  final $Res Function(Person) _then;
+
+  /// Create a copy of Person
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? nickname = null,
+    Object? avatarPath = freezed,
+    Object? isDefault = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_self.copyWith(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      nickname: null == nickname
+          ? _self.nickname
+          : nickname // ignore: cast_nullable_to_non_nullable
+              as String,
+      avatarPath: freezed == avatarPath
+          ? _self.avatarPath
+          : avatarPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isDefault: null == isDefault
+          ? _self.isDefault
+          : isDefault // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [Person].
+extension PersonPatterns on Person {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_Person value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _Person() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_Person value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Person():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_Person value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Person() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String id, String nickname, String? avatarPath,
+            bool isDefault, DateTime createdAt)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _Person() when $default != null:
+        return $default(_that.id, _that.nickname, _that.avatarPath,
+            _that.isDefault, _that.createdAt);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String id, String nickname, String? avatarPath,
+            bool isDefault, DateTime createdAt)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Person():
+        return $default(_that.id, _that.nickname, _that.avatarPath,
+            _that.isDefault, _that.createdAt);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String id, String nickname, String? avatarPath,
+            bool isDefault, DateTime createdAt)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Person() when $default != null:
+        return $default(_that.id, _that.nickname, _that.avatarPath,
+            _that.isDefault, _that.createdAt);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _Person implements Person {
+  const _Person(
+      {required this.id,
+      required this.nickname,
+      this.avatarPath,
+      this.isDefault = false,
+      required this.createdAt});
+  factory _Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
   @override
-  String get id;
+  final String id;
   @override
-  String get nickname;
+  final String nickname;
   @override
-  String? get avatarPath;
+  final String? avatarPath;
   @override
-  bool get isDefault;
+  @JsonKey()
+  final bool isDefault;
   @override
-  DateTime get createdAt;
+  final DateTime createdAt;
 
   /// Create a copy of Person
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PersonImplCopyWith<_$PersonImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  _$PersonCopyWith<_Person> get copyWith =>
+      __$PersonCopyWithImpl<_Person>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$PersonToJson(
+      this,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _Person &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.nickname, nickname) ||
+                other.nickname == nickname) &&
+            (identical(other.avatarPath, avatarPath) ||
+                other.avatarPath == avatarPath) &&
+            (identical(other.isDefault, isDefault) ||
+                other.isDefault == isDefault) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, id, nickname, avatarPath, isDefault, createdAt);
+
+  @override
+  String toString() {
+    return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, createdAt: $createdAt)';
+  }
 }
+
+/// @nodoc
+abstract mixin class _$PersonCopyWith<$Res> implements $PersonCopyWith<$Res> {
+  factory _$PersonCopyWith(_Person value, $Res Function(_Person) _then) =
+      __$PersonCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String nickname,
+      String? avatarPath,
+      bool isDefault,
+      DateTime createdAt});
+}
+
+/// @nodoc
+class __$PersonCopyWithImpl<$Res> implements _$PersonCopyWith<$Res> {
+  __$PersonCopyWithImpl(this._self, this._then);
+
+  final _Person _self;
+  final $Res Function(_Person) _then;
+
+  /// Create a copy of Person
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? nickname = null,
+    Object? avatarPath = freezed,
+    Object? isDefault = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_Person(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      nickname: null == nickname
+          ? _self.nickname
+          : nickname // ignore: cast_nullable_to_non_nullable
+              as String,
+      avatarPath: freezed == avatarPath
+          ? _self.avatarPath
+          : avatarPath // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isDefault: null == isDefault
+          ? _self.isDefault
+          : isDefault // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
+}
+
+// dart format on

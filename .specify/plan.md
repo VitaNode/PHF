@@ -23,7 +23,7 @@
 
 ## 3. Implementation Phases & Tasks
 
-### Phase 1: Infrastructure & Security (基础设施层)
+### 3.1: Infrastructure & Security (基础设施层)
 **Goal**: 建立全应用的安全信任根基。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -35,7 +35,7 @@
 | **T1.5** | **安全设置引导 (Security Setup UI)** | 实现首次启动时的 Pin/Biometric 录入界面及逻辑。DoD: 验证未设置锁时无法跳过，设置后写入 app_meta。 | T1.1 |
 | **T1.6** | **目录管理与沙盒隔离** | 确保加密资源存储在应用私有沙盒目录下，文件权限正确。 | - |
 
-### Phase 2: Data & Persistence (数据访问层)
+### 3.2: Data & Persistence (数据访问层)
 **Goal**: 建立结构化数据模型与持久化方案。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -44,7 +44,7 @@
 | **T2.2** | **Repository 模式实现** | 实现 `RecordRepository` 和 `ImageRepository`。核心逻辑：更新 `image_tags` 时需自动同步更新 `records.tags_cache` 以供展示。 | T2.1, T1.4 |
 | **T2.3** | **种子数据初始化 (Seed Data)** | 应用首次启动时自动创建默认用户（"本人"）并插入定义的 4 个内置标签。DoD: 验证 `persons` 表中存在 `id='def_me'` 的且 `is_default=1` 的记录。 | T2.1 |
 
-### Phase 3: Business Logic & Utilities (业务逻辑层)
+### 3.3: Business Logic & Utilities (业务逻辑层)
 **Goal**: 实现图片处理引擎与业务状态管理。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -54,7 +54,7 @@
 | **T3.3** | **文件流式加密适配** | 处理大尺寸图片。DoD: 在 512MB 限制的模拟器中，连续加密写入 5 张 10MB 以上的大图，应用不崩溃且内存波动平稳。 | T1.4, T3.1 |
 | **T3.4** | **存取权与相册集成 (Media Access)** | 集成 `image_picker` 并处理跨平台权限（尤其是 iOS `NSPhotoLibraryUsageDescription`）。 | - |
 
-### Phase 4: UI Development (界面展示层)
+### 3.4: UI Development (界面展示层)
 **Goal**: 实现宪章风格的 UI Kit 与核心交互路径。
 
 | ID | Task | DoD (验收标准) | Dependencies |
@@ -65,20 +65,42 @@
 
 ---
 
-## 4. Verification Plan
+## Phase 2: On-Device OCR & Intelligent Ingestion (智能录入与识别)
+**Goal**: 实现 100% 离线 OCR、异步处理队列及智能元数据提取。
 
-### Automated Tests
-- **Security Unit Tests**: `test/security/encryption_test.dart` (验证 AES-256-GCM 正确性)。
-- **Database Integration Tests**: `test/data/db_migration_test.dart` (验证 Schema 正确性)。
-- **Repository Tests**: `test/data/repository_test.dart` (验证存入加密数据后查询出的原文一致性)。
+### 2.1: Infrastructure & Schema (基础设施与数据层)
+**Goal**: 升级数据库模型以支持任务队列与全文检索。
 
-### Manual Verification
-1.  **物理导出验证**: 手动从真机沙盒导出 `.db` 和 `.webp.enc` 文件，尝试用标准工具打开，确认不可读。
-2.  **离线性能检查**: 记录从按下“保存”到返回首页的耗时，通过控制台日志输出加密耗时。
-3.  **UI 走查**: 确认医疗数值（如日期、潜在的后期 OCR 数值）是否使用了 Inconsolata 等宽字体。
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T2.1.1** | **Schema Update & Migration** | 1. `records` 表新增 status 字段。<br>2. `images` 表新增 OCR 相关字段。<br>3. 新增 `ocr_queue` 表。<br>4. 验证旧版本数据迁移无损。 | Phase 1 |
+| **T2.1.2** | **FTS5 Search Index Setup** | 1. 创建 `ocr_search_index` 虚拟表。<br>2. 验证 FTS5 插件在 SQLCipher 下可用。<br>3. 实现基本的 Match 查询测试。 | T2.1.1 |
+| **T2.1.3** | **Queue & OCR Repository** | 实现 `OCRQueueRepository` (CRUD) 和 `OCRResult` 实体模型。DoD: 单元测试覆盖队列的入队、出队、状态更新。 | T2.1.1 |
 
----
+### 2.2: OCR Engine Integration (OCR 引擎集成)
+**Goal**: 集成双平台原生 OCR 引擎，确保离线与隐私。
 
-## 5. Potential Constraints & Risks
-- **Performance**: 大量图片同时解密展示在 Timeline 时可能造成的滑动掉帧。*对策：严格使用缩略图并行解密，并限制单个 View 的内存缓存。*
-- **Key Loss**: 若主密钥丢失，数据理论上永久不可找回。*对策：Phase 1 需确保 KeyStore 的持久化可靠性。*
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T2.2.1** | **OCR Service Interface (Facade)** | 定义 `IOCRService` 抽象接口及统一的返回结构 `OCRResult` (Text, Blocks, Confidence)。 | - |
+| **T2.2.2** | **Android OCR Impl (ML Kit)** | 集成 `google_mlkit_text_recognition`。<br>DoD: Android 真机/模拟器断网环境下，能准确识别测试图片文字。 | T2.2.1 |
+| **T2.2.3** | **iOS OCR Impl (Apple Vision)** | 集成 Apple Vision Framework (通过插件或 Native Channel)。<br>DoD: iOS 真机断网环境下，能准确识别测试图片文字，且不产生网络请求。 | T2.2.1 |
+
+### 2.3: Business Logic & Processing (业务逻辑层)
+**Goal**: 实现智能提取算法与后台任务调度。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T2.3.1** | **Intelligent Extraction Strategy** | 实现日期 (Regex) 和医院名称 (Keyword/Regex) 提取算法。<br>DoD: 针对 50 张样本图片的单元测试，提取准确率达标，置信度计算逻辑符合 Spec。 | T2.2.1 |
+| **T2.3.2** | **OCR Processor & Manager** | 协调 `Queue` -> `OCRService` -> `Extraction` -> `DB Update` 的核心逻辑。<br>DoD: 模拟入队任务，能自动顺序执行并更新数据库状态。 | T2.1.3, T2.3.1, T2.2.2/3 |
+| **T2.3.3** | **Background Task Scheduling** | 集成 `workmanager` (Android) / `BGTask` (iOS)。<br>DoD: 应用退后台 5 分钟后，队列中的待处理任务仍能被调度执行（或下次启动自动恢复）。 | T2.3.2 |
+
+### 2.4: UI Adaptation (界面交互层)
+**Goal**: 构建“待确认”闭环与检索体验。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T2.4.1** | **Pending Review Banner (Home)** | 首页 Timeline 顶部增加“待确认”入口状态感知。<br>DoD: 当有 `status='review'` 记录时显示入口，数量角标准确。 | T2.1.1 |
+| **T2.4.2** | **Review Queue List & Edit UI** | 实现“待确认”列表页及专用编辑页（高亮 OCR 结果 vs 现有数据）。<br>DoD: 用户修正数据并保存后，记录状态变为 `archived` 并从列表消失。 | T2.4.1 |
+| **T2.4.3** | **Detail View OCR Enhancement** | 详情页支持查看/展开 OCR 识别全文。<br>DoD: 点击图片或“查看文字”按钮，能展示对应的解密后 OCR 文本。 | Phase 1 Detail View |
+| **T2.4.4** | **Global Search UI** | 实现基于 FTS5 的全文搜索界面。<br>DoD: 输入关键词能毫秒级返回包含该词的病历记录。 | T2.1.2 |

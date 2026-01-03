@@ -16,8 +16,13 @@ library;
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../../logic/utils/secure_wipe_helper.dart';
 
 class PathProviderService {
+  static final PathProviderService _instance = PathProviderService._internal();
+  factory PathProviderService() => _instance;
+  PathProviderService._internal();
+
   late final Directory _appDocDir;
   late final Directory _dbDir;
   late final Directory _imagesDir;
@@ -81,11 +86,9 @@ class PathProviderService {
   Future<void> clearTemp() async {
     _checkInitialized();
     if (await _tempDir.exists()) {
-      await for (final entity in _tempDir.list()) {
+      await for (final entity in _tempDir.list(recursive: true)) {
         if (entity is File) {
-          await entity.delete();
-        } else if (entity is Directory) {
-          await entity.delete(recursive: true);
+          await SecureWipeHelper.wipe(entity);
         }
       }
     }

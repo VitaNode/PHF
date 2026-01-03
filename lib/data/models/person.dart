@@ -21,7 +21,7 @@ part 'person.freezed.dart';
 part 'person.g.dart';
 
 @freezed
-class Person with _$Person {
+abstract class Person with _$Person {
   const factory Person({
     required String id,
     required String nickname,

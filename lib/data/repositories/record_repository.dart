@@ -131,6 +131,32 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
   }
 
   @override
+  Future<void> updateRecordMetadata(String id, {String? hospitalName, DateTime? visitDate, String? notes}) async {
+    final db = await dbService.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.update(
+      'records',
+      {
+        if (hospitalName != null) 'hospital_name': hospitalName,
+        if (visitDate != null) ...{
+          'visit_date_ms': visitDate.millisecondsSinceEpoch,
+          'visit_date_iso': visitDate.toIso8601String(),
+        },
+        if (notes != null) 'notes': notes,
+        'updated_at_ms': now,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  @override
+  Future<void> hardDeleteRecord(String id) async {
+    final db = await dbService.database;
+    await db.delete('records', where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
   Future<List<MedicalRecord>> searchRecords({
     required String personId,
     String? query,
@@ -234,16 +260,70 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     }
   }
 
+  @override
+  Future<int> getPendingCount(String personId) async {
+    final db = await dbService.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM records WHERE person_id = ? AND status = ?',
+      [personId, 'review'],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  @override
+  Future<List<MedicalRecord>> getReviewRecords(String personId) async {
+    final db = await dbService.database;
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'records',
+      where: 'person_id = ? AND status = ?',
+      whereArgs: [personId, 'review'],
+      orderBy: 'created_at_ms DESC', // Pending reviews typically in entry order
+    );
+
+    if (maps.isEmpty) return [];
+
+    final recordIds = maps.map((m) => m['id'] as String).toList();
+
+    // Fetch Images for N+1 optimization
+    final String placeholders = List.filled(recordIds.length, '?').join(',');
+    final List<Map<String, dynamic>> imageMaps = await db.query(
+      'images',
+      where: 'record_id IN ($placeholders)',
+      whereArgs: recordIds,
+      orderBy: 'page_index ASC',
+    );
+
+    final Map<String, List<MedicalImage>> imagesByRecord = {};
+    for (var imgMap in imageMaps) {
+      final rid = imgMap['record_id'] as String;
+      imagesByRecord.putIfAbsent(rid, () => []);
+      imagesByRecord[rid]!.add(_mapToImage(imgMap));
+    }
+
+    return maps.map((m) {
+      final rid = m['id'] as String;
+      return _mapToRecord(m, imagesByRecord[rid] ?? []);
+    }).toList();
+  }
+
   // --- Helpers ---
 
   MedicalRecord _mapToRecord(Map<String, dynamic> row, List<MedicalImage> images) {
     // 还原 DateTime
-    final notedAt = DateTime.fromMillisecondsSinceEpoch(row['visit_date_ms'] as int);
+    final visitDateMs = row['visit_date_ms'] as int?;
+    final createdAtMs = row['created_at_ms'] as int;
+    final updatedAtMs = row['updated_at_ms'] as int;
+
+    final notedAt = visitDateMs != null 
+        ? DateTime.fromMillisecondsSinceEpoch(visitDateMs)
+        : DateTime.fromMillisecondsSinceEpoch(createdAtMs); // Fallback to creation date
+
     final visitEndDate = row['visit_end_date_ms'] != null 
         ? DateTime.fromMillisecondsSinceEpoch(row['visit_end_date_ms'] as int) 
         : null;
-    final createdAt = DateTime.fromMillisecondsSinceEpoch(row['created_at_ms'] as int);
-    final updatedAt = DateTime.fromMillisecondsSinceEpoch(row['updated_at_ms'] as int);
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs);
+    final updatedAt = DateTime.fromMillisecondsSinceEpoch(updatedAtMs);
     
     // 还原 Status
     final statusStr = row['status'] as String;
@@ -280,6 +360,9 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       'displayOrder': row['page_index'],
       'width': row['width'],
       'height': row['height'],
+      'ocrText': row['ocr_text'],
+      'ocrRawJson': row['ocr_raw_json'],
+      'ocrConfidence': row['ocr_confidence'],
       'hospitalName': row['hospital_name'],
       'visitDate': row['visit_date_ms'] != null 
           ? DateTime.fromMillisecondsSinceEpoch(row['visit_date_ms'] as int).toIso8601String() 

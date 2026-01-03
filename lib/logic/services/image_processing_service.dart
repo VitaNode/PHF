@@ -7,11 +7,14 @@
 /// ## Privacy & Security
 /// - **Memory**: 尽可能及时释放中间对象（Dart GC 自动管理，但业务层需避免持有引用）。
 /// - **Wipe**: `secureWipe` 确保物理文件被删除。
+/// ## Repair Logs
+/// - [2025-12-31] 优化：新增 `processFull` 方法实现“一站式”图像处理（旋转+压缩+缩略图），将内存解码次数从 3 次降为 1 次，大幅提升大批量图片录入时的性能并降低 OOM 风险。
 library;
 
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart';
+import '../utils/secure_wipe_helper.dart';
 import 'interfaces/image_service.dart';
 
 class ImageProcessingService implements IImageService {
@@ -34,7 +37,7 @@ class ImageProcessingService implements IImageService {
     final jpeg = encodeJpg(image, quality: quality);
     
     // 3. Return as Uint8List
-    return Uint8List.fromList(jpeg);
+    return jpeg;
   }
 
   @override
@@ -56,7 +59,7 @@ class ImageProcessingService implements IImageService {
     // 3. Encode to JPEG
     final jpeg = encodeJpg(thumbnail, quality: 75);
 
-    return Uint8List.fromList(jpeg);
+    return jpeg;
   }
 
   @override
@@ -72,28 +75,53 @@ class ImageProcessingService implements IImageService {
     }
 
     // 2. Rotate
-    // The image package's copyRotate function rotates counter-clockwise.
-    // We need to convert common clockwise angles (e.g., 90, 180, 270)
-    // to counter-clockwise for the function.
-    // A 90-degree clockwise rotation is equivalent to a 270-degree counter-clockwise rotation.
-    // A 270-degree clockwise rotation is equivalent to a 90-degree counter-clockwise rotation.
-    // 180 degrees is the same for both.
-    final normalizedAngle = (360 - (angle % 360)) % 360; // Convert to CCW angle for img.copyRotate
-
+    final normalizedAngle = (360 - (angle % 360)) % 360; 
     final rotatedImage = copyRotate(image, angle: normalizedAngle);
 
     // 3. Encode to JPEG
-    final jpeg = encodeJpg(rotatedImage, quality: 80); // Use a default quality
+    final jpeg = encodeJpg(rotatedImage, quality: 80); 
 
-    return Uint8List.fromList(jpeg);
+    return jpeg;
+  }
+
+  @override
+  Future<ImageProcessingResult> processFull({
+    required Uint8List data,
+    int? rotationAngle,
+    int quality = 80,
+    int thumbWidth = 200,
+  }) async {
+    // 1. 单次解码
+    final image = decodeImage(data);
+    if (image == null) {
+      throw Exception('Failed to decode image data.');
+    }
+
+    // 2. 旋转 (如果需要)
+    Image processed = image;
+    if (rotationAngle != null && rotationAngle != 0) {
+      final normalizedAngle = (360 - (rotationAngle % 360)) % 360;
+      processed = copyRotate(image, angle: normalizedAngle);
+    }
+
+    // 3. 生成主图字节流
+    final mainBytes = encodeJpg(processed, quality: quality);
+
+    // 4. 生成缩略图
+    final thumb = copyResize(processed, width: thumbWidth);
+    final thumbBytes = encodeJpg(thumb, quality: 75);
+
+    return ImageProcessingResult(
+      mainBytes: mainBytes,
+      thumbBytes: thumbBytes,
+      width: processed.width,
+      height: processed.height,
+    );
   }
 
   @override
   Future<void> secureWipe(String filePath) async {
-    final file = File(filePath);
-    if (await file.exists()) {
-      await file.delete();
-    }
+    await SecureWipeHelper.wipe(File(filePath));
   }
 
   @override

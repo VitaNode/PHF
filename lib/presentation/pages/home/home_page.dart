@@ -14,18 +14,23 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../timeline/timeline_page.dart';
 import '../ingestion/ingestion_page.dart';
+import '../search/global_search_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+import '../../../logic/providers/logging_provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   void _onFabPressed(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const IngestionPage()),
+      MaterialPageRoute<void>(builder: (_) => const IngestionPage()),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final talker = ref.watch(talkerProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -33,6 +38,26 @@ class HomePage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report_outlined, color: Colors.orange),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => TalkerScreen(talker: talker),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(builder: (_) => const GlobalSearchPage()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {

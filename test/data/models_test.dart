@@ -73,13 +73,13 @@ void main() {
         updatedAt: testTime,
       );
 
-      expect(record.status, RecordStatus.archived); // Default
+      expect(record.status, RecordStatus.processing); // Default
       expect(record.title, 'Mayo Clinic'); // Getter logic
       
       final json = record.toJson();
       expect(json['personId'], 'p1');
       expect(json['hospitalName'], 'Mayo Clinic');
-      expect(json['status'], 'archived');
+      expect(json['status'], 'processing');
       
       final fromJson = MedicalRecord.fromJson(json);
       expect(fromJson.title, 'Mayo Clinic');

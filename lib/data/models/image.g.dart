@@ -6,8 +6,8 @@ part of 'image.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MedicalImageImpl _$$MedicalImageImplFromJson(Map<String, dynamic> json) =>
-    _$MedicalImageImpl(
+_MedicalImage _$MedicalImageFromJson(Map<String, dynamic> json) =>
+    _MedicalImage(
       id: json['id'] as String,
       recordId: json['recordId'] as String,
       encryptionKey: json['encryptionKey'] as String,
@@ -19,6 +19,9 @@ _$MedicalImageImpl _$$MedicalImageImplFromJson(Map<String, dynamic> json) =>
       displayOrder: (json['displayOrder'] as num?)?.toInt() ?? 0,
       width: (json['width'] as num?)?.toInt(),
       height: (json['height'] as num?)?.toInt(),
+      ocrText: json['ocrText'] as String?,
+      ocrRawJson: json['ocrRawJson'] as String?,
+      ocrConfidence: (json['ocrConfidence'] as num?)?.toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       hospitalName: json['hospitalName'] as String?,
       visitDate: json['visitDate'] == null
@@ -30,7 +33,7 @@ _$MedicalImageImpl _$$MedicalImageImplFromJson(Map<String, dynamic> json) =>
           const [],
     );
 
-Map<String, dynamic> _$$MedicalImageImplToJson(_$MedicalImageImpl instance) =>
+Map<String, dynamic> _$MedicalImageToJson(_MedicalImage instance) =>
     <String, dynamic>{
       'id': instance.id,
       'recordId': instance.recordId,
@@ -43,6 +46,9 @@ Map<String, dynamic> _$$MedicalImageImplToJson(_$MedicalImageImpl instance) =>
       'displayOrder': instance.displayOrder,
       'width': instance.width,
       'height': instance.height,
+      'ocrText': instance.ocrText,
+      'ocrRawJson': instance.ocrRawJson,
+      'ocrConfidence': instance.ocrConfidence,
       'createdAt': instance.createdAt.toIso8601String(),
       'hospitalName': instance.hospitalName,
       'visitDate': instance.visitDate?.toIso8601String(),

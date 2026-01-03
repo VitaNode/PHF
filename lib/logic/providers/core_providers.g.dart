@@ -6,245 +6,673 @@ part of 'core_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pathProviderServiceHash() =>
-    r'f84e806e0241af138636fdfe8e5f7060daf48d97';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [pathProviderService].
 @ProviderFor(pathProviderService)
-final pathProviderServiceProvider = Provider<PathProviderService>.internal(
-  pathProviderService,
-  name: r'pathProviderServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pathProviderServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final pathProviderServiceProvider = PathProviderServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PathProviderServiceRef = ProviderRef<PathProviderService>;
-String _$permissionServiceHash() => r'e07c638ee568b8164a852a099b38fd0c08427a05';
+final class PathProviderServiceProvider extends $FunctionalProvider<
+    PathProviderService,
+    PathProviderService,
+    PathProviderService> with $Provider<PathProviderService> {
+  PathProviderServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'pathProviderServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [permissionService].
+  @override
+  String debugGetCreateSourceHash() => _$pathProviderServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<PathProviderService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PathProviderService create(Ref ref) {
+    return pathProviderService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PathProviderService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PathProviderService>(value),
+    );
+  }
+}
+
+String _$pathProviderServiceHash() =>
+    r'8ac5e6419686ea0b5a2cbab77944595dac2111b7';
+
 @ProviderFor(permissionService)
-final permissionServiceProvider = Provider<PermissionService>.internal(
-  permissionService,
-  name: r'permissionServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$permissionServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final permissionServiceProvider = PermissionServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PermissionServiceRef = ProviderRef<PermissionService>;
-String _$masterKeyManagerHash() => r'932348c39db27b2df354f367a44489e32da4b2ca';
+final class PermissionServiceProvider extends $FunctionalProvider<
+    PermissionService,
+    PermissionService,
+    PermissionService> with $Provider<PermissionService> {
+  PermissionServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'permissionServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [masterKeyManager].
+  @override
+  String debugGetCreateSourceHash() => _$permissionServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<PermissionService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PermissionService create(Ref ref) {
+    return permissionService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PermissionService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PermissionService>(value),
+    );
+  }
+}
+
+String _$permissionServiceHash() => r'c2d80eefe41d876497606e2f7f35e68b50a5d1d7';
+
 @ProviderFor(masterKeyManager)
-final masterKeyManagerProvider = Provider<MasterKeyManager>.internal(
-  masterKeyManager,
-  name: r'masterKeyManagerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$masterKeyManagerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final masterKeyManagerProvider = MasterKeyManagerProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MasterKeyManagerRef = ProviderRef<MasterKeyManager>;
-String _$databaseServiceHash() => r'a6dfeb3aca206c95eaf1fbebecfbe97b5f23652c';
+final class MasterKeyManagerProvider extends $FunctionalProvider<
+    MasterKeyManager,
+    MasterKeyManager,
+    MasterKeyManager> with $Provider<MasterKeyManager> {
+  MasterKeyManagerProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'masterKeyManagerProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [databaseService].
+  @override
+  String debugGetCreateSourceHash() => _$masterKeyManagerHash();
+
+  @$internal
+  @override
+  $ProviderElement<MasterKeyManager> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MasterKeyManager create(Ref ref) {
+    return masterKeyManager(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MasterKeyManager value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MasterKeyManager>(value),
+    );
+  }
+}
+
+String _$masterKeyManagerHash() => r'baa610668f63a9468e933fa5de2e59faceeebbae';
+
 @ProviderFor(databaseService)
-final databaseServiceProvider = Provider<SQLCipherDatabaseService>.internal(
-  databaseService,
-  name: r'databaseServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$databaseServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final databaseServiceProvider = DatabaseServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DatabaseServiceRef = ProviderRef<SQLCipherDatabaseService>;
-String _$fileSecurityHelperHash() =>
-    r'9bb8ea69110d9cc39c09879162f9ac652ed05f0c';
+final class DatabaseServiceProvider extends $FunctionalProvider<
+    SQLCipherDatabaseService,
+    SQLCipherDatabaseService,
+    SQLCipherDatabaseService> with $Provider<SQLCipherDatabaseService> {
+  DatabaseServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'databaseServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [fileSecurityHelper].
+  @override
+  String debugGetCreateSourceHash() => _$databaseServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SQLCipherDatabaseService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SQLCipherDatabaseService create(Ref ref) {
+    return databaseService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SQLCipherDatabaseService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SQLCipherDatabaseService>(value),
+    );
+  }
+}
+
+String _$databaseServiceHash() => r'4a6397efd932ef53bd6e69e8e7484d7973edaae7';
+
 @ProviderFor(fileSecurityHelper)
-final fileSecurityHelperProvider = Provider<FileSecurityHelper>.internal(
-  fileSecurityHelper,
-  name: r'fileSecurityHelperProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$fileSecurityHelperHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final fileSecurityHelperProvider = FileSecurityHelperProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FileSecurityHelperRef = ProviderRef<FileSecurityHelper>;
-String _$imageProcessingServiceHash() =>
-    r'e0ca610023c36839a046b8857834f356bee3d045';
+final class FileSecurityHelperProvider extends $FunctionalProvider<
+    FileSecurityHelper,
+    FileSecurityHelper,
+    FileSecurityHelper> with $Provider<FileSecurityHelper> {
+  FileSecurityHelperProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'fileSecurityHelperProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [imageProcessingService].
+  @override
+  String debugGetCreateSourceHash() => _$fileSecurityHelperHash();
+
+  @$internal
+  @override
+  $ProviderElement<FileSecurityHelper> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FileSecurityHelper create(Ref ref) {
+    return fileSecurityHelper(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FileSecurityHelper value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FileSecurityHelper>(value),
+    );
+  }
+}
+
+String _$fileSecurityHelperHash() =>
+    r'7a59118c3f9947841c7b1aad42e9983e627f4893';
+
 @ProviderFor(imageProcessingService)
-final imageProcessingServiceProvider = Provider<IImageService>.internal(
-  imageProcessingService,
-  name: r'imageProcessingServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$imageProcessingServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final imageProcessingServiceProvider = ImageProcessingServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ImageProcessingServiceRef = ProviderRef<IImageService>;
-String _$galleryServiceHash() => r'2c5cf950ef4d333455b533ffb4dee06e1ffdeb13';
+final class ImageProcessingServiceProvider
+    extends $FunctionalProvider<IImageService, IImageService, IImageService>
+    with $Provider<IImageService> {
+  ImageProcessingServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'imageProcessingServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [galleryService].
+  @override
+  String debugGetCreateSourceHash() => _$imageProcessingServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IImageService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IImageService create(Ref ref) {
+    return imageProcessingService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IImageService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IImageService>(value),
+    );
+  }
+}
+
+String _$imageProcessingServiceHash() =>
+    r'943c0f3a5709deb4ed8ee118e51fff82d50c6c62';
+
 @ProviderFor(galleryService)
-final galleryServiceProvider = Provider<IGalleryService>.internal(
-  galleryService,
-  name: r'galleryServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$galleryServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final galleryServiceProvider = GalleryServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GalleryServiceRef = ProviderRef<IGalleryService>;
-String _$recordRepositoryHash() => r'8d313c66aa1382711037dba5c26dc59caaa08c27';
+final class GalleryServiceProvider extends $FunctionalProvider<IGalleryService,
+    IGalleryService, IGalleryService> with $Provider<IGalleryService> {
+  GalleryServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'galleryServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [recordRepository].
+  @override
+  String debugGetCreateSourceHash() => _$galleryServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IGalleryService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IGalleryService create(Ref ref) {
+    return galleryService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IGalleryService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IGalleryService>(value),
+    );
+  }
+}
+
+String _$galleryServiceHash() => r'c27c171329bb2a913915c82476b8287feacbbc3f';
+
 @ProviderFor(recordRepository)
-final recordRepositoryProvider = Provider<IRecordRepository>.internal(
-  recordRepository,
-  name: r'recordRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$recordRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final recordRepositoryProvider = RecordRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RecordRepositoryRef = ProviderRef<IRecordRepository>;
-String _$cryptoServiceHash() => r'843d4d06d3525af7d56ca1e6e9633e5f40ef620d';
+final class RecordRepositoryProvider extends $FunctionalProvider<
+    IRecordRepository,
+    IRecordRepository,
+    IRecordRepository> with $Provider<IRecordRepository> {
+  RecordRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'recordRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [cryptoService].
+  @override
+  String debugGetCreateSourceHash() => _$recordRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IRecordRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IRecordRepository create(Ref ref) {
+    return recordRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IRecordRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IRecordRepository>(value),
+    );
+  }
+}
+
+String _$recordRepositoryHash() => r'3b95d841fbeb3f7e7f393f32f0ca6927bfed267f';
+
 @ProviderFor(cryptoService)
-final cryptoServiceProvider = Provider<ICryptoService>.internal(
-  cryptoService,
-  name: r'cryptoServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$cryptoServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final cryptoServiceProvider = CryptoServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CryptoServiceRef = ProviderRef<ICryptoService>;
-String _$imageRepositoryHash() => r'1b339eabd3674fd5167d77f083b7b31a8c05aa93';
+final class CryptoServiceProvider
+    extends $FunctionalProvider<ICryptoService, ICryptoService, ICryptoService>
+    with $Provider<ICryptoService> {
+  CryptoServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'cryptoServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [imageRepository].
+  @override
+  String debugGetCreateSourceHash() => _$cryptoServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ICryptoService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ICryptoService create(Ref ref) {
+    return cryptoService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ICryptoService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ICryptoService>(value),
+    );
+  }
+}
+
+String _$cryptoServiceHash() => r'7bf1c14754df33bf2bac1d9430f02e51b3c70e8d';
+
 @ProviderFor(imageRepository)
-final imageRepositoryProvider = Provider<IImageRepository>.internal(
-  imageRepository,
-  name: r'imageRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$imageRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final imageRepositoryProvider = ImageRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ImageRepositoryRef = ProviderRef<IImageRepository>;
-String _$appMetaRepositoryHash() => r'b7350a9d504ae1286b1efe34d5623412ebd43a70';
+final class ImageRepositoryProvider extends $FunctionalProvider<
+    IImageRepository,
+    IImageRepository,
+    IImageRepository> with $Provider<IImageRepository> {
+  ImageRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'imageRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [appMetaRepository].
+  @override
+  String debugGetCreateSourceHash() => _$imageRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IImageRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IImageRepository create(Ref ref) {
+    return imageRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IImageRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IImageRepository>(value),
+    );
+  }
+}
+
+String _$imageRepositoryHash() => r'a818f6f215615efc5cc70caac9292da693082327';
+
 @ProviderFor(appMetaRepository)
-final appMetaRepositoryProvider = Provider<AppMetaRepository>.internal(
-  appMetaRepository,
-  name: r'appMetaRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appMetaRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final appMetaRepositoryProvider = AppMetaRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AppMetaRepositoryRef = ProviderRef<AppMetaRepository>;
-String _$securityServiceHash() => r'7fbe42273a94f0cc5bd8307cdf1eb314a0f3c7cc';
+final class AppMetaRepositoryProvider extends $FunctionalProvider<
+    AppMetaRepository,
+    AppMetaRepository,
+    AppMetaRepository> with $Provider<AppMetaRepository> {
+  AppMetaRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'appMetaRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [securityService].
+  @override
+  String debugGetCreateSourceHash() => _$appMetaRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<AppMetaRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AppMetaRepository create(Ref ref) {
+    return appMetaRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppMetaRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppMetaRepository>(value),
+    );
+  }
+}
+
+String _$appMetaRepositoryHash() => r'e9091b67401ef415be39f15a9daf4ab9414b92ed';
+
 @ProviderFor(securityService)
-final securityServiceProvider = Provider<SecurityService>.internal(
-  securityService,
-  name: r'securityServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$securityServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final securityServiceProvider = SecurityServiceProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SecurityServiceRef = ProviderRef<SecurityService>;
-String _$tagRepositoryHash() => r'af31d335dddee78d2ffe41433370facdce944052';
+final class SecurityServiceProvider extends $FunctionalProvider<SecurityService,
+    SecurityService, SecurityService> with $Provider<SecurityService> {
+  SecurityServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'securityServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [tagRepository].
+  @override
+  String debugGetCreateSourceHash() => _$securityServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SecurityService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SecurityService create(Ref ref) {
+    return securityService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SecurityService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SecurityService>(value),
+    );
+  }
+}
+
+String _$securityServiceHash() => r'8e7036d7cc50758efc34fb8f19faec6a1cdeefd8';
+
 @ProviderFor(tagRepository)
-final tagRepositoryProvider = Provider<ITagRepository>.internal(
-  tagRepository,
-  name: r'tagRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tagRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final tagRepositoryProvider = TagRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TagRepositoryRef = ProviderRef<ITagRepository>;
-String _$allTagsHash() => r'2da877478590ccc47192cb22afe601e3bda15acf';
+final class TagRepositoryProvider
+    extends $FunctionalProvider<ITagRepository, ITagRepository, ITagRepository>
+    with $Provider<ITagRepository> {
+  TagRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'tagRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
 
-/// See also [allTags].
+  @override
+  String debugGetCreateSourceHash() => _$tagRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ITagRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ITagRepository create(Ref ref) {
+    return tagRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ITagRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ITagRepository>(value),
+    );
+  }
+}
+
+String _$tagRepositoryHash() => r'93305b9c45a923381656be0c101fcbd6339d8d48';
+
+@ProviderFor(searchRepository)
+final searchRepositoryProvider = SearchRepositoryProvider._();
+
+final class SearchRepositoryProvider extends $FunctionalProvider<
+    ISearchRepository,
+    ISearchRepository,
+    ISearchRepository> with $Provider<ISearchRepository> {
+  SearchRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'searchRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$searchRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ISearchRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ISearchRepository create(Ref ref) {
+    return searchRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ISearchRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ISearchRepository>(value),
+    );
+  }
+}
+
+String _$searchRepositoryHash() => r'1fcc9063bbf4a2b83823d515e9c69d41088307f6';
+
+@ProviderFor(ocrQueueRepository)
+final ocrQueueRepositoryProvider = OcrQueueRepositoryProvider._();
+
+final class OcrQueueRepositoryProvider extends $FunctionalProvider<
+    IOCRQueueRepository,
+    IOCRQueueRepository,
+    IOCRQueueRepository> with $Provider<IOCRQueueRepository> {
+  OcrQueueRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'ocrQueueRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$ocrQueueRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IOCRQueueRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IOCRQueueRepository create(Ref ref) {
+    return ocrQueueRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IOCRQueueRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IOCRQueueRepository>(value),
+    );
+  }
+}
+
+String _$ocrQueueRepositoryHash() =>
+    r'4aae7f48301a7a6107e82afcbf09f45dfc4036df';
+
 @ProviderFor(allTags)
-final allTagsProvider = AutoDisposeFutureProvider<List<Tag>>.internal(
-  allTags,
-  name: r'allTagsProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$allTagsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final allTagsProvider = AllTagsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AllTagsRef = AutoDisposeFutureProviderRef<List<Tag>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class AllTagsProvider extends $FunctionalProvider<AsyncValue<List<Tag>>,
+        List<Tag>, FutureOr<List<Tag>>>
+    with $FutureModifier<List<Tag>>, $FutureProvider<List<Tag>> {
+  AllTagsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'allTagsProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$allTagsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Tag>> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Tag>> create(Ref ref) {
+    return allTags(ref);
+  }
+}
+
+String _$allTagsHash() => r'40bcc092347698fb3d21df54443ed0c84a8b18b3';

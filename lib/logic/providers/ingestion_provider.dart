@@ -10,13 +10,22 @@
 ///    2. 并发处理所有图片 (Compress + Encrypt + Save)。
 ///    3. 保存 Record。
 ///    4. 触发 Timeline 刷新。
+///
+/// ## Repair Logs
+/// - [2025-12-31] 优化：实现即时物理擦除机制。图片处理并加密存入沙盒后立即擦除原始临时文件；在 `removeImage` 及 `onDispose` 时强制执行清理，确保隐私数据不滞留在系统临时目录。
+/// - [2025-12-31] 性能：在 `submit` 中切换为 `processFull` 一站式处理，将多张图片录入时的内存峰值解码次数减少 66%，显著降低 OOM 风险。
 library;
 
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/image.dart';
 import '../../data/models/record.dart';
+import '../services/background_worker_service.dart';
+import '../utils/secure_wipe_helper.dart';
+import '../providers/logging_provider.dart';
+import 'ocr_status_provider.dart';
 import 'core_providers.dart';
 import 'states/ingestion_state.dart';
 import 'timeline_provider.dart';
@@ -27,6 +36,12 @@ part 'ingestion_provider.g.dart';
 class IngestionController extends _$IngestionController {
   @override
   IngestionState build() {
+    // 确保在 Provider 销毁时清理所有未提交的临时文件
+    // 注意：必须通过闭包捕获当时的列表，不能在 onDispose 内部访问 state
+    ref.onDispose(() {
+      final imagesToCleanup = state.rawImages;
+      _cleanupFiles(imagesToCleanup);
+    });
     return const IngestionState();
   }
 
@@ -91,6 +106,10 @@ class IngestionController extends _$IngestionController {
 
   /// 移除选中的图片
   void removeImage(int index) {
+    final xFile = state.rawImages[index];
+    // 立即物理擦除被移除的图片，防止隐私泄漏
+    SecureWipeHelper.wipe(File(xFile.path)).catchError((_) {});
+
     final newImages = [...state.rawImages];
     final newRotations = [...state.rotations];
     newImages.removeAt(index);
@@ -133,8 +152,8 @@ class IngestionController extends _$IngestionController {
       final recordId = const Uuid().v4();
       final recordRepo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
+      final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider); // T17.4
       final fileSecurity = ref.read(fileSecurityHelperProvider);
-      final cryptoService = ref.read(cryptoServiceProvider);
       final imageProcessing = ref.read(imageProcessingServiceProvider);
       final pathService = ref.read(pathProviderServiceProvider);
       
@@ -149,29 +168,26 @@ class IngestionController extends _$IngestionController {
       await Future.wait(state.rawImages.asMap().entries.map((entry) async {
         final index = entry.key;
         final xFile = entry.value;
-        var rawBytes = await xFile.readAsBytes();
+        final rawBytes = await xFile.readAsBytes();
         
-        // Apply Rotation if needed
-        final rotation = state.rotations[index];
-        if (rotation != 0) {
-           rawBytes = await imageProcessing.rotateImage(data: rawBytes, angle: rotation);
-        }
-
-        // 1. Image Processing
-        final compressedBytes = await imageProcessing.compressImage(data: rawBytes);
-        final thumbnailBytes = await imageProcessing.generateThumbnail(data: rawBytes);
-        final dimensions = await imageProcessing.getDimensions(compressedBytes);
+        // 1. Optimized Image Processing (Single Decode)
+        final result = await imageProcessing.processFull(
+          data: rawBytes,
+          rotationAngle: state.rotations[index],
+          quality: 80,
+        );
 
         // 2. Encrypt & Save Main File (Generate New Key)
         final fileResult = await fileSecurity.saveEncryptedFile(
-          data: compressedBytes, 
+          data: result.mainBytes, 
           targetDir: pathService.imagesDirPath,
         );
         
         // 3. Encrypt & Save Thumbnail (NEW INDEPENDENT Key - T16.1)
+        final thumbDir = '${pathService.sandboxRoot}/images/thumbnails';
         final thumbResult = await fileSecurity.saveEncryptedFile(
-          data: thumbnailBytes,
-          targetDir: '${pathService.sandboxRoot}/images/thumbnails',
+          data: result.thumbBytes,
+          targetDir: thumbDir,
         );
 
         // 4. Create Entity
@@ -183,18 +199,21 @@ class IngestionController extends _$IngestionController {
           filePath: 'images/${fileResult.relativePath}',
           thumbnailPath: 'images/thumbnails/${thumbResult.relativePath}',
           mimeType: 'image/jpeg',
-          fileSize: compressedBytes.lengthInBytes,
+          fileSize: result.mainBytes.lengthInBytes,
           displayOrder: index,
-          width: dimensions.width,
-          height: dimensions.height,
+          width: result.width,
+          height: result.height,
           createdAt: DateTime.now(),
           hospitalName: defaultHospital,
           visitDate: defaultDate,
           tagIds: state.selectedTagIds,
         ));
+
+        // 5. 关键优化：一旦完成处理并安全存入加密沙盒，立即擦除原始临时文件
+        await SecureWipeHelper.wipe(File(xFile.path)).catchError((_) {});
       }));
 
-      // 5. Create Record
+      // 6. Create Record
       final record = MedicalRecord(
         id: recordId,
         personId: currentPersonId,
@@ -203,23 +222,54 @@ class IngestionController extends _$IngestionController {
         notedAt: defaultDate,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        status: RecordStatus.archived,
-        // images: medicalImages, // Not persisted here
+        // Phase 2 Change: Default status is processing
+        status: RecordStatus.processing, 
       );
       
-      // 6. Transactional Save
+      // 7. Transactional Save
       await recordRepo.saveRecord(record);
       await imageRepo.saveImages(medicalImages);
       
-      // 7. Sync Aggregated Metadata (New Phase 2 Requirement)
+      // 8. Sync Aggregated Metadata
       await recordRepo.syncRecordMetadata(recordId);
+
+      // 9. Phase 2: Enqueue OCR Jobs
+      for (final img in medicalImages) {
+        await ocrQueueRepo.enqueue(img.id);
+      }
+
+      // 10. Phase 2: Trigger Background Worker & Foreground processing
+      await BackgroundWorkerService().triggerProcessing();
+      // Start foreground processing immediately (fire-and-forget)
+      // ignore: unawaited_futures
+      BackgroundWorkerService().startForegroundProcessing(
+        talker: ref.read(talkerProvider),
+      );
       
-      // 8. Refresh Timeline & Reset State
+      // 10. Refresh Timeline & Reset State
       ref.invalidate(timelineControllerProvider);
+      ref.invalidate(ocrPendingCountProvider); // 强制立即重新开始轮询探测
+      
+      // 11. Secure Wipe raw images
+      await _cleanupFiles(state.rawImages);
+      
       state = const IngestionState(status: IngestionStatus.success);
       
     } catch (e) {
       state = state.copyWith(status: IngestionStatus.error, errorMessage: e.toString());
+      // Cleanup even on error
+      await _cleanupFiles(state.rawImages);
+    }
+  }
+
+  /// 物理擦除所有已加载的原始临时图片
+  Future<void> _cleanupFiles(List<XFile> images) async {
+    for (final xFile in images) {
+      try {
+        await SecureWipeHelper.wipe(File(xFile.path));
+      } catch (_) {
+        // 忽略清理阶段的错误
+      }
     }
   }
 }

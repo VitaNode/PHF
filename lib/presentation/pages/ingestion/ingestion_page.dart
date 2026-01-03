@@ -62,7 +62,9 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
 
     ref.listen(ingestionControllerProvider.select((s) => s.status), (previous, next) {
       if (next == IngestionStatus.success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存成功')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已进入后台 OCR 处理队列...'))
+        );
         Navigator.of(context).pop();
       } else if (next == IngestionStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,7 +105,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
               SizedBox(
                 width: double.infinity,
                 child: ActiveButton(
-                  text: '一键保存',
+                  text: '开始处理并归档',
                   onPressed: () => notifier.submit(),
                   isLoading: state.status == IngestionStatus.processing,
                 ),

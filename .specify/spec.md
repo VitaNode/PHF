@@ -240,7 +240,138 @@ CREATE VIRTUAL TABLE ocr_search_index USING fts5(
 
 ---
 
+# Phase 2 Specification: On-Device OCR & Intelligent Ingestion
+
+**Status**: Draft  
+**Strategy**: Local OCR | Queue Management | Confidence-based Flow
+
+## 1. Product Goals (Phase 2)
+实现 100% 离线 OCR 识别流，包括 Android/iOS 差异化引擎集成、异步处理队列、智能数据提取、以及“待确认”UI 闭环。
+- **自动化元数据提取**: 利用本地 OCR 自动识别就诊日期、医院名称，减少手动录入成本。
+- **内容搜索化**: 实现全文索引 (FTS5)，允许用户通过病历中的具体文字内容搜索记录。
+- **容错与闭环**: 引入“待确认”机制，确保置信度较低时通过人工校验维持数据准确。
+
+## 2. User Flows (Phase 2)
+
+### A. 智能录入流 (Intelligent Ingestion)
+1.  **Entry**: 用户点击“拍照/导入”。
+2.  **Capture & Prep**: 拍摄/选择 -> 预览/编辑（裁剪/删除）。
+3.  **Dispatch**: 点击「开始处理并归档」。
+    - **UI**: App 返回首页，Toast “处理中…”。
+4.  **Background Processing**:
+    - **OCR**: 后台执行本地 OCR 扫描。
+    - **Extraction**: 提取日期、医院名称。
+    - **Confidence Check**: 评估识别置信度。
+5.  **Branching**:
+    - **高置信度 (>0.9)**: 自动归档，Timeline 追加事件。
+    - **低置信度 (≤0.9)**: 标记为 `review` (待确认)，进入首页“待确认区”。
+
+### B. 待确认处理流 (Pending Review)
+1.  **Entry**: 首页显示“待确认[N]”，用户点击进入待确认列表。
+2.  **Resolution**: 选择卡片 -> 进入详情页 -> 编辑修正（医院/日期/标签） -> 保存。
+3.  **Result**: 
+    - `is_pending` 置为 `false` (status -> `archived`)。
+    - 事件插入 Timeline。
+    - 返回待确认列表（条目减少）。
+
+### C. 查看与编辑 (Enhanced View)
+1.  **Detail**: 首页 Timeline 卡片 -> 详情页。
+2.  **Interaction**: 滑动浏览图片 -> 编辑字段 -> 展开查看 OCR 全文。
+3.  **Refinement**: 支持“重新识别”（针对旧记录）或后续的分屏对比（Phase 3）。
+4.  **Save**: 保存更新 -> Timeline 刷新。
+
+## 3. Functional Requirements
+
+### FR-201: 本地 OCR 引擎集成 (Platform Optimized)
+- **100% 离线**: 严禁调用任何云端 API。
+- **Android**: 集成 **Google ML Kit (Text Recognition v2)**。
+- **iOS**: 集成 **Apple Vision Framework** (VNRecognizeTextRequest)。
+- **Interface**: 定义 Flutter 侧 `IOCRService`，统一返回 `OCRResult` (text, blocks, confidence)。
+
+### FR-202: 异步任务队列 (Async Queue)
+- **Persistence**: 在 SQLCipher 中维护 `ocr_queue` 表。
+- **Scheduling**:
+    - **Android**: `WorkManager` (OneTimeWorkRequest)。
+    - **iOS**: `BGTaskScheduler` (BGProcessingTask) + `beginBackgroundTask` (即时保活)。
+- **Resume**: 应用重启或回到前台时，自动扫描队列中 `status='processing'` 或 `pending` 的任务并恢复执行。
+
+### FR-203: 智能提取算法 (Extraction Logic)
+- **Date**: 正则匹配 `YYYY-MM-DD`, `YYYY年MM月DD日` 等常见格式。
+- **Hospital**: 匹配预置的医院关键词库（可选）。
+- **Confidence Strategy**: 
+    - 基础分：OCR 引擎返回的平均置信度。
+    - 惩罚项：未找到有效日期 (-0.3)，未找到医院 (-0.1)。
+    - 阈值：总分 > 0.9 为高置信度。
+
+### FR-204: 全文检索 (FTS5)
+- **Indexing**: OCR 完成后，将 `ocr_text` 写入 FTS5 虚拟表 `ocr_search_index`。
+- **Search**: 支持首页搜索栏输入关键词，快速检索相关病历。
+
+## 4. Data Schema (Phase 2 Updates)
+
+### 4.1 Records Table Update
+- `status`: 枚举值扩展 `processing` (处理中), `review` (待确认), `archived` (已归档)。
+
+### 4.2 New: ocr_queue (任务队列)
+```sql
+CREATE TABLE ocr_queue (
+  id              TEXT PRIMARY KEY, -- 对应 record_id 或 image_id
+  image_path      TEXT NOT NULL,
+  status          TEXT NOT NULL,    -- 'pending', 'processing', 'failed', 'completed'
+  attempts        INTEGER DEFAULT 0,
+  created_at_ms   INTEGER,
+  updated_at_ms   INTEGER
+);
+```
+
+### 4.3 Images Table Update
+- `ocr_text`: TEXT (加密存储)
+- `ocr_raw_json`: TEXT (坐标数据)
+- `ocr_confidence`: REAL
+
+## 5. Security Implementation (Phase 2)
+- **Sandboxed Processing**: OCR 过程仅在内存或应用私有缓存区进行，处理完毕立即销毁中间文件。
+- **Encrypted Results**: 提取的文本和原始 JSON 数据必须写入加密数据库（SQLCipher），不可明文存储。
+- **Background Privacy**: 确保后台任务运行时不向系统日志泄露敏感数据（如识别到的文字）。
+
+---
+
 ## Appendix: Roadmap Snapshot
 - **Phase 2**: On-Device OCR & Queue System.
+
+	- Product Goals: 实现 100% 离线 OCR 识别流，包括 Android/iOS 差异化引擎集成、异步处理队列、智能数据提取、以及“待确认”UI 闭环。
+
+	- User Flows: 
+        1. **添加医疗档案**: 首页 -> 拍照/导入 -> 预览/编辑 -> 开始处理 -> 返回首页(Toast处理中) -> 后台OCR -> 待确认/归档。
+        2. **处理待确认档案**: 首页(待确认入口) -> 列表 -> 详情 -> 编辑修正 -> 保存(归档)。
+        3. **查看与编辑**: Timeline -> 详情页 -> 查看OCR全文/重新识别 -> 保存。
+
+	- Functional Requirements: 
+        - **FR-201 离线 OCR**: Android (ML Kit) / iOS (Vision)，统一接口 `IOCRService`。
+        - **FR-202 异步队列**: `ocr_queue` 持久化，WorkManager/BGTaskScheduler 调度。
+        - **FR-203 智能提取**: 日期/医院正则提取，置信度评分算法(阈值0.9)。
+        - **FR-204 待确认 UI**: 首页入口状态感知，低置信度数据高亮提示。
+
+	- Data Schema: 
+        - `records.status`: processing, review, archived.
+        - `images`: ocr_text, ocr_confidence, ocr_raw_json.
+        - `ocr_queue`: 任务状态持久化表。
+        - `ocr_search_index`: FTS5 全文索引。
+
+	- Security Implementation: 
+        - OCR 过程零网络请求。
+        - 识别结果写入 SQLCipher 加密存储。
+        - 临时图片处理后立即执行 Secure Wipe。
+
+
+
+
+
 - **Phase 3**: FTS5 Search, Tags & Timeline Refinement.
+
+
+
+
+
 - **Phase 4**: Biometrics, Backups, Multi-user support.
+

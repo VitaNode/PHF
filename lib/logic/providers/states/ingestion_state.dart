@@ -12,7 +12,7 @@ enum IngestionStatus {
 }
 
 @freezed
-class IngestionState with _$IngestionState {
+abstract class IngestionState with _$IngestionState {
   const factory IngestionState({
     @Default([]) List<XFile> rawImages,
     @Default([]) List<int> rotations, // 90, 180, 270 (degrees)

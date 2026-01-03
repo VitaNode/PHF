@@ -6,22 +6,47 @@ part of 'timeline_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$timelineControllerHash() =>
-    r'e8b718f594526dc03d5427b86a0c6c22dcd8ac76';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [TimelineController].
 @ProviderFor(TimelineController)
-final timelineControllerProvider = AutoDisposeAsyncNotifierProvider<
-    TimelineController, List<MedicalRecord>>.internal(
-  TimelineController.new,
-  name: r'timelineControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$timelineControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final timelineControllerProvider = TimelineControllerProvider._();
 
-typedef _$TimelineController = AutoDisposeAsyncNotifier<List<MedicalRecord>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TimelineControllerProvider
+    extends $AsyncNotifierProvider<TimelineController, HomeState> {
+  TimelineControllerProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'timelineControllerProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$timelineControllerHash();
+
+  @$internal
+  @override
+  TimelineController create() => TimelineController();
+}
+
+String _$timelineControllerHash() =>
+    r'988d02cd88a97748394eab446c131d152b0bedf9';
+
+abstract class _$TimelineController extends $AsyncNotifier<HomeState> {
+  FutureOr<HomeState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<HomeState>, HomeState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<HomeState>, HomeState>,
+        AsyncValue<HomeState>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}

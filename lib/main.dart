@@ -6,23 +6,45 @@ import 'presentation/pages/auth/lock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'logic/providers/auth_provider.dart';
+import 'logic/services/background_worker_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
 
 Future<void> main() async {
   // 确保 Flutter 绑定初始化，因为我们需要在 runApp 前或初始化 provider 时进行异步操作
   WidgetsFlutterBinding.ensureInitialized();
   
   // 初始化全局 ProviderContainer 并预热异步服务
-  final container = ProviderContainer();
+  final talker = TalkerFlutter.init();
+  final container = ProviderContainer(
+    observers: [
+      TalkerRiverpodObserver(
+        talker: talker,
+        settings: const TalkerRiverpodLoggerSettings(
+          printStateFullData: false,
+          printProviderDisposed: true,
+        ),
+      ),
+    ],
+  );
+
   try {
+    talker.info('App Bootstrap Started');
     // 必须首先初始化路径服务，否则后续数据库操作会因路径未就绪报错
     await container.read(pathProviderServiceProvider).initialize();
-  } catch (e) {
-    debugPrint('Bootstrap Error: $e');
+
+    // 初始化后台任务处理器 (OCR Worker)
+    final worker = BackgroundWorkerService();
+    worker.setTalker(talker);
+    await worker.initialize();
+    talker.info('App Bootstrap Completed');
+  } catch (e, stack) {
+    talker.handle(e, stack, 'Bootstrap Error');
   }
 
   runApp(
-    ProviderScope(
-      parent: container,
+    UncontrolledProviderScope(
+      container: container,
       child: const PaperHealthApp(),
     ),
   );

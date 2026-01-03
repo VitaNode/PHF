@@ -30,6 +30,7 @@ import 'package:phf/data/repositories/interfaces/record_repository.dart' as _i4;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeEncryptedFileResult_0 extends _i1.SmartFake
     implements _i2.EncryptedFileResult {
@@ -108,6 +109,37 @@ class MockIRecordRepository extends _i1.Mock implements _i4.IRecordRepository {
       ) as _i5.Future<void>);
 
   @override
+  _i5.Future<void> updateRecordMetadata(
+    String? id, {
+    String? hospitalName,
+    DateTime? visitDate,
+    String? notes,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateRecordMetadata,
+          [id],
+          {
+            #hospitalName: hospitalName,
+            #visitDate: visitDate,
+            #notes: notes,
+          },
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> hardDeleteRecord(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #hardDeleteRecord,
+          [id],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
   _i5.Future<List<_i6.MedicalRecord>> searchRecords({
     required String? personId,
     String? query,
@@ -138,6 +170,29 @@ class MockIRecordRepository extends _i1.Mock implements _i4.IRecordRepository {
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<int> getPendingCount(String? personId) => (super.noSuchMethod(
+        Invocation.method(
+          #getPendingCount,
+          [personId],
+        ),
+        returnValue: _i5.Future<int>.value(0),
+        returnValueForMissingStub: _i5.Future<int>.value(0),
+      ) as _i5.Future<int>);
+
+  @override
+  _i5.Future<List<_i6.MedicalRecord>> getReviewRecords(String? personId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getReviewRecords,
+          [personId],
+        ),
+        returnValue:
+            _i5.Future<List<_i6.MedicalRecord>>.value(<_i6.MedicalRecord>[]),
+        returnValueForMissingStub:
+            _i5.Future<List<_i6.MedicalRecord>>.value(<_i6.MedicalRecord>[]),
+      ) as _i5.Future<List<_i6.MedicalRecord>>);
 }
 
 /// A class which mocks [IImageRepository].
@@ -208,6 +263,39 @@ class MockIImageRepository extends _i1.Mock implements _i7.IImageRepository {
           {
             #hospitalName: hospitalName,
             #visitDate: visitDate,
+          },
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i8.MedicalImage?> getImageById(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #getImageById,
+          [id],
+        ),
+        returnValue: _i5.Future<_i8.MedicalImage?>.value(),
+        returnValueForMissingStub: _i5.Future<_i8.MedicalImage?>.value(),
+      ) as _i5.Future<_i8.MedicalImage?>);
+
+  @override
+  _i5.Future<void> updateOCRData(
+    String? imageId,
+    String? text, {
+    String? rawJson,
+    double? confidence = 0.0,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateOCRData,
+          [
+            imageId,
+            text,
+          ],
+          {
+            #rawJson: rawJson,
+            #confidence: confidence,
           },
         ),
         returnValue: _i5.Future<void>.value(),

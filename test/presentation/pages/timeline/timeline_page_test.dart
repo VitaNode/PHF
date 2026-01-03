@@ -51,6 +51,8 @@ void main() {
 
     when(mockRecordRepo.getRecordsByPerson(any))
         .thenAnswer((_) async => [record]);
+    when(mockRecordRepo.getPendingCount(any))
+        .thenAnswer((_) async => 0);
     when(mockImageRepo.getImagesForRecord(any))
         .thenAnswer((_) async => []);
 
@@ -64,10 +66,24 @@ void main() {
   testWidgets('Timeline displays empty state when no records', (tester) async {
     when(mockRecordRepo.getRecordsByPerson(any))
         .thenAnswer((_) async => []);
+    when(mockRecordRepo.getPendingCount(any))
+        .thenAnswer((_) async => 0);
 
     await tester.pumpWidget(createSubject());
     await tester.pumpAndSettle();
 
     expect(find.textContaining('暂无记录'), findsOneWidget);
+  });
+
+  testWidgets('Timeline displays pending banner when pendingCount > 0', (tester) async {
+    when(mockRecordRepo.getRecordsByPerson(any))
+        .thenAnswer((_) async => []);
+    when(mockRecordRepo.getPendingCount(any))
+        .thenAnswer((_) async => 5);
+
+    await tester.pumpWidget(createSubject());
+    await tester.pumpAndSettle();
+
+    expect(find.text('有 5 项病历待确认'), findsOneWidget);
   });
 }

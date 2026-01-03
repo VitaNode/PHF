@@ -13,6 +13,10 @@
 ///   3. 更新 `records.tags_cache` 字段，确保列表页查询性能。
 library;
 
+/// ## 修复记录
+/// - **2025-12-31**: T21.2 级联删除逻辑优化 - 当一个 Record 下的所有图片被用户手动删除后，
+///   自动删除该 Record 实体及其关联的 OCR 队列任务。同时删除 FTS5 搜索索引中的相关记录。
+
 import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../data/models/image.dart';
@@ -112,10 +116,29 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     final String recordId = maps.first['record_id'] as String;
 
     await db.transaction((txn) async {
+      // 1. Delete OCR Task for this image
+      await txn.delete('ocr_queue', where: 'image_id = ?', whereArgs: [imageId]);
+      
+      // 2. Delete image and its tags
       await txn.delete('images', where: 'id = ?', whereArgs: [imageId]);
       await txn.delete('image_tags', where: 'image_id = ?', whereArgs: [imageId]);
-      await _syncRecordTagsCache(txn, recordId);
-      await _syncRecordMetadataCache(txn, recordId);
+
+      // 3. Check remaining images for this record
+      final List<Map<String, dynamic>> remaining = await txn.rawQuery(
+        'SELECT COUNT(*) as count FROM images WHERE record_id = ?',
+        [recordId]
+      );
+      final int count = Sqflite.firstIntValue(remaining) ?? 0;
+
+      if (count == 0) {
+        // 4. No images left, delete the entire Record and its search index
+        await txn.delete('records', where: 'id = ?', whereArgs: [recordId]);
+        await txn.delete('ocr_search_index', where: 'record_id = ?', whereArgs: [recordId]);
+      } else {
+        // 5. Still has images, sync caches
+        await _syncRecordTagsCache(txn, recordId);
+        await _syncRecordMetadataCache(txn, recordId);
+      }
     });
   }
 
@@ -158,6 +181,19 @@ class ImageRepository extends BaseRepository implements IImageRepository {
   }
 
   @override
+  Future<MedicalImage?> getImageById(String id) async {
+    final db = await dbService.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'images',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+    return _mapToImage(maps.first);
+  }
+
+  @override
   Future<void> updateImageMetadata(String imageId, {String? hospitalName, DateTime? visitDate}) async {
     final db = await dbService.database;
 
@@ -186,6 +222,21 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     });
   }
 
+  @override
+  Future<void> updateOCRData(String imageId, String text, {String? rawJson, double confidence = 0.0}) async {
+    final db = await dbService.database;
+    await db.update(
+      'images',
+      {
+        'ocr_text': text,
+        'ocr_raw_json': rawJson,
+        'ocr_confidence': confidence,
+      },
+      where: 'id = ?',
+      whereArgs: [imageId],
+    );
+  }
+
   Future<void> _syncRecordTagsCache(Transaction txn, String recordId) async {
     // 1. Query all tags for this record
     // Join images -> image_tags -> tags to get Names
@@ -205,6 +256,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       'records',
       {'tags_cache': jsonEncode(tagNames)},
       where: 'id = ?',
+      whereArgs: [recordId],
     );
   }
 
@@ -302,6 +354,9 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       'displayOrder': row['page_index'],
       'width': row['width'],
       'height': row['height'],
+      'ocrText': row['ocr_text'],
+      'ocrRawJson': row['ocr_raw_json'],
+      'ocrConfidence': row['ocr_confidence'],
       'createdAt': DateTime.fromMillisecondsSinceEpoch(row['created_at_ms'] as int).toIso8601String(),
       'hospitalName': row['hospital_name'],
       'visitDate': row['visit_date_ms'] != null 

@@ -10,6 +10,7 @@ import 'package:phf/data/repositories/interfaces/image_repository.dart';
 import 'package:phf/data/repositories/interfaces/record_repository.dart';
 import 'package:phf/presentation/pages/timeline/record_detail_page.dart';
 import 'package:phf/logic/providers/core_providers.dart';
+import 'package:phf/logic/providers/ocr_status_provider.dart';
 import 'package:phf/presentation/widgets/secure_image.dart';
 
 import 'package:phf/core/security/file_security_helper.dart';
@@ -49,6 +50,7 @@ void main() {
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
         fileSecurityHelperProvider.overrideWithValue(mockFileHelper),
         pathProviderServiceProvider.overrideWithValue(mockPathService),
+        ocrPendingCountProvider.overrideWith((ref) => Stream.value(0)),
       ],
       child: MaterialApp(
         home: RecordDetailPage(recordId: recordId),
@@ -86,7 +88,7 @@ void main() {
         .thenAnswer((_) async => [image]);
 
     await tester.pumpWidget(createSubject(recordId));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Verify Metadata
     expect(find.text('Detail Hospital'), findsOneWidget);
@@ -107,8 +109,112 @@ void main() {
         .thenAnswer((_) async => []);
 
     await tester.pumpWidget(createSubject(recordId));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('记录不存在'), findsOneWidget);
+  });
+
+  testWidgets('RecordDetailPage allows viewing OCR text', (tester) async {
+    const recordId = 'r1';
+    final record = MedicalRecord(
+      id: recordId,
+      personId: 'p1',
+      notedAt: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      status: RecordStatus.archived,
+    );
+
+    final image = MedicalImage(
+      id: 'i1',
+      recordId: recordId,
+      encryptionKey: 'key',
+      thumbnailEncryptionKey: 'thumb_key',
+      filePath: 'path/to/img.enc',
+      thumbnailPath: 'path/to/thumb.enc',
+      createdAt: DateTime.now(),
+      ocrText: 'Recognized Text Content',
+    );
+
+    when(mockRecordRepo.getRecordById(recordId))
+        .thenAnswer((_) async => record);
+    when(mockImageRepo.getImagesForRecord(recordId))
+        .thenAnswer((_) async => [image]);
+
+    await tester.pumpWidget(createSubject(recordId));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Find OCR button and tap
+    final ocrButton = find.byTooltip('查看识别文本');
+    expect(ocrButton, findsOneWidget);
+    await tester.tap(ocrButton);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify Bottom Sheet content
+    expect(find.text('OCR 识别结果'), findsOneWidget);
+    expect(find.text('Recognized Text Content'), findsOneWidget);
+  });
+
+  testWidgets('RecordDetailPage allows editing and saving metadata', (tester) async {
+    const recordId = 'r1';
+    final record = MedicalRecord(
+      id: recordId,
+      personId: 'p1',
+      hospitalName: 'Old Hospital',
+      notedAt: DateTime(2023, 10, 1),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      status: RecordStatus.archived,
+    );
+
+    final image = MedicalImage(
+      id: 'i1',
+      recordId: recordId,
+      encryptionKey: 'key',
+      thumbnailEncryptionKey: 'thumb_key',
+      filePath: 'path/to/img.enc',
+      thumbnailPath: 'path/to/thumb.enc',
+      createdAt: DateTime.now(),
+      hospitalName: 'Old Hospital',
+      visitDate: DateTime(2023, 10, 1),
+    );
+
+    when(mockRecordRepo.getRecordById(recordId)).thenAnswer((_) async => record);
+    when(mockImageRepo.getImagesForRecord(recordId)).thenAnswer((_) async => [image]);
+    when(mockImageRepo.updateImageMetadata('i1', hospitalName: anyNamed('hospitalName'), visitDate: anyNamed('visitDate')))
+        .thenAnswer((_) async {});
+    when(mockRecordRepo.updateRecordMetadata(recordId, hospitalName: anyNamed('hospitalName'), visitDate: anyNamed('visitDate')))
+        .thenAnswer((_) async {});
+
+    await tester.pumpWidget(createSubject(recordId));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // 1. Enter edit mode
+    await tester.tap(find.text('编辑此页'));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // 2. Change hospital name
+    await tester.enterText(find.byType(TextField), 'New Hospital');
+    
+    // 3. Save
+    await tester.tap(find.text('保存'));
+    await tester.pump(); 
+    await tester.pump(const Duration(milliseconds: 500)); 
+    await tester.pump(const Duration(milliseconds: 500)); 
+
+    // Verify repository calls
+    verify(mockImageRepo.updateImageMetadata(
+      'i1',
+      hospitalName: 'New Hospital',
+      visitDate: anyNamed('visitDate'),
+    )).called(1);
+
+    verify(mockRecordRepo.updateRecordMetadata(
+      recordId,
+      hospitalName: 'New Hospital',
+      visitDate: anyNamed('visitDate'),
+    )).called(1);
+
+    expect(find.text('保存成功'), findsOneWidget);
   });
 }
