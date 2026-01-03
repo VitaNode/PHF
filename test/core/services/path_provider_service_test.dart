@@ -20,6 +20,7 @@ void main() {
   setUp(() async {
     PathProviderPlatform.instance = FakePathProviderPlatform();
     service = PathProviderService();
+    service.reset();
   });
 
   group('PathProviderService', () {

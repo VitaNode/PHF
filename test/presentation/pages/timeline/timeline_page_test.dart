@@ -7,6 +7,7 @@ import 'package:phf/data/models/record.dart';
 import 'package:phf/data/repositories/interfaces/image_repository.dart';
 import 'package:phf/data/repositories/interfaces/record_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
+import 'package:phf/logic/providers/ocr_status_provider.dart';
 import 'package:phf/presentation/pages/timeline/timeline_page.dart';
 import 'package:phf/presentation/widgets/event_card.dart';
 
@@ -25,11 +26,12 @@ void main() {
     mockImageRepo = MockIImageRepository();
   });
 
-  Widget createSubject() {
+  Widget createSubject({int pendingCount = 0}) {
     return ProviderScope(
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepo),
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
+        ocrPendingCountProvider.overrideWith((ref) => Stream.value(pendingCount)),
       ],
       child: const MaterialApp(home: Scaffold(body: TimelinePage())),
     );
@@ -75,7 +77,7 @@ void main() {
     when(mockRecordRepo.getRecordsByPerson(any)).thenAnswer((_) async => []);
     when(mockRecordRepo.getPendingCount(any)).thenAnswer((_) async => 5);
 
-    await tester.pumpWidget(createSubject());
+    await tester.pumpWidget(createSubject(pendingCount: 5));
     await tester.pumpAndSettle();
 
     expect(find.text('有 5 项病历待确认'), findsOneWidget);

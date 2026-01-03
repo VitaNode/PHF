@@ -238,6 +238,12 @@ class MockPathProviderService extends _i1.Mock
           as _i5.Future<void>);
 
   @override
+  void reset() => super.noSuchMethod(
+    Invocation.method(#reset, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   String getDatabasePath(String? fileName) =>
       (super.noSuchMethod(
             Invocation.method(#getDatabasePath, [fileName]),

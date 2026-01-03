@@ -14,6 +14,7 @@
 library;
 
 import 'dart:io';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../../logic/utils/secure_wipe_helper.dart';
@@ -23,10 +24,10 @@ class PathProviderService {
   factory PathProviderService() => _instance;
   PathProviderService._internal();
 
-  late final Directory _appDocDir;
-  late final Directory _dbDir;
-  late final Directory _imagesDir;
-  late final Directory _tempDir;
+  Directory? _appDocDir;
+  Directory? _dbDir;
+  Directory? _imagesDir;
+  Directory? _tempDir;
 
   bool _isInitialized = false;
 
@@ -36,38 +37,49 @@ class PathProviderService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _appDocDir = await getApplicationDocumentsDirectory();
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    _appDocDir = appDir;
 
-    _dbDir = Directory(p.join(_appDocDir.path, 'db'));
-    _imagesDir = Directory(p.join(_appDocDir.path, 'images'));
-    _tempDir = Directory(p.join(_appDocDir.path, 'temp'));
+    _dbDir = Directory(p.join(appDir.path, 'db'));
+    _imagesDir = Directory(p.join(appDir.path, 'images'));
+    _tempDir = Directory(p.join(appDir.path, 'temp'));
 
     // 确保物理目录存在
-    await _dbDir.create(recursive: true);
-    await _imagesDir.create(recursive: true);
-    await _tempDir.create(recursive: true);
+    await _dbDir!.create(recursive: true);
+    await _imagesDir!.create(recursive: true);
+    await _tempDir!.create(recursive: true);
 
     _isInitialized = true;
   }
 
+  /// 仅用于测试：重置单例状态
+  @visibleForTesting
+  void reset() {
+    _isInitialized = false;
+    _appDocDir = null;
+    _dbDir = null;
+    _imagesDir = null;
+    _tempDir = null;
+  }
+
   String get sandboxRoot {
     _checkInitialized();
-    return _appDocDir.path;
+    return _appDocDir!.path;
   }
 
   String get dbDirPath {
     _checkInitialized();
-    return _dbDir.path;
+    return _dbDir!.path;
   }
 
   String get imagesDirPath {
     _checkInitialized();
-    return _imagesDir.path;
+    return _imagesDir!.path;
   }
 
   String get tempDirPath {
     _checkInitialized();
-    return _tempDir.path;
+    return _tempDir!.path;
   }
 
   /// 获取指定文件名的完整数据库路径
@@ -77,7 +89,7 @@ class PathProviderService {
   /// [relativePath]: 例如 'images/uuid.enc'
   Future<File> getSecureFile(String relativePath) async {
     _checkInitialized();
-    return File(p.join(_appDocDir.path, relativePath));
+    return File(p.join(_appDocDir!.path, relativePath));
   }
 
   /// 清理临时目录
@@ -85,8 +97,8 @@ class PathProviderService {
   /// 遍历 temp 目录并物理删除所有文件，符合安全清理策略。
   Future<void> clearTemp() async {
     _checkInitialized();
-    if (await _tempDir.exists()) {
-      await for (final entity in _tempDir.list(recursive: true)) {
+    if (await _tempDir!.exists()) {
+      await for (final entity in _tempDir!.list(recursive: true)) {
         if (entity is File) {
           await SecureWipeHelper.wipe(entity);
         }
