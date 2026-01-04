@@ -87,15 +87,11 @@ jobs:
             for (const file of logFiles) {
               if (fs.existsSync(file.path)) {
                 const content = fs.readFileSync(file.path, 'utf8');
-                if (file.pattern.test(content) || content.length > 0) {
+                if (file.pattern.test(content) || (content && content.trim().length > 0)) {
                   foundLogs = true;
                   const lines = content.trim().split('\n');
-                  // Capture up to 50 lines for more context
                   const core = lines.length > 50 ? '...\n' + lines.slice(-50).join('\n') : lines.join('\n');
-                  body += `#### ${file.name}\n\n\
-${core}
-\
-```\n\n`;
+                  body += '#### ' + file.name + '\n\n```text\n' + core + '\n```\n\n';
                 }
               }
             }
@@ -104,7 +100,7 @@ ${core}
               body += '_Could not automatically extract specific error logs. Please check the workflow execution details._\n';
             }
             
-            body += `\n[View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            body += '\n[View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})';
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
