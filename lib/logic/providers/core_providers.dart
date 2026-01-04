@@ -135,9 +135,11 @@ AppMetaRepository appMetaRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 ISecurityService securityService(Ref ref) {
   final metaRepo = ref.watch(appMetaRepositoryProvider);
+  final talker = ref.watch(talkerProvider);
   return SecurityService(
     secureStorage: const FlutterSecureStorage(),
     metaRepo: metaRepo,
+    talker: talker,
   );
 }
 

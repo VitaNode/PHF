@@ -65,6 +65,7 @@ dev_dependencies:
   dart_code_linter: ^3.2.1
   workmanager_platform_interface: ^0.9.1+1
 
+  talker: any
 flutter:
   uses-material-design: true
   fonts:

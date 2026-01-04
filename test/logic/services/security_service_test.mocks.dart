@@ -3,16 +3,17 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
-import 'package:flutter/foundation.dart' as _i3;
+import 'package:flutter/foundation.dart' as _i4;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i2;
-import 'package:local_auth/src/local_auth.dart' as _i5;
-import 'package:local_auth_android/local_auth_android.dart' as _i6;
-import 'package:local_auth_darwin/local_auth_darwin.dart' as _i7;
-import 'package:local_auth_windows/local_auth_windows.dart' as _i8;
+import 'package:local_auth/src/local_auth.dart' as _i6;
+import 'package:local_auth_android/local_auth_android.dart' as _i7;
+import 'package:local_auth_darwin/local_auth_darwin.dart' as _i8;
+import 'package:local_auth_windows/local_auth_windows.dart' as _i9;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:phf/data/repositories/app_meta_repository.dart' as _i9;
+import 'package:phf/data/repositories/app_meta_repository.dart' as _i10;
+import 'package:talker/talker.dart' as _i3;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -58,6 +59,17 @@ class _FakeWebOptions_4 extends _i1.SmartFake implements _i2.WebOptions {
 
 class _FakeAppleOptions_5 extends _i1.SmartFake implements _i2.AppleOptions {
   _FakeAppleOptions_5(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeTalkerSettings_6 extends _i1.SmartFake
+    implements _i3.TalkerSettings {
+  _FakeTalkerSettings_6(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeTalkerFilter_7 extends _i1.SmartFake implements _i3.TalkerFilter {
+  _FakeTalkerFilter_7(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -154,19 +166,19 @@ class MockFlutterSecureStorage extends _i1.Mock
           as _i2.AppleOptions);
 
   @override
-  Map<String, List<_i3.ValueChanged<String?>>> get getListeners =>
+  Map<String, List<_i4.ValueChanged<String?>>> get getListeners =>
       (super.noSuchMethod(
             Invocation.getter(#getListeners),
-            returnValue: <String, List<_i3.ValueChanged<String?>>>{},
+            returnValue: <String, List<_i4.ValueChanged<String?>>>{},
             returnValueForMissingStub:
-                <String, List<_i3.ValueChanged<String?>>>{},
+                <String, List<_i4.ValueChanged<String?>>>{},
           )
-          as Map<String, List<_i3.ValueChanged<String?>>>);
+          as Map<String, List<_i4.ValueChanged<String?>>>);
 
   @override
   void registerListener({
     required String? key,
-    required _i3.ValueChanged<String?>? listener,
+    required _i4.ValueChanged<String?>? listener,
   }) => super.noSuchMethod(
     Invocation.method(#registerListener, [], {#key: key, #listener: listener}),
     returnValueForMissingStub: null,
@@ -175,7 +187,7 @@ class MockFlutterSecureStorage extends _i1.Mock
   @override
   void unregisterListener({
     required String? key,
-    required _i3.ValueChanged<String?>? listener,
+    required _i4.ValueChanged<String?>? listener,
   }) => super.noSuchMethod(
     Invocation.method(#unregisterListener, [], {
       #key: key,
@@ -198,7 +210,7 @@ class MockFlutterSecureStorage extends _i1.Mock
   );
 
   @override
-  _i4.Future<void> write({
+  _i5.Future<void> write({
     required String? key,
     required String? value,
     _i2.AppleOptions? iOptions,
@@ -219,13 +231,13 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<String?> read({
+  _i5.Future<String?> read({
     required String? key,
     _i2.AppleOptions? iOptions,
     _i2.AndroidOptions? aOptions,
@@ -244,13 +256,13 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<String?>.value(),
-            returnValueForMissingStub: _i4.Future<String?>.value(),
+            returnValue: _i5.Future<String?>.value(),
+            returnValueForMissingStub: _i5.Future<String?>.value(),
           )
-          as _i4.Future<String?>);
+          as _i5.Future<String?>);
 
   @override
-  _i4.Future<bool> containsKey({
+  _i5.Future<bool> containsKey({
     required String? key,
     _i2.AppleOptions? iOptions,
     _i2.AndroidOptions? aOptions,
@@ -269,13 +281,13 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<void> delete({
+  _i5.Future<void> delete({
     required String? key,
     _i2.AppleOptions? iOptions,
     _i2.AndroidOptions? aOptions,
@@ -294,13 +306,13 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<Map<String, String>> readAll({
+  _i5.Future<Map<String, String>> readAll({
     _i2.AppleOptions? iOptions,
     _i2.AndroidOptions? aOptions,
     _i2.LinuxOptions? lOptions,
@@ -317,17 +329,17 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<Map<String, String>>.value(
+            returnValue: _i5.Future<Map<String, String>>.value(
               <String, String>{},
             ),
-            returnValueForMissingStub: _i4.Future<Map<String, String>>.value(
+            returnValueForMissingStub: _i5.Future<Map<String, String>>.value(
               <String, String>{},
             ),
           )
-          as _i4.Future<Map<String, String>>);
+          as _i5.Future<Map<String, String>>);
 
   @override
-  _i4.Future<void> deleteAll({
+  _i5.Future<void> deleteAll({
     _i2.AppleOptions? iOptions,
     _i2.AndroidOptions? aOptions,
     _i2.LinuxOptions? lOptions,
@@ -344,42 +356,42 @@ class MockFlutterSecureStorage extends _i1.Mock
               #mOptions: mOptions,
               #wOptions: wOptions,
             }),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<bool?> isCupertinoProtectedDataAvailable() =>
+  _i5.Future<bool?> isCupertinoProtectedDataAvailable() =>
       (super.noSuchMethod(
             Invocation.method(#isCupertinoProtectedDataAvailable, []),
-            returnValue: _i4.Future<bool?>.value(),
-            returnValueForMissingStub: _i4.Future<bool?>.value(),
+            returnValue: _i5.Future<bool?>.value(),
+            returnValueForMissingStub: _i5.Future<bool?>.value(),
           )
-          as _i4.Future<bool?>);
+          as _i5.Future<bool?>);
 }
 
 /// A class which mocks [LocalAuthentication].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLocalAuthentication extends _i1.Mock
-    implements _i5.LocalAuthentication {
+    implements _i6.LocalAuthentication {
   @override
-  _i4.Future<bool> get canCheckBiometrics =>
+  _i5.Future<bool> get canCheckBiometrics =>
       (super.noSuchMethod(
             Invocation.getter(#canCheckBiometrics),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<bool> authenticate({
+  _i5.Future<bool> authenticate({
     required String? localizedReason,
-    Iterable<_i6.AuthMessages>? authMessages = const [
-      _i7.IOSAuthMessages(),
-      _i6.AndroidAuthMessages(),
-      _i8.WindowsAuthMessages(),
+    Iterable<_i7.AuthMessages>? authMessages = const [
+      _i8.IOSAuthMessages(),
+      _i7.AndroidAuthMessages(),
+      _i9.WindowsAuthMessages(),
     ],
     bool? biometricOnly = false,
     bool? sensitiveTransaction = true,
@@ -393,99 +405,275 @@ class MockLocalAuthentication extends _i1.Mock
               #sensitiveTransaction: sensitiveTransaction,
               #persistAcrossBackgrounding: persistAcrossBackgrounding,
             }),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<bool> stopAuthentication() =>
+  _i5.Future<bool> stopAuthentication() =>
       (super.noSuchMethod(
             Invocation.method(#stopAuthentication, []),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<bool> isDeviceSupported() =>
+  _i5.Future<bool> isDeviceSupported() =>
       (super.noSuchMethod(
             Invocation.method(#isDeviceSupported, []),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<List<_i6.BiometricType>> getAvailableBiometrics() =>
+  _i5.Future<List<_i7.BiometricType>> getAvailableBiometrics() =>
       (super.noSuchMethod(
             Invocation.method(#getAvailableBiometrics, []),
-            returnValue: _i4.Future<List<_i6.BiometricType>>.value(
-              <_i6.BiometricType>[],
+            returnValue: _i5.Future<List<_i7.BiometricType>>.value(
+              <_i7.BiometricType>[],
             ),
             returnValueForMissingStub:
-                _i4.Future<List<_i6.BiometricType>>.value(
-                  <_i6.BiometricType>[],
+                _i5.Future<List<_i7.BiometricType>>.value(
+                  <_i7.BiometricType>[],
                 ),
           )
-          as _i4.Future<List<_i6.BiometricType>>);
+          as _i5.Future<List<_i7.BiometricType>>);
 }
 
 /// A class which mocks [AppMetaRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppMetaRepository extends _i1.Mock implements _i9.AppMetaRepository {
+class MockAppMetaRepository extends _i1.Mock implements _i10.AppMetaRepository {
   @override
-  _i4.Future<String?> get(String? key) =>
+  _i5.Future<String?> get(String? key) =>
       (super.noSuchMethod(
             Invocation.method(#get, [key]),
-            returnValue: _i4.Future<String?>.value(),
-            returnValueForMissingStub: _i4.Future<String?>.value(),
+            returnValue: _i5.Future<String?>.value(),
+            returnValueForMissingStub: _i5.Future<String?>.value(),
           )
-          as _i4.Future<String?>);
+          as _i5.Future<String?>);
 
   @override
-  _i4.Future<void> put(String? key, String? value) =>
+  _i5.Future<void> put(String? key, String? value) =>
       (super.noSuchMethod(
             Invocation.method(#put, [key, value]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<bool> hasLock() =>
+  _i5.Future<bool> hasLock() =>
       (super.noSuchMethod(
             Invocation.method(#hasLock, []),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i5.Future<bool>);
 
   @override
-  _i4.Future<void> setHasLock(bool? enabled) =>
+  _i5.Future<void> setHasLock(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#setHasLock, [enabled]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
 
   @override
-  _i4.Future<String?> getCurrentPersonId() =>
+  _i5.Future<String?> getCurrentPersonId() =>
       (super.noSuchMethod(
             Invocation.method(#getCurrentPersonId, []),
-            returnValue: _i4.Future<String?>.value(),
-            returnValueForMissingStub: _i4.Future<String?>.value(),
+            returnValue: _i5.Future<String?>.value(),
+            returnValueForMissingStub: _i5.Future<String?>.value(),
           )
-          as _i4.Future<String?>);
+          as _i5.Future<String?>);
 
   @override
-  _i4.Future<void> setCurrentPersonId(String? id) =>
+  _i5.Future<void> setCurrentPersonId(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#setCurrentPersonId, [id]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i5.Future<void>);
+}
+
+/// A class which mocks [Talker].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockTalker extends _i1.Mock implements _i3.Talker {
+  @override
+  _i3.TalkerSettings get settings =>
+      (super.noSuchMethod(
+            Invocation.getter(#settings),
+            returnValue: _FakeTalkerSettings_6(
+              this,
+              Invocation.getter(#settings),
+            ),
+            returnValueForMissingStub: _FakeTalkerSettings_6(
+              this,
+              Invocation.getter(#settings),
+            ),
+          )
+          as _i3.TalkerSettings);
+
+  @override
+  _i5.Stream<_i3.TalkerData> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i5.Stream<_i3.TalkerData>.empty(),
+            returnValueForMissingStub: _i5.Stream<_i3.TalkerData>.empty(),
+          )
+          as _i5.Stream<_i3.TalkerData>);
+
+  @override
+  List<_i3.TalkerData> get history =>
+      (super.noSuchMethod(
+            Invocation.getter(#history),
+            returnValue: <_i3.TalkerData>[],
+            returnValueForMissingStub: <_i3.TalkerData>[],
+          )
+          as List<_i3.TalkerData>);
+
+  @override
+  _i3.TalkerFilter get filter =>
+      (super.noSuchMethod(
+            Invocation.getter(#filter),
+            returnValue: _FakeTalkerFilter_7(this, Invocation.getter(#filter)),
+            returnValueForMissingStub: _FakeTalkerFilter_7(
+              this,
+              Invocation.getter(#filter),
+            ),
+          )
+          as _i3.TalkerFilter);
+
+  @override
+  set settings(_i3.TalkerSettings? value) => super.noSuchMethod(
+    Invocation.setter(#settings, value),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void configure({
+    _i3.TalkerLogger? logger,
+    _i3.TalkerSettings? settings,
+    _i3.TalkerObserver? observer,
+    _i3.TalkerFilter? filter,
+    _i3.TalkerErrorHandler? errorHandler,
+    _i3.TalkerHistory? history,
+  }) => super.noSuchMethod(
+    Invocation.method(#configure, [], {
+      #logger: logger,
+      #settings: settings,
+      #observer: observer,
+      #filter: filter,
+      #errorHandler: errorHandler,
+      #history: history,
+    }),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void handle(Object? exception, [StackTrace? stackTrace, dynamic msg]) =>
+      super.noSuchMethod(
+        Invocation.method(#handle, [exception, stackTrace, msg]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void log(
+    dynamic message, {
+    _i3.LogLevel? logLevel = _i3.LogLevel.debug,
+    Object? exception,
+    StackTrace? stackTrace,
+    _i3.AnsiPen? pen,
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #log,
+      [message],
+      {
+        #logLevel: logLevel,
+        #exception: exception,
+        #stackTrace: stackTrace,
+        #pen: pen,
+      },
+    ),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void logTyped(_i3.TalkerLog? log) => super.noSuchMethod(
+    Invocation.method(#logTyped, [log]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void logCustom(_i3.TalkerLog? log) => super.noSuchMethod(
+    Invocation.method(#logCustom, [log]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void critical(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#critical, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void debug(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#debug, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void error(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#error, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void info(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#info, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void verbose(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#verbose, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void warning(dynamic msg, [Object? exception, StackTrace? stackTrace]) =>
+      super.noSuchMethod(
+        Invocation.method(#warning, [msg, exception, stackTrace]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void cleanHistory() => super.noSuchMethod(
+    Invocation.method(#cleanHistory, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void enable() => super.noSuchMethod(
+    Invocation.method(#enable, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void disable() => super.noSuchMethod(
+    Invocation.method(#disable, []),
+    returnValueForMissingStub: null,
+  );
 }

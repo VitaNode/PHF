@@ -1134,7 +1134,7 @@ packages:
     source: hosted
     version: "3.4.0"
   talker:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: talker
       sha256: e5d4f7cce6a639037e551660ae1b93b451f107e78dabcc9f89fc52ffeb6d63d5

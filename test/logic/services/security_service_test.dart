@@ -5,11 +5,13 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:phf/data/repositories/app_meta_repository.dart';
 import 'package:phf/logic/services/security_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 @GenerateNiceMocks([
   MockSpec<FlutterSecureStorage>(),
   MockSpec<LocalAuthentication>(),
   MockSpec<AppMetaRepository>(),
+  MockSpec<Talker>(),
 ])
 import 'security_service_test.mocks.dart';
 
@@ -17,16 +19,19 @@ void main() {
   late MockFlutterSecureStorage mockStorage;
   late MockLocalAuthentication mockLocalAuth;
   late MockAppMetaRepository mockMetaRepo;
+  late MockTalker mockTalker;
   late SecurityService securityService;
 
   setUp(() {
     mockStorage = MockFlutterSecureStorage();
     mockLocalAuth = MockLocalAuthentication();
     mockMetaRepo = MockAppMetaRepository();
+    mockTalker = MockTalker();
     securityService = SecurityService(
       secureStorage: mockStorage,
       localAuth: mockLocalAuth,
       metaRepo: mockMetaRepo,
+      talker: mockTalker,
     );
   });
 
@@ -42,10 +47,8 @@ void main() {
 
     test('validatePin should return true for correct PIN', () async {
       const pin = '123456';
-      // Manual hash for '123456' or just let the service set it then mock read
       await securityService.setPin(pin);
 
-      // We need to capture the hash or just mock return it
       when(mockStorage.read(key: 'user_pin_hash')).thenAnswer(
         (_) async =>
             '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',

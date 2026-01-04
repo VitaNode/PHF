@@ -39,7 +39,7 @@ final class SecuritySettingsControllerProvider
 }
 
 String _$securitySettingsControllerHash() =>
-    r'49261e28d3b20ff68324da9ed7f97385a19286ed';
+    r'ba6804d7d6078db53a6e6a456f4467af63de1e68';
 
 abstract class _$SecuritySettingsController
     extends $AsyncNotifier<SecuritySettingsState> {
