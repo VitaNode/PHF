@@ -67,88 +67,48 @@ jobs:
           set -o pipefail
           flutter test | tee tests.log
 
-            - name: 💬 Comment on failure
+      - name: 💬 Comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            let body = '### ❌ CI Build Failed\n\n';
+            let foundLogs = false;
+            
+            const logFiles = [
+              { name: '🎨 Formatting', path: 'format.log', pattern: /Formatted/ },
+              { name: '🔍 Static Analysis', path: 'analyze.log', pattern: /error|warning|info/i },
+              { name: '📊 Code Metrics', path: 'metrics.log', pattern: /error|warning/i },
+              { name: '🧪 Unit Tests', path: 'tests.log', pattern: /FAILED|failed|Exception|Error/i }
+            ];
+            
+            for (const file of logFiles) {
+              if (fs.existsSync(file.path)) {
+                const content = fs.readFileSync(file.path, 'utf8');
+                if (file.pattern.test(content) || content.length > 0) {
+                  foundLogs = true;
+                  const lines = content.trim().split('\n');
+                  // Capture up to 50 lines for more context
+                  const core = lines.length > 50 ? '...\n' + lines.slice(-50).join('\n') : lines.join('\n');
+                  body += `#### ${file.name}\n\n\
+${core}
+\
+```\n\n`;
+                }
+              }
+            }
+            
+            if (!foundLogs) {
+              body += '_Could not automatically extract specific error logs. Please check the workflow execution details._\n';
+            }
+            
+            body += `\n[View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
 
-              if: failure() && github.event_name == 'pull_request'
-
-              uses: actions/github-script@v7
-
-              with:
-
-                github-token: ${{secrets.GITHUB_TOKEN}}
-
-                script: |
-
-                  const fs = require('fs');
-
-                  let body = '### ❌ CI Build Failed\n\n';
-
-                  let foundLogs = false;
-
-                  
-
-                  const logFiles = [
-
-                    { name: '🎨 Formatting', path: 'format.log', pattern: /Formatted/ },
-
-                    { name: '🔍 Static Analysis', path: 'analyze.log', pattern: /error|warning|info/i },
-
-                    { name: '📊 Code Metrics', path: 'metrics.log', pattern: /error|warning/i },
-
-                    { name: '🧪 Unit Tests', path: 'tests.log', pattern: /FAILED|failed|Exception|Error/i }
-
-                  ];
-
-                  
-
-                  for (const file of logFiles) {
-
-                    if (fs.existsSync(file.path)) {
-
-                      const content = fs.readFileSync(file.path, 'utf8');
-
-                      if (file.pattern.test(content) || content.length > 0) {
-
-                        foundLogs = true;
-
-                        const lines = content.trim().split('\n');
-
-                        // Capture up to 50 lines for more context
-
-                        const core = lines.length > 50 ? '...\n' + lines.slice(-50).join('\n') : lines.join('\n');
-
-                        body += `#### ${file.name}\n\n\`\`\`text\n${core}\n\`\`\`\n\n`;
-
-                      }
-
-                    }
-
-                  }
-
-                  
-
-                  if (!foundLogs) {
-
-                    body += '_Could not automatically extract specific error logs. Please check the workflow execution details._\n';
-
-                  }
-
-                  
-
-                  body += `\n[View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
-
-      
-
-                  github.rest.issues.createComment({
-
-                    issue_number: context.issue.number,
-
-                    owner: context.repo.owner,
-
-                    repo: context.repo.repo,
-
-                    body: body
-
-                  });
-
-      
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
