@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/search_result.dart';
 import 'core_providers.dart';
+import 'person_provider.dart';
 
 part 'search_provider.g.dart';
 
@@ -17,12 +18,16 @@ class SearchController extends _$SearchController {
       return;
     }
 
+    final personId = await ref.read(currentPersonIdControllerProvider.future);
+    if (personId == null) {
+      state = const AsyncValue.data([]);
+      return;
+    }
+
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(searchRepositoryProvider);
-      // TODO: Get real user ID
-      const userId = 'def_me';
-      return repo.search(query, userId);
+      return repo.search(query, personId);
     });
   }
 }

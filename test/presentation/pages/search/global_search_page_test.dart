@@ -7,10 +7,18 @@ import 'package:phf/data/models/record.dart';
 import 'package:phf/data/models/search_result.dart';
 import 'package:phf/data/repositories/interfaces/search_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
+import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/pages/search/global_search_page.dart';
 
 @GenerateNiceMocks([MockSpec<ISearchRepository>()])
 import 'global_search_page_test.mocks.dart';
+
+class MockCurrentPersonIdController extends CurrentPersonIdController {
+  final String id;
+  MockCurrentPersonIdController(this.id);
+  @override
+  Future<String?> build() async => id;
+}
 
 void main() {
   late MockISearchRepository mockSearchRepo;
@@ -21,7 +29,12 @@ void main() {
 
   Widget createSubject() {
     return ProviderScope(
-      overrides: [searchRepositoryProvider.overrideWithValue(mockSearchRepo)],
+      overrides: [
+        searchRepositoryProvider.overrideWithValue(mockSearchRepo),
+        currentPersonIdControllerProvider.overrideWith(
+          () => MockCurrentPersonIdController('p1'),
+        ),
+      ],
       child: const MaterialApp(home: GlobalSearchPage()),
     );
   }

@@ -13,6 +13,7 @@ import 'package:phf/data/models/record.dart';
 import 'package:phf/data/models/tag.dart';
 import 'package:phf/data/repositories/interfaces/tag_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
+import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/widgets/event_card.dart';
 
 @GenerateNiceMocks([
@@ -21,6 +22,13 @@ import 'package:phf/presentation/widgets/event_card.dart';
   MockSpec<ITagRepository>(),
 ])
 import 'event_card_tags_test.mocks.dart';
+
+class MockCurrentPersonIdController extends CurrentPersonIdController {
+  final String id;
+  MockCurrentPersonIdController(this.id);
+  @override
+  Future<String?> build() async => id;
+}
 
 void main() {
   late MockFileSecurityHelper mockFileSecurityHelper;
@@ -33,6 +41,9 @@ void main() {
         fileSecurityHelperProvider.overrideWithValue(mockFileSecurityHelper),
         pathProviderServiceProvider.overrideWithValue(mockPathProviderService),
         tagRepositoryProvider.overrideWithValue(mockTagRepository),
+        currentPersonIdControllerProvider.overrideWith(
+          () => MockCurrentPersonIdController('p1'),
+        ),
       ],
       child: MaterialApp(
         home: Scaffold(
@@ -167,7 +178,9 @@ void main() {
       ];
 
       // Setup Mocks
-      when(mockTagRepository.getAllTags()).thenAnswer((_) async => tags);
+      when(
+        mockTagRepository.getAllTags(personId: anyNamed('personId')),
+      ).thenAnswer((_) async => tags);
 
       // Pump Widget
       await widgetTester.pumpWidget(createSubject(recordWithImage));

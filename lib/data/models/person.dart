@@ -8,6 +8,8 @@
 /// - `nickname`: 昵称.
 /// - `avatarPath`: 头像文件的相对路径（加密存储）.
 /// - `isDefault`: 是否为默认用户 (Me).
+/// - `orderIndex`: 排序索引.
+/// - `profileColor`: 档案配色 (Hex).
 /// - `createdAt`: 创建时间.
 ///
 /// ## Security & Privacy
@@ -27,6 +29,8 @@ abstract class Person with _$Person {
     required String nickname,
     String? avatarPath,
     @Default(false) bool isDefault,
+    @Default(0) int orderIndex,
+    String? profileColor,
     required DateTime createdAt,
   }) = _Person;
 

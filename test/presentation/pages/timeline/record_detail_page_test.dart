@@ -10,6 +10,7 @@ import 'package:phf/data/repositories/interfaces/record_repository.dart';
 import 'package:phf/presentation/pages/timeline/record_detail_page.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/ocr_status_provider.dart';
+import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/widgets/secure_image.dart';
 
 import 'package:phf/core/security/file_security_helper.dart';
@@ -23,6 +24,13 @@ import 'dart:convert';
   MockSpec<PathProviderService>(),
 ])
 import 'record_detail_page_test.mocks.dart';
+
+class MockCurrentPersonIdController extends CurrentPersonIdController {
+  final String id;
+  MockCurrentPersonIdController(this.id);
+  @override
+  Future<String?> build() async => id;
+}
 
 void main() {
   late MockIRecordRepository mockRecordRepo;
@@ -52,6 +60,9 @@ void main() {
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
         fileSecurityHelperProvider.overrideWithValue(mockFileHelper),
         pathProviderServiceProvider.overrideWithValue(mockPathService),
+        currentPersonIdControllerProvider.overrideWith(
+          () => MockCurrentPersonIdController('p1'),
+        ),
         ocrPendingCountProvider.overrideWith((ref) => Stream.value(0)),
       ],
       child: MaterialApp(home: RecordDetailPage(recordId: recordId)),

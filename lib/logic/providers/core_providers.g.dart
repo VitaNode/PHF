@@ -195,7 +195,7 @@ final class DatabaseServiceProvider
   }
 }
 
-String _$databaseServiceHash() => r'4a6397efd932ef53bd6e69e8e7484d7973edaae7';
+String _$databaseServiceHash() => r'41a5cb3df2951886dbfb6d67efeca44f6a75b698';
 
 @ProviderFor(fileSecurityHelper)
 final fileSecurityHelperProvider = FileSecurityHelperProvider._();
@@ -417,6 +417,47 @@ final class CryptoServiceProvider
 
 String _$cryptoServiceHash() => r'7bf1c14754df33bf2bac1d9430f02e51b3c70e8d';
 
+@ProviderFor(backupService)
+final backupServiceProvider = BackupServiceProvider._();
+
+final class BackupServiceProvider
+    extends $FunctionalProvider<IBackupService, IBackupService, IBackupService>
+    with $Provider<IBackupService> {
+  BackupServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IBackupService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IBackupService create(Ref ref) {
+    return backupService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IBackupService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IBackupService>(value),
+    );
+  }
+}
+
+String _$backupServiceHash() => r'f0bfa452d55a7c6cb10efb0a1a206e9843025544';
+
 @ProviderFor(imageRepository)
 final imageRepositoryProvider = ImageRepositoryProvider._();
 
@@ -462,6 +503,53 @@ final class ImageRepositoryProvider
 }
 
 String _$imageRepositoryHash() => r'a818f6f215615efc5cc70caac9292da693082327';
+
+@ProviderFor(personRepository)
+final personRepositoryProvider = PersonRepositoryProvider._();
+
+final class PersonRepositoryProvider
+    extends
+        $FunctionalProvider<
+          IPersonRepository,
+          IPersonRepository,
+          IPersonRepository
+        >
+    with $Provider<IPersonRepository> {
+  PersonRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IPersonRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  IPersonRepository create(Ref ref) {
+    return personRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IPersonRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IPersonRepository>(value),
+    );
+  }
+}
+
+String _$personRepositoryHash() => r'3e777378932b2ac4e9af168b9a23aa91e14631bf';
 
 @ProviderFor(appMetaRepository)
 final appMetaRepositoryProvider = AppMetaRepositoryProvider._();
@@ -688,53 +776,6 @@ final class OcrQueueRepositoryProvider
 String _$ocrQueueRepositoryHash() =>
     r'4aae7f48301a7a6107e82afcbf09f45dfc4036df';
 
-@ProviderFor(personRepository)
-final personRepositoryProvider = PersonRepositoryProvider._();
-
-final class PersonRepositoryProvider
-    extends
-        $FunctionalProvider<
-          IPersonRepository,
-          IPersonRepository,
-          IPersonRepository
-        >
-    with $Provider<IPersonRepository> {
-  PersonRepositoryProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'personRepositoryProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$personRepositoryHash();
-
-  @$internal
-  @override
-  $ProviderElement<IPersonRepository> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  IPersonRepository create(Ref ref) {
-    return personRepository(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(IPersonRepository value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<IPersonRepository>(value),
-    );
-  }
-}
-
-String _$personRepositoryHash() => r'3e777378932b2ac4e9af168b9a23aa91e14631bf';
-
 @ProviderFor(allTags)
 final allTagsProvider = AllTagsProvider._();
 
@@ -771,4 +812,4 @@ final class AllTagsProvider
   }
 }
 
-String _$allTagsHash() => r'40bcc092347698fb3d21df54443ed0c84a8b18b3';
+String _$allTagsHash() => r'b59a84310ef7b42ada4934bb728d8e7fad886721';

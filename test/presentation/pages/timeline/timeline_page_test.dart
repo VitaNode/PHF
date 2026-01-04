@@ -8,6 +8,7 @@ import 'package:phf/data/repositories/interfaces/image_repository.dart';
 import 'package:phf/data/repositories/interfaces/record_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/ocr_status_provider.dart';
+import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/pages/timeline/timeline_page.dart';
 import 'package:phf/presentation/widgets/event_card.dart';
 
@@ -16,6 +17,13 @@ import 'package:phf/presentation/widgets/event_card.dart';
   MockSpec<IImageRepository>(),
 ])
 import 'timeline_page_test.mocks.dart';
+
+class MockCurrentPersonIdController extends CurrentPersonIdController {
+  final String id;
+  MockCurrentPersonIdController(this.id);
+  @override
+  Future<String?> build() async => id;
+}
 
 void main() {
   late MockIRecordRepository mockRecordRepo;
@@ -31,6 +39,9 @@ void main() {
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepo),
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
+        currentPersonIdControllerProvider.overrideWith(
+          () => MockCurrentPersonIdController('p1'),
+        ),
         ocrPendingCountProvider.overrideWith(
           (ref) => Stream.value(pendingCount),
         ),

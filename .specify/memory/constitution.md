@@ -168,6 +168,19 @@ SYNC IMPACT REPORT
   - **覆盖率**: 核心业务逻辑必须达到 80% 以上的测试覆盖率
   - **测试类型**: 包括单元测试、集成测试和 UI 测试，确保不同层面的质量
 
+#### 14. 本地预检与 CI 自动化 (Pre-flight Checks & CI Automation)
+- **原则**: Agent 在推送代码前必须确保代码质量，并对 CI 反馈负责。
+- **实现**:
+  - **强制本地预检**: 在执行 `git push` 前，Agent 必须自主按序完成以下步骤：
+    1. `dart run build_runner build --delete-conflicting-outputs` (若修改了含有注解的 Model/Entity)。
+    2. `dart format .` (确保格式符合工程规范)。
+    3. `flutter analyze` (确保零警告、零错误)。
+    4. `flutter test` (至少运行与当前改动相关的测试用例，确保无回归问题)。
+  - **CI 闭环责任**:
+    - 如果收到来自 GitHub Actions 的报错评论（PR Comment），Agent 必须立即根据评论中的日志和堆栈信息进行修正。
+    - 持续修正并推送，直到评论消失或 CI 状态变为绿色。
+    - 禁止在 CI 失败的情况下尝试合并代码。
+
 ## 治理
 所有开发活动和功能变更都必须严格遵守本章程定义的原则。任何偏离核心原则的修改都需要经过正式的章程修订流程。
 

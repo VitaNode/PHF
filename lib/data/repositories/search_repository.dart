@@ -7,10 +7,13 @@
 /// - 基于 SQLCipher 加密环境。
 /// - FTS5 索引存储在加密数据库内部。
 ///
-/// ## Fix Record
+/// ## Updates
+/// - **2026-01-04**:
+///   - 升级 `syncRecordIndex` 以填充多字段 (`hospital_name`, `tags`, `ocr_text`, `notes`) 到 FTS5 索引。
+///   - 升级 `search` 使用 FTS5 MATCH 语法查询多字段。
 /// - **2025-12-31**:
-///   1. 实现 `syncRecordIndex` 以支持同 Record 下多图 OCR 文本的聚合检索。
-///   2. 修复 `search` 结果映射中 `MedicalImage` 缺失及 `notedAt` null 转换问题。
+///   - 实现 `syncRecordIndex` 以支持同 Record 下多图 OCR 文本的聚合检索。
+///   - 修复 `search` 结果映射中 `MedicalImage` 缺失及 `notedAt` null 转换问题。
 library;
 
 import 'dart:convert';
@@ -27,23 +30,37 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
   Future<List<SearchResult>> search(String query, String personId) async {
     final db = await dbService.database;
 
-    // 执行 FTS5 全文搜索
-    // JOIN records 表以获取元数据，并过滤 personId
-    // snippet(index_name, column_index, start_tag, end_tag, ellipsis, max_tokens)
+    // FTS5 MATCH query syntax:
+    // Simple: "query" (matches any column)
+    // Targeted: "ocr_text:query"
+    // To match ANY column, we can just pass the query.
+    // The query should be sanitized to avoid FTS syntax errors if user types special chars.
+    // For now, we assume simple text search.
+    // "Return keywords in highlight results" -> snippet.
+
+    // Using `ocr_search_index MATCH ?` matches against all columns in the virtual table.
+    // We request snippet for 'content' or other columns?
+    // Usually snippet is taken from the column that matched.
+    // But snippet() function takes column index.
+    // Columns: record_id(0), hospital_name(1), tags(2), ocr_text(3), notes(4), content(5).
+    // Let's try to get snippet from 'content' as it aggregates everything,
+    // OR we can rely on FTS finding the best match.
+    // However, snippet() only works on one column.
+    // The requirement says "Return keywords in highlight results".
+    // Let's snippet the 'content' column (index 5) as it contains everything.
+
     final sql = '''
-      SELECT r.*, snippet(ocr_search_index, 1, '<b>', '</b>', '...', 16) as snippet
+      SELECT r.*, snippet(ocr_search_index, 5, '<b>', '</b>', '...', 16) as snippet
       FROM records r
       JOIN ocr_search_index fts ON r.id = fts.record_id
-      WHERE r.person_id = ? AND r.status != 'deleted' AND fts.content MATCH ?
+      WHERE r.person_id = ? AND r.status != 'deleted' AND ocr_search_index MATCH ?
       ORDER BY r.visit_date_ms DESC
       LIMIT 100
     ''';
 
-    // FTS5 MATCH query syntax: simple words or phrases.
-    // Ideally we should sanitize or prepare the query.
-    // SQLCipher FTS5 standard query.
-    // If query is empty, this SQL might fail or return nothing. Caller should handle empty query check.
-
+    // Quote the query for FTS safety if needed, or rely on parameter binding.
+    // Note: Parameter binding works for MATCH ? but strict FTS syntax rules apply to the string.
+    // If user types "foo OR bar", it works. If "foo*", it works.
     final List<Map<String, dynamic>> maps = await db.rawQuery(sql, [
       personId,
       query,
@@ -68,7 +85,6 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       final rid = imgRow['record_id'] as String;
       imagesByRecord.putIfAbsent(rid, () => []);
 
-      // Use the same mapping logic as RecordRepository or similar
       final List<String> tagIds = [];
       if (imgRow['tags'] != null) {
         try {
@@ -142,9 +158,16 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<void> updateIndex(String recordId, String content) async {
-    final db = await dbService.database;
+    // Deprecated direct usage, but kept for interface compatibility if needed.
+    // Ideally we should use syncRecordIndex for full updates.
+    // If called directly, we assume content maps to 'content' column only,
+    // or we might lose other columns.
+    // For now, let's redirect to syncRecordIndex logic if possible,
+    // but updateIndex signature is simple.
+    // We will just update 'content' and leave others null/empty?
+    // Or better, let's just implement it as "Update content column only".
 
-    // SQLite FTS5 不支持直接 REPLACE，通常先 DELETE 再 INSERT
+    final db = await dbService.database;
     await db.transaction((txn) async {
       await txn.delete(
         'ocr_search_index',
@@ -162,25 +185,84 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
   Future<void> syncRecordIndex(String recordId) async {
     final db = await dbService.database;
 
-    // 1. 获取该 Record 下所有图片的 OCR 文本
-    final List<Map<String, dynamic>> maps = await db.query(
+    // 1. Fetch Record Info
+    final List<Map<String, dynamic>> recordRows = await db.query(
+      'records',
+      columns: ['hospital_name', 'notes'],
+      where: 'id = ?',
+      whereArgs: [recordId],
+    );
+    if (recordRows.isEmpty) {
+      await deleteIndex(recordId);
+      return;
+    }
+    final recordRow = recordRows.first;
+    final hospitalName = recordRow['hospital_name'] as String? ?? '';
+    final notes = recordRow['notes'] as String? ?? '';
+
+    // 2. Fetch Images Info (OCR Text & Tags)
+    final List<Map<String, dynamic>> imageRows = await db.query(
       'images',
-      columns: ['ocr_text'],
-      where: 'record_id = ? AND ocr_text IS NOT NULL',
+      columns: ['ocr_text', 'tags'],
+      where: 'record_id = ?',
       whereArgs: [recordId],
       orderBy: 'page_index ASC',
     );
 
-    if (maps.isEmpty) {
-      await deleteIndex(recordId);
-      return;
+    final StringBuffer ocrBuffer = StringBuffer();
+    final Set<String> tagIds = {};
+
+    for (var row in imageRows) {
+      if (row['ocr_text'] != null) {
+        ocrBuffer.writeln(row['ocr_text'] as String);
+        ocrBuffer.writeln(); // Spacing
+      }
+
+      if (row['tags'] != null) {
+        try {
+          final decoded = jsonDecode(row['tags'] as String);
+          if (decoded is List) tagIds.addAll(List<String>.from(decoded));
+        } catch (_) {}
+      }
     }
 
-    // 2. 合并文本
-    final fullText = maps.map((m) => m['ocr_text'] as String).join('\n\n');
+    // 3. Resolve Tag Names
+    final StringBuffer tagNamesBuffer = StringBuffer();
+    if (tagIds.isNotEmpty) {
+      final placeholder = List.filled(tagIds.length, '?').join(',');
+      final List<Map<String, dynamic>> tagRows = await db.query(
+        'tags',
+        columns: ['name'],
+        where: 'id IN ($placeholder)',
+        whereArgs: tagIds.toList(),
+      );
+      for (var row in tagRows) {
+        tagNamesBuffer.write('${row['name']} ');
+      }
+    }
 
-    // 3. 更新索引
-    await updateIndex(recordId, fullText);
+    final ocrText = ocrBuffer.toString();
+    final tagNames = tagNamesBuffer.toString();
+
+    // 4. Construct Content (Aggregate for fallback)
+    final content = [hospitalName, tagNames, notes, ocrText].join('\n');
+
+    // 5. Update FTS Index
+    await db.transaction((txn) async {
+      await txn.delete(
+        'ocr_search_index',
+        where: 'record_id = ?',
+        whereArgs: [recordId],
+      );
+      await txn.insert('ocr_search_index', {
+        'record_id': recordId,
+        'hospital_name': hospitalName,
+        'tags': tagNames,
+        'ocr_text': ocrText,
+        'notes': notes,
+        'content': content,
+      });
+    });
   }
 
   @override

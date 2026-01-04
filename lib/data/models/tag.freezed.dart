@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Tag {
 
- String get id; String? get personId; String get name; String get color; bool get isSystem; DateTime get createdAt;
+ String get id; String? get personId; String get name; String get color; int get orderIndex; bool get isCustom; DateTime get createdAt;
 /// Create a copy of Tag
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TagCopyWith<Tag> get copyWith => _$TagCopyWithImpl<Tag>(this as Tag, _$identity
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tag&&(identical(other.id, id) || other.id == id)&&(identical(other.personId, personId) || other.personId == personId)&&(identical(other.name, name) || other.name == name)&&(identical(other.color, color) || other.color == color)&&(identical(other.isSystem, isSystem) || other.isSystem == isSystem)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tag&&(identical(other.id, id) || other.id == id)&&(identical(other.personId, personId) || other.personId == personId)&&(identical(other.name, name) || other.name == name)&&(identical(other.color, color) || other.color == color)&&(identical(other.orderIndex, orderIndex) || other.orderIndex == orderIndex)&&(identical(other.isCustom, isCustom) || other.isCustom == isCustom)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,personId,name,color,isSystem,createdAt);
+int get hashCode => Object.hash(runtimeType,id,personId,name,color,orderIndex,isCustom,createdAt);
 
 @override
 String toString() {
-  return 'Tag(id: $id, personId: $personId, name: $name, color: $color, isSystem: $isSystem, createdAt: $createdAt)';
+  return 'Tag(id: $id, personId: $personId, name: $name, color: $color, orderIndex: $orderIndex, isCustom: $isCustom, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TagCopyWith<$Res>  {
   factory $TagCopyWith(Tag value, $Res Function(Tag) _then) = _$TagCopyWithImpl;
 @useResult
 $Res call({
- String id, String? personId, String name, String color, bool isSystem, DateTime createdAt
+ String id, String? personId, String name, String color, int orderIndex, bool isCustom, DateTime createdAt
 });
 
 
@@ -65,13 +65,14 @@ class _$TagCopyWithImpl<$Res>
 
 /// Create a copy of Tag
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? personId = freezed,Object? name = null,Object? color = null,Object? isSystem = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? personId = freezed,Object? name = null,Object? color = null,Object? orderIndex = null,Object? isCustom = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,personId: freezed == personId ? _self.personId : personId // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,color: null == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as String,isSystem: null == isSystem ? _self.isSystem : isSystem // ignore: cast_nullable_to_non_nullable
+as String,orderIndex: null == orderIndex ? _self.orderIndex : orderIndex // ignore: cast_nullable_to_non_nullable
+as int,isCustom: null == isCustom ? _self.isCustom : isCustom // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? personId,  String name,  String color,  bool isSystem,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? personId,  String name,  String color,  int orderIndex,  bool isCustom,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tag() when $default != null:
-return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_that.createdAt);case _:
+return $default(_that.id,_that.personId,_that.name,_that.color,_that.orderIndex,_that.isCustom,_that.createdAt);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? personId,  String name,  String color,  bool isSystem,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? personId,  String name,  String color,  int orderIndex,  bool isCustom,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Tag():
-return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_that.createdAt);case _:
+return $default(_that.id,_that.personId,_that.name,_that.color,_that.orderIndex,_that.isCustom,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +200,10 @@ return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? personId,  String name,  String color,  bool isSystem,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? personId,  String name,  String color,  int orderIndex,  bool isCustom,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Tag() when $default != null:
-return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_that.createdAt);case _:
+return $default(_that.id,_that.personId,_that.name,_that.color,_that.orderIndex,_that.isCustom,_that.createdAt);case _:
   return null;
 
 }
@@ -213,15 +214,16 @@ return $default(_that.id,_that.personId,_that.name,_that.color,_that.isSystem,_t
 /// @nodoc
 @JsonSerializable()
 
-class _Tag implements Tag {
-  const _Tag({required this.id, this.personId, required this.name, required this.color, this.isSystem = false, required this.createdAt});
+class _Tag extends Tag {
+  const _Tag({required this.id, this.personId, required this.name, required this.color, this.orderIndex = 0, this.isCustom = false, required this.createdAt}): super._();
   factory _Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
 
 @override final  String id;
 @override final  String? personId;
 @override final  String name;
 @override final  String color;
-@override@JsonKey() final  bool isSystem;
+@override@JsonKey() final  int orderIndex;
+@override@JsonKey() final  bool isCustom;
 @override final  DateTime createdAt;
 
 /// Create a copy of Tag
@@ -237,16 +239,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tag&&(identical(other.id, id) || other.id == id)&&(identical(other.personId, personId) || other.personId == personId)&&(identical(other.name, name) || other.name == name)&&(identical(other.color, color) || other.color == color)&&(identical(other.isSystem, isSystem) || other.isSystem == isSystem)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tag&&(identical(other.id, id) || other.id == id)&&(identical(other.personId, personId) || other.personId == personId)&&(identical(other.name, name) || other.name == name)&&(identical(other.color, color) || other.color == color)&&(identical(other.orderIndex, orderIndex) || other.orderIndex == orderIndex)&&(identical(other.isCustom, isCustom) || other.isCustom == isCustom)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,personId,name,color,isSystem,createdAt);
+int get hashCode => Object.hash(runtimeType,id,personId,name,color,orderIndex,isCustom,createdAt);
 
 @override
 String toString() {
-  return 'Tag(id: $id, personId: $personId, name: $name, color: $color, isSystem: $isSystem, createdAt: $createdAt)';
+  return 'Tag(id: $id, personId: $personId, name: $name, color: $color, orderIndex: $orderIndex, isCustom: $isCustom, createdAt: $createdAt)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$TagCopyWith<$Res> implements $TagCopyWith<$Res> {
   factory _$TagCopyWith(_Tag value, $Res Function(_Tag) _then) = __$TagCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? personId, String name, String color, bool isSystem, DateTime createdAt
+ String id, String? personId, String name, String color, int orderIndex, bool isCustom, DateTime createdAt
 });
 
 
@@ -274,13 +276,14 @@ class __$TagCopyWithImpl<$Res>
 
 /// Create a copy of Tag
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? personId = freezed,Object? name = null,Object? color = null,Object? isSystem = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? personId = freezed,Object? name = null,Object? color = null,Object? orderIndex = null,Object? isCustom = null,Object? createdAt = null,}) {
   return _then(_Tag(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,personId: freezed == personId ? _self.personId : personId // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,color: null == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as String,isSystem: null == isSystem ? _self.isSystem : isSystem // ignore: cast_nullable_to_non_nullable
+as String,orderIndex: null == orderIndex ? _self.orderIndex : orderIndex // ignore: cast_nullable_to_non_nullable
+as int,isCustom: null == isCustom ? _self.isCustom : isCustom // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

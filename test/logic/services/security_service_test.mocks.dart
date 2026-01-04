@@ -398,6 +398,24 @@ class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+
+  @override
+  _i4.Future<String?> getCurrentPersonId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getCurrentPersonId, []),
+            returnValue: _i4.Future<String?>.value(),
+            returnValueForMissingStub: _i4.Future<String?>.value(),
+          )
+          as _i4.Future<String?>);
+
+  @override
+  _i4.Future<void> setCurrentPersonId(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#setCurrentPersonId, [id]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [LocalAuthentication].

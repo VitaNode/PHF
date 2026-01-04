@@ -292,9 +292,47 @@ class MockPathProviderService extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockITagRepository extends _i1.Mock implements _i9.ITagRepository {
   @override
-  _i5.Future<List<_i10.Tag>> getAllTags() =>
+  _i5.Future<List<_i10.Tag>> getAllTags({String? personId}) =>
       (super.noSuchMethod(
-            Invocation.method(#getAllTags, []),
+            Invocation.method(#getAllTags, [], {#personId: personId}),
+            returnValue: _i5.Future<List<_i10.Tag>>.value(<_i10.Tag>[]),
+            returnValueForMissingStub: _i5.Future<List<_i10.Tag>>.value(
+              <_i10.Tag>[],
+            ),
+          )
+          as _i5.Future<List<_i10.Tag>>);
+
+  @override
+  _i5.Future<void> createTag(_i10.Tag? tag) =>
+      (super.noSuchMethod(
+            Invocation.method(#createTag, [tag]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> updateTag(_i10.Tag? tag) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateTag, [tag]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> deleteTag(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteTag, [id]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  _i5.Future<List<_i10.Tag>> suggestTags(String? text, {String? personId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#suggestTags, [text], {#personId: personId}),
             returnValue: _i5.Future<List<_i10.Tag>>.value(<_i10.Tag>[]),
             returnValueForMissingStub: _i5.Future<List<_i10.Tag>>.value(
               <_i10.Tag>[],

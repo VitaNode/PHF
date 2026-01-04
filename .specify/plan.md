@@ -104,3 +104,42 @@
 | **T2.4.2** | **Review Queue List & Edit UI** | 实现“待确认”列表页及专用编辑页（高亮 OCR 结果 vs 现有数据）。<br>DoD: 用户修正数据并保存后，记录状态变为 `archived` 并从列表消失。 | T2.4.1 |
 | **T2.4.3** | **Detail View OCR Enhancement** | 详情页支持查看/展开 OCR 识别全文。<br>DoD: 点击图片或“查看文字”按钮，能展示对应的解密后 OCR 文本。 | Phase 1 Detail View |
 | **T2.4.4** | **Global Search UI** | 实现基于 FTS5 的全文搜索界面。<br>DoD: 输入关键词能毫秒级返回包含该词的病历记录。 | T2.1.2 |
+
+---
+
+## Phase 3: Profile Governance & Tag Ecosystem (档案治理与标签生态)
+**Goal**: 实现多档案管理、标签全生命周期维护及离线加密备份，确保应用具备上架水准。
+
+### 3.1: Infrastructure & Data Layer (基础设施与数据层)
+**Goal**: 扩展 Schema 以支持配色与排序，建立备份引擎。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T3.1.1** | **Schema Migration (Profiles & Tags)** | 1. `persons` 表新增 `profile_color` 字段。<br>2. `tags` 表完善 `order_index` 与 `person_id` 支持。<br>DoD: 数据库版本升级无损，新字段读取正常。 | Phase 2 |
+| **T3.1.2** | **Backup Engine foundation** | 研究并实现基于 ZIP 的存档逻辑，初步验证对加密 DB 和图片的打包能力。 | T1.4 |
+
+### 3.2: Data & Persistence (数据访问层)
+**Goal**: 实现档案与标签的 Repository 完整操作。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T3.2.1** | **PersonRepository Impl** | 实现人员的 CRUD。核心：删除人员时需调用 `SecureWipeHelper` 物理级联删除图片。 | T3.1.1 |
+| **T3.2.2** | **Enhanced TagRepository** | 实现动态标签 CRUD。DoD: 验证删除标签后，`image_tags` 关联关系自动解除，但不删除物理图片。 | T3.1.1 |
+
+### 3.3: Business Logic & Services (业务逻辑层)
+**Goal**: 实现多档案隔离逻辑与加密备份服务。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T3.3.1** | **Multi-profile Isolation Logic** | 在 Riverpod 层实现全局 `currentPersonId`。所有数据查询 Repository 默认带上所属人过滤。 | T3.2.1 |
+| **T3.3.2** | **Offline Backup/Restore Service** | 实现生成 `.phf` 加密包及识别恢复逻辑。DoD: 导出的文件可在另一台模拟器上完整恢复（含图片和 FTS 索引）。 | T3.1.2, T3.2.1/2 |
+
+### 3.4: UI & Store Readiness (界面展示与上架准备)
+**Goal**: 提供完整的设置管理功能，完成合规性资产准备。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T3.4.1** | **Profile Switching & Management UI** | 首页顶部切换入口 + 人员管理页（配色选择）。DoD: 切换成员后 Timeline 刷新对应数据。 | T3.3.1 |
+| **T3.4.2** | **Tag Library Management UI** | 设置页 -> 标签库。支持新增标签、修改颜色、长按拖拽排序。 | T3.2.2 |
+| **T3.4.3** | **Backup & Restore UI** | 导出/导入操作界面，支持系统分享对话框调用。 | T3.3.2 |
+| **T3.4.4** | **Store Compliance & Assets** | 1. 静态 Markdown 隐私政策页面。<br>2. App Icon & Splash Screen。DoD: 运行 `flutter build` 无 Asset 缺失。 | - |

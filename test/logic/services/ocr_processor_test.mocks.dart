@@ -103,9 +103,9 @@ class MockIOCRQueueRepository extends _i1.Mock
           as _i6.Future<void>);
 
   @override
-  _i6.Future<int> getPendingCount() =>
+  _i6.Future<int> getPendingCount({String? personId}) =>
       (super.noSuchMethod(
-            Invocation.method(#getPendingCount, []),
+            Invocation.method(#getPendingCount, [], {#personId: personId}),
             returnValue: _i6.Future<int>.value(0),
             returnValueForMissingStub: _i6.Future<int>.value(0),
           )

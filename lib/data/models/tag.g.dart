@@ -11,7 +11,8 @@ _Tag _$TagFromJson(Map<String, dynamic> json) => _Tag(
   personId: json['personId'] as String?,
   name: json['name'] as String,
   color: json['color'] as String,
-  isSystem: json['isSystem'] as bool? ?? false,
+  orderIndex: (json['orderIndex'] as num?)?.toInt() ?? 0,
+  isCustom: json['isCustom'] as bool? ?? false,
   createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
@@ -20,6 +21,7 @@ Map<String, dynamic> _$TagToJson(_Tag instance) => <String, dynamic>{
   'personId': instance.personId,
   'name': instance.name,
   'color': instance.color,
-  'isSystem': instance.isSystem,
+  'orderIndex': instance.orderIndex,
+  'isCustom': instance.isCustom,
   'createdAt': instance.createdAt.toIso8601String(),
 };

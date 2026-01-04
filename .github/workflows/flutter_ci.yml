@@ -2,9 +2,18 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ feat/phase3 ]
+    branches: [ develop ]
   pull_request:
-    branches: [ feat/phase3 ]
+    branches: [ develop ]
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   quality-check:
@@ -39,13 +48,63 @@ jobs:
         # This step ensures that all core generated logic is committed.
 
       - name: 🎨 Check Formatting
-        run: dart format --set-exit-if-changed .
+        run: |
+          set -o pipefail
+          dart format --set-exit-if-changed . | tee format.log
 
       - name: 🔍 Static Analysis
-        run: flutter analyze
+        run: |
+          set -o pipefail
+          flutter analyze | tee analyze.log
 
       - name: 📊 Check Code Metrics
-        run: dart run dart_code_linter:metrics analyze lib
+        run: |
+          set -o pipefail
+          dart run dart_code_linter:metrics analyze lib | tee metrics.log
 
       - name: 🧪 Run Unit Tests
-        run: flutter test
+        run: |
+          set -o pipefail
+          flutter test | tee tests.log
+
+      - name: 💬 Comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            let body = '### ❌ CI Build Failed\n\n';
+            let foundLogs = false;
+            
+            const logFiles = [
+              { name: '🎨 Formatting', path: 'format.log', pattern: /Formatted/ },
+              { name: '🔍 Static Analysis', path: 'analyze.log', pattern: /error|warning|info/i },
+              { name: '📊 Code Metrics', path: 'metrics.log', pattern: /error|warning/i },
+              { name: '🧪 Unit Tests', path: 'tests.log', pattern: /FAILED|failed|Exception|Error/i }
+            ];
+            
+            for (const file of logFiles) {
+              if (fs.existsSync(file.path)) {
+                const content = fs.readFileSync(file.path, 'utf8');
+                if (file.pattern.test(content) || (content && content.trim().length > 0)) {
+                  foundLogs = true;
+                  const lines = content.trim().split('\n');
+                  const core = lines.length > 50 ? '...\n' + lines.slice(-50).join('\n') : lines.join('\n');
+                  body += '#### ' + file.name + '\n\n```text\n' + core + '\n```\n\n';
+                }
+              }
+            }
+            
+            if (!foundLogs) {
+              body += '_Could not automatically extract specific error logs. Please check the workflow execution details._\n';
+            }
+            
+            body += '\n[View Full Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

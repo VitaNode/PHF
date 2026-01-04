@@ -16,6 +16,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/record.dart';
 import 'core_providers.dart';
 import 'logging_provider.dart';
+import 'person_provider.dart';
 import 'states/home_state.dart';
 import 'ocr_status_provider.dart';
 
@@ -26,6 +27,12 @@ class TimelineController extends _$TimelineController {
   @override
   FutureOr<HomeState> build() async {
     final talker = ref.watch(talkerProvider);
+    // 监听当前人员变更，触发重新加载
+    final personId = await ref.watch(currentPersonIdControllerProvider.future);
+
+    if (personId == null) {
+      return const HomeState(records: [], pendingCount: 0);
+    }
 
     // 监听 OCR 任务状态
     ref.listen(ocrPendingCountProvider, (previous, next) {
@@ -43,17 +50,16 @@ class TimelineController extends _$TimelineController {
       }
     });
 
-    return _fetchRecords();
+    return _fetchRecords(personId);
   }
 
-  /// 内部获取当前用户的所有记录 (默认)
-  Future<HomeState> _fetchRecords() async {
+  /// 内部获取当前用户的所有记录
+  Future<HomeState> _fetchRecords(String personId) async {
     final repo = ref.read(recordRepositoryProvider);
     final imageRepo = ref.read(imageRepositoryProvider);
-    // TODO: Phase 2 Get Person ID from User Session
-    const currentPersonId = 'def_me';
-    final records = await repo.getRecordsByPerson(currentPersonId);
-    final pendingCount = await repo.getPendingCount(currentPersonId);
+
+    final records = await repo.getRecordsByPerson(personId);
+    final pendingCount = await repo.getPendingCount(personId);
 
     // Enrich with images (Phase 1 N+1)
     final List<MedicalRecord> enriched = [];
@@ -67,24 +73,29 @@ class TimelineController extends _$TimelineController {
 
   /// 刷新列表
   Future<void> refresh() async {
+    final personId = await ref.read(currentPersonIdControllerProvider.future);
+    if (personId == null) return;
+
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchRecords());
+    state = await AsyncValue.guard(() => _fetchRecords(personId));
   }
 
   /// 搜索与过滤
   Future<void> search({String? query, List<String>? tags}) async {
+    final personId = await ref.read(currentPersonIdControllerProvider.future);
+    if (personId == null) return;
+
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
-      const currentPersonId = 'def_me';
 
       final records = await repo.searchRecords(
-        personId: currentPersonId,
+        personId: personId,
         query: query,
         tags: tags,
       );
-      final pendingCount = await repo.getPendingCount(currentPersonId);
+      final pendingCount = await repo.getPendingCount(personId);
 
       final List<MedicalRecord> enriched = [];
       for (var rec in records) {
