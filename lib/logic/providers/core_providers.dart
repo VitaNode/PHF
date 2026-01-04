@@ -30,6 +30,7 @@ import 'logging_provider.dart';
 import '../services/interfaces/backup_service.dart';
 import '../services/backup_service.dart';
 import '../services/crypto_service.dart';
+import '../services/interfaces/security_service.dart';
 import '../services/security_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/gallery_import_service.dart';
@@ -132,7 +133,7 @@ AppMetaRepository appMetaRepository(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-SecurityService securityService(Ref ref) {
+ISecurityService securityService(Ref ref) {
   final metaRepo = ref.watch(appMetaRepositoryProvider);
   return SecurityService(
     secureStorage: const FlutterSecureStorage(),

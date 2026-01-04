@@ -7,12 +7,12 @@ import 'dart:async' as _i4;
 
 import 'package:flutter/foundation.dart' as _i3;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i2;
-import 'package:local_auth/src/local_auth.dart' as _i6;
-import 'package:local_auth_android/local_auth_android.dart' as _i7;
-import 'package:local_auth_darwin/local_auth_darwin.dart' as _i8;
-import 'package:local_auth_windows/local_auth_windows.dart' as _i9;
+import 'package:local_auth/src/local_auth.dart' as _i5;
+import 'package:local_auth_android/local_auth_android.dart' as _i6;
+import 'package:local_auth_darwin/local_auth_darwin.dart' as _i7;
+import 'package:local_auth_windows/local_auth_windows.dart' as _i8;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:phf/data/repositories/app_meta_repository.dart' as _i5;
+import 'package:phf/data/repositories/app_meta_repository.dart' as _i9;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -359,10 +359,82 @@ class MockFlutterSecureStorage extends _i1.Mock
           as _i4.Future<bool?>);
 }
 
+/// A class which mocks [LocalAuthentication].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockLocalAuthentication extends _i1.Mock
+    implements _i5.LocalAuthentication {
+  @override
+  _i4.Future<bool> get canCheckBiometrics =>
+      (super.noSuchMethod(
+            Invocation.getter(#canCheckBiometrics),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> authenticate({
+    required String? localizedReason,
+    Iterable<_i6.AuthMessages>? authMessages = const [
+      _i7.IOSAuthMessages(),
+      _i6.AndroidAuthMessages(),
+      _i8.WindowsAuthMessages(),
+    ],
+    bool? biometricOnly = false,
+    bool? sensitiveTransaction = true,
+    bool? persistAcrossBackgrounding = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#authenticate, [], {
+              #localizedReason: localizedReason,
+              #authMessages: authMessages,
+              #biometricOnly: biometricOnly,
+              #sensitiveTransaction: sensitiveTransaction,
+              #persistAcrossBackgrounding: persistAcrossBackgrounding,
+            }),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> stopAuthentication() =>
+      (super.noSuchMethod(
+            Invocation.method(#stopAuthentication, []),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<bool> isDeviceSupported() =>
+      (super.noSuchMethod(
+            Invocation.method(#isDeviceSupported, []),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<List<_i6.BiometricType>> getAvailableBiometrics() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAvailableBiometrics, []),
+            returnValue: _i4.Future<List<_i6.BiometricType>>.value(
+              <_i6.BiometricType>[],
+            ),
+            returnValueForMissingStub:
+                _i4.Future<List<_i6.BiometricType>>.value(
+                  <_i6.BiometricType>[],
+                ),
+          )
+          as _i4.Future<List<_i6.BiometricType>>);
+}
+
 /// A class which mocks [AppMetaRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
+class MockAppMetaRepository extends _i1.Mock implements _i9.AppMetaRepository {
   @override
   _i4.Future<String?> get(String? key) =>
       (super.noSuchMethod(
@@ -416,76 +488,4 @@ class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
-}
-
-/// A class which mocks [LocalAuthentication].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockLocalAuthentication extends _i1.Mock
-    implements _i6.LocalAuthentication {
-  @override
-  _i4.Future<bool> get canCheckBiometrics =>
-      (super.noSuchMethod(
-            Invocation.getter(#canCheckBiometrics),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
-          )
-          as _i4.Future<bool>);
-
-  @override
-  _i4.Future<bool> authenticate({
-    required String? localizedReason,
-    Iterable<_i7.AuthMessages>? authMessages = const [
-      _i8.IOSAuthMessages(),
-      _i7.AndroidAuthMessages(),
-      _i9.WindowsAuthMessages(),
-    ],
-    bool? biometricOnly = false,
-    bool? sensitiveTransaction = true,
-    bool? persistAcrossBackgrounding = false,
-  }) =>
-      (super.noSuchMethod(
-            Invocation.method(#authenticate, [], {
-              #localizedReason: localizedReason,
-              #authMessages: authMessages,
-              #biometricOnly: biometricOnly,
-              #sensitiveTransaction: sensitiveTransaction,
-              #persistAcrossBackgrounding: persistAcrossBackgrounding,
-            }),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
-          )
-          as _i4.Future<bool>);
-
-  @override
-  _i4.Future<bool> stopAuthentication() =>
-      (super.noSuchMethod(
-            Invocation.method(#stopAuthentication, []),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
-          )
-          as _i4.Future<bool>);
-
-  @override
-  _i4.Future<bool> isDeviceSupported() =>
-      (super.noSuchMethod(
-            Invocation.method(#isDeviceSupported, []),
-            returnValue: _i4.Future<bool>.value(false),
-            returnValueForMissingStub: _i4.Future<bool>.value(false),
-          )
-          as _i4.Future<bool>);
-
-  @override
-  _i4.Future<List<_i7.BiometricType>> getAvailableBiometrics() =>
-      (super.noSuchMethod(
-            Invocation.method(#getAvailableBiometrics, []),
-            returnValue: _i4.Future<List<_i7.BiometricType>>.value(
-              <_i7.BiometricType>[],
-            ),
-            returnValueForMissingStub:
-                _i4.Future<List<_i7.BiometricType>>.value(
-                  <_i7.BiometricType>[],
-                ),
-          )
-          as _i4.Future<List<_i7.BiometricType>>);
 }

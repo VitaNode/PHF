@@ -603,8 +603,12 @@ final securityServiceProvider = SecurityServiceProvider._();
 
 final class SecurityServiceProvider
     extends
-        $FunctionalProvider<SecurityService, SecurityService, SecurityService>
-    with $Provider<SecurityService> {
+        $FunctionalProvider<
+          ISecurityService,
+          ISecurityService,
+          ISecurityService
+        >
+    with $Provider<ISecurityService> {
   SecurityServiceProvider._()
     : super(
         from: null,
@@ -621,24 +625,24 @@ final class SecurityServiceProvider
 
   @$internal
   @override
-  $ProviderElement<SecurityService> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<ISecurityService> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  SecurityService create(Ref ref) {
+  ISecurityService create(Ref ref) {
     return securityService(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SecurityService value) {
+  Override overrideWithValue(ISecurityService value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<SecurityService>(value),
+      providerOverride: $SyncValueProvider<ISecurityService>(value),
     );
   }
 }
 
-String _$securityServiceHash() => r'8e7036d7cc50758efc34fb8f19faec6a1cdeefd8';
+String _$securityServiceHash() => r'fd747b834d5232b26f9380318d53377bbf5ce551';
 
 @ProviderFor(tagRepository)
 final tagRepositoryProvider = TagRepositoryProvider._();

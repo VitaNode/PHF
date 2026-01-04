@@ -36,6 +36,11 @@
 Phase 3 (Governance & Store Readiness) has started.
 
 ### Completed (Phase 3)
+- [x] **T3.3.5**: Security Settings Service.
+    - Implemented `ISecurityService` interface and refined `SecurityService`.
+    - Added PIN modification logic with old PIN validation.
+    - Added biometric persistence and toggle logic.
+    - Implemented `SecuritySettingsController` for reactive UI updates.
 - [x] **T3.1**: Infrastructure & Schema (V7 Migration).
     - `persons` table: Added `order_index`, `profile_color`.
     - `tags` table: Added `is_custom`, `order_index`.
