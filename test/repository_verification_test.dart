@@ -1,10 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:phf/data/repositories/person_repository.dart';
 import 'package:phf/data/repositories/tag_repository.dart';
-import 'package:phf/data/repositories/search_repository.dart';
 import 'package:phf/data/datasources/local/database_service.dart';
 import 'package:phf/data/models/person.dart';
 import 'package:phf/data/models/tag.dart';
@@ -14,7 +13,7 @@ import 'package:phf/core/services/path_provider_service.dart';
 // Mock Classes
 class MockMasterKeyManager extends Mock implements MasterKeyManager {
   @override
-  Future<List<int>> getMasterKey() async => List.filled(32, 0);
+  Future<Uint8List> getMasterKey() async => Uint8List(32);
 }
 
 class MockPathProviderService extends Mock implements PathProviderService {
@@ -30,7 +29,6 @@ void main() {
   late SQLCipherDatabaseService dbService;
   late PersonRepository personRepo;
   late TagRepository tagRepo;
-  late SearchRepository searchRepo;
 
   setUp(() async {
     final mockKeyManager = MockMasterKeyManager();
@@ -45,7 +43,6 @@ void main() {
 
     personRepo = PersonRepository(dbService);
     tagRepo = TagRepository(dbService);
-    searchRepo = SearchRepository(dbService);
   });
 
   tearDown(() async {
@@ -122,10 +119,16 @@ void main() {
 
   group('TagRepository Tests', () {
     test('createTag and filtering', () async {
-      final t1 = Tag(id: 't1', name: 'Global', createdAt: DateTime.now());
+      final t1 = Tag(
+        id: 't1',
+        name: 'Global',
+        color: '#009688',
+        createdAt: DateTime.now(),
+      );
       final t2 = Tag(
         id: 't2',
         name: 'Personal',
+        color: '#009688',
         personId: 'p1',
         createdAt: DateTime.now(),
       );
@@ -142,7 +145,12 @@ void main() {
     });
 
     test('deleteTag cascade to images', () async {
-      final t1 = Tag(id: 't1', name: 'Test', createdAt: DateTime.now());
+      final t1 = Tag(
+        id: 't1',
+        name: 'Test',
+        color: '#009688',
+        createdAt: DateTime.now(),
+      );
       await tagRepo.createTag(t1);
 
       // Create image with tag
