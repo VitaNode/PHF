@@ -41,9 +41,8 @@ void main() {
         fileSecurityHelperProvider.overrideWithValue(mockFileSecurityHelper),
         pathProviderServiceProvider.overrideWithValue(mockPathProviderService),
         tagRepositoryProvider.overrideWithValue(mockTagRepository),
-        currentPersonIdControllerProvider.overrideWith(
-          () => MockCurrentPersonIdController('p1'),
-        ),
+        currentPersonIdControllerProvider
+            .overrideWith(() => MockCurrentPersonIdController('p1')),
       ],
       child: MaterialApp(
         home: Scaffold(
@@ -178,9 +177,8 @@ void main() {
       ];
 
       // Setup Mocks
-      when(
-        mockTagRepository.getAllTags(personId: anyNamed('personId')),
-      ).thenAnswer((_) async => tags);
+      when(mockTagRepository.getAllTags(personId: anyNamed('personId')))
+          .thenAnswer((_) async => tags);
 
       // Pump Widget
       await widgetTester.pumpWidget(createSubject(recordWithImage));

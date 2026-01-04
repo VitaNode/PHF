@@ -23,7 +23,6 @@ class AppMetaRepository {
   static const String _table = 'app_meta';
   static const String _keyHasLock = 'has_lock';
   static const String _keyCurrentPersonId = 'current_person_id';
-  static const String _keyDisclaimerAccepted = 'is_disclaimer_accepted';
 
   /// 通用读取
   Future<String?> get(String key) async {
@@ -69,16 +68,5 @@ class AppMetaRepository {
   /// 设置当前选择的人员 ID
   Future<void> setCurrentPersonId(String id) async {
     await put(_keyCurrentPersonId, id);
-  }
-
-  /// 检查是否已接受免责声明
-  Future<bool> isDisclaimerAccepted() async {
-    final val = await get(_keyDisclaimerAccepted);
-    return val == '1' || val == 'true';
-  }
-
-  /// 设置免责声明接受状态
-  Future<void> setDisclaimerAccepted(bool accepted) async {
-    await put(_keyDisclaimerAccepted, accepted ? '1' : '0');
   }
 }

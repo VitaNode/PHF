@@ -368,7 +368,66 @@ class MockFlutterSecureStorage extends _i1.Mock
             returnValue: _i5.Future<bool?>.value(),
             returnValueForMissingStub: _i5.Future<bool?>.value(),
           )
-          as _i5.Future<bool?>);
+          as _i4.Future<bool?>);
+}
+
+/// A class which mocks [AppMetaRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
+  @override
+  _i4.Future<String?> get(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#get, [key]),
+            returnValue: _i4.Future<String?>.value(),
+            returnValueForMissingStub: _i4.Future<String?>.value(),
+          )
+          as _i4.Future<String?>);
+
+  @override
+  _i4.Future<void> put(String? key, String? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#put, [key, value]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<bool> hasLock() =>
+      (super.noSuchMethod(
+            Invocation.method(#hasLock, []),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> setHasLock(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#setHasLock, [enabled]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<String?> getCurrentPersonId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getCurrentPersonId, []),
+            returnValue: _i4.Future<String?>.value(),
+            returnValueForMissingStub: _i4.Future<String?>.value(),
+          )
+          as _i4.Future<String?>);
+
+  @override
+  _i4.Future<void> setCurrentPersonId(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#setCurrentPersonId, [id]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [LocalAuthentication].

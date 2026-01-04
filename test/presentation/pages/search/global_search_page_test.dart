@@ -31,9 +31,7 @@ void main() {
     return ProviderScope(
       overrides: [
         searchRepositoryProvider.overrideWithValue(mockSearchRepo),
-        currentPersonIdControllerProvider.overrideWith(
-          () => MockCurrentPersonIdController('p1'),
-        ),
+        currentPersonIdControllerProvider.overrideWith(() => MockCurrentPersonIdController('p1')),
       ],
       child: const MaterialApp(home: GlobalSearchPage()),
     );

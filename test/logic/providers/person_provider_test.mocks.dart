@@ -75,24 +75,6 @@ class MockIPersonRepository extends _i1.Mock implements _i2.IPersonRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
-
-  @override
-  _i3.Future<_i4.Person?> getDefaultPerson() =>
-      (super.noSuchMethod(
-            Invocation.method(#getDefaultPerson, []),
-            returnValue: _i3.Future<_i4.Person?>.value(),
-            returnValueForMissingStub: _i3.Future<_i4.Person?>.value(),
-          )
-          as _i3.Future<_i4.Person?>);
-
-  @override
-  _i3.Future<_i4.Person?> getPerson(String? id) =>
-      (super.noSuchMethod(
-            Invocation.method(#getPerson, [id]),
-            returnValue: _i3.Future<_i4.Person?>.value(),
-            returnValueForMissingStub: _i3.Future<_i4.Person?>.value(),
-          )
-          as _i3.Future<_i4.Person?>);
 }
 
 /// A class which mocks [AppMetaRepository].
@@ -148,24 +130,6 @@ class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
   _i3.Future<void> setCurrentPersonId(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#setCurrentPersonId, [id]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  _i3.Future<bool> isDisclaimerAccepted() =>
-      (super.noSuchMethod(
-            Invocation.method(#isDisclaimerAccepted, []),
-            returnValue: _i3.Future<bool>.value(false),
-            returnValueForMissingStub: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
-
-  @override
-  _i3.Future<void> setDisclaimerAccepted(bool? accepted) =>
-      (super.noSuchMethod(
-            Invocation.method(#setDisclaimerAccepted, [accepted]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

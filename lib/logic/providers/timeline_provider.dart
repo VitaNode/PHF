@@ -57,23 +57,11 @@ class TimelineController extends _$TimelineController {
   }
 
   /// 内部获取当前用户的所有记录
-  Future<HomeState> _fetchRecords(
-    String personId, {
-    String? query,
-    List<String>? tags,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+  Future<HomeState> _fetchRecords(String personId) async {
     final repo = ref.read(recordRepositoryProvider);
     final imageRepo = ref.read(imageRepositoryProvider);
 
-    final records = await repo.searchRecords(
-      personId: personId,
-      query: query,
-      tags: tags,
-      startDate: startDate,
-      endDate: endDate,
-    );
+    final records = await repo.getRecordsByPerson(personId);
     final pendingCount = await repo.getPendingCount(personId);
 
     // Enrich with images (Phase 1 N+1)
@@ -98,43 +86,35 @@ class TimelineController extends _$TimelineController {
     final personId = await ref.read(currentPersonIdControllerProvider.future);
     if (personId == null) return;
 
-    final currentQuery = state.value?.searchQuery;
-    final currentTags = state.value?.filterTags;
-    final currentStart = state.value?.startDate;
-    final currentEnd = state.value?.endDate;
-
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _fetchRecords(
-        personId,
-        query: currentQuery,
-        tags: currentTags,
-        startDate: currentStart,
-        endDate: currentEnd,
-      ),
-    );
+    state = await AsyncValue.guard(() => _fetchRecords(personId));
   }
 
   /// 搜索与过滤
-  Future<void> search({
-    String? query,
-    List<String>? tags,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+  Future<void> search({String? query, List<String>? tags}) async {
     final personId = await ref.read(currentPersonIdControllerProvider.future);
     if (personId == null) return;
 
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => _fetchRecords(
-        personId,
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(recordRepositoryProvider);
+      final imageRepo = ref.read(imageRepositoryProvider);
+
+      final records = await repo.searchRecords(
+        personId: personId,
         query: query,
         tags: tags,
-        startDate: startDate,
-        endDate: endDate,
-      ),
-    );
+      );
+      final pendingCount = await repo.getPendingCount(personId);
+
+      final List<MedicalRecord> enriched = [];
+      for (var rec in records) {
+        final images = await imageRepo.getImagesForRecord(rec.id);
+        enriched.add(rec.copyWith(images: images));
+      }
+
+      return HomeState(records: enriched, pendingCount: pendingCount);
+    });
   }
 
   /// 删除记录

@@ -60,9 +60,8 @@ void main() {
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
         fileSecurityHelperProvider.overrideWithValue(mockFileHelper),
         pathProviderServiceProvider.overrideWithValue(mockPathService),
-        currentPersonIdControllerProvider.overrideWith(
-          () => MockCurrentPersonIdController('p1'),
-        ),
+        currentPersonIdControllerProvider
+            .overrideWith(() => MockCurrentPersonIdController('p1')),
         ocrPendingCountProvider.overrideWith((ref) => Stream.value(0)),
       ],
       child: MaterialApp(home: RecordDetailPage(recordId: recordId)),
