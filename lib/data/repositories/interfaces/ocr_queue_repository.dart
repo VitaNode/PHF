@@ -26,7 +26,9 @@ abstract interface class IOCRQueueRepository {
   Future<void> incrementRetry(String id);
 
   /// 获取所有挂起的任务数量
-  Future<int> getPendingCount();
+  ///
+  /// 如果提供 [personId]，则仅统计该用户的任务。
+  Future<int> getPendingCount({String? personId});
 
   /// 删除任务
   Future<void> deleteJob(String id);

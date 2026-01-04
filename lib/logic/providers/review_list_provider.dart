@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/record.dart';
 import 'core_providers.dart';
 import 'ocr_status_provider.dart';
+import 'person_provider.dart';
 
 part 'review_list_provider.g.dart';
 
@@ -9,6 +10,11 @@ part 'review_list_provider.g.dart';
 class ReviewListController extends _$ReviewListController {
   @override
   FutureOr<List<MedicalRecord>> build() async {
+    // 监听当前人员变更
+    final personId = await ref.watch(currentPersonIdControllerProvider.future);
+
+    if (personId == null) return [];
+
     // 监听 OCR 任务，当有任务完成时，刷新待确认列表
     ref.listen(ocrPendingCountProvider, (previous, next) {
       if (previous != null && next.hasValue && previous.hasValue) {
@@ -18,19 +24,20 @@ class ReviewListController extends _$ReviewListController {
       }
     });
 
-    return _fetchRecords();
+    return _fetchRecords(personId);
   }
 
-  Future<List<MedicalRecord>> _fetchRecords() async {
+  Future<List<MedicalRecord>> _fetchRecords(String personId) async {
     final repo = ref.read(recordRepositoryProvider);
-    // TODO: Phase 2 Get Person ID from User Session
-    const currentPersonId = 'def_me';
-    return repo.getReviewRecords(currentPersonId);
+    return repo.getReviewRecords(personId);
   }
 
   Future<void> refresh() async {
+    final personId = await ref.read(currentPersonIdControllerProvider.future);
+    if (personId == null) return;
+
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchRecords());
+    state = await AsyncValue.guard(() => _fetchRecords(personId));
   }
 
   /// 归档记录 (Approve)

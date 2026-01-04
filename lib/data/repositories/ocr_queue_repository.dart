@@ -120,14 +120,31 @@ class OCRQueueRepository extends BaseRepository implements IOCRQueueRepository {
   }
 
   @override
-  Future<int> getPendingCount() async {
+  Future<int> getPendingCount({String? personId}) async {
     final db = await dbService.database;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery('SELECT COUNT(*) FROM ocr_queue WHERE status = ?', [
-        OCRJobStatus.pending.name,
-      ]),
-    );
-    return count ?? 0;
+
+    if (personId == null) {
+      final count = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM ocr_queue WHERE status = ?', [
+          OCRJobStatus.pending.name,
+        ]),
+      );
+      return count ?? 0;
+    } else {
+      final count = Sqflite.firstIntValue(
+        await db.rawQuery(
+          '''
+          SELECT COUNT(*) 
+          FROM ocr_queue q
+          JOIN images i ON q.image_id = i.id
+          JOIN records r ON i.record_id = r.id
+          WHERE q.status = ? AND r.person_id = ?
+          ''',
+          [OCRJobStatus.pending.name, personId],
+        ),
+      );
+      return count ?? 0;
+    }
   }
 
   @override

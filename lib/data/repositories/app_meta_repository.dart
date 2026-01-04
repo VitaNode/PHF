@@ -22,6 +22,7 @@ class AppMetaRepository {
 
   static const String _table = 'app_meta';
   static const String _keyHasLock = 'has_lock';
+  static const String _keyCurrentPersonId = 'current_person_id';
 
   /// 通用读取
   Future<String?> get(String key) async {
@@ -57,5 +58,15 @@ class AppMetaRepository {
   /// 设置应用锁状态
   Future<void> setHasLock(bool enabled) async {
     await put(_keyHasLock, enabled ? '1' : '0');
+  }
+
+  /// 获取当前选择的人员 ID
+  Future<String?> getCurrentPersonId() async {
+    return get(_keyCurrentPersonId);
+  }
+
+  /// 设置当前选择的人员 ID
+  Future<void> setCurrentPersonId(String id) async {
+    await put(_keyCurrentPersonId, id);
   }
 }

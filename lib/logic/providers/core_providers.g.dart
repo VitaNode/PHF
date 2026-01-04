@@ -463,6 +463,53 @@ final class ImageRepositoryProvider
 
 String _$imageRepositoryHash() => r'a818f6f215615efc5cc70caac9292da693082327';
 
+@ProviderFor(personRepository)
+final personRepositoryProvider = PersonRepositoryProvider._();
+
+final class PersonRepositoryProvider
+    extends
+        $FunctionalProvider<
+          IPersonRepository,
+          IPersonRepository,
+          IPersonRepository
+        >
+    with $Provider<IPersonRepository> {
+  PersonRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IPersonRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  IPersonRepository create(Ref ref) {
+    return personRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IPersonRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IPersonRepository>(value),
+    );
+  }
+}
+
+String _$personRepositoryHash() => r'3e777378932b2ac4e9af168b9a23aa91e14631bf';
+
 @ProviderFor(appMetaRepository)
 final appMetaRepositoryProvider = AppMetaRepositoryProvider._();
 
@@ -724,4 +771,4 @@ final class AllTagsProvider
   }
 }
 
-String _$allTagsHash() => r'40bcc092347698fb3d21df54443ed0c84a8b18b3';
+String _$allTagsHash() => r'b59a84310ef7b42ada4934bb728d8e7fad886721';
