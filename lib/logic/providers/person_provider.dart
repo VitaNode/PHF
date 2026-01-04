@@ -3,11 +3,15 @@
 /// ## Description
 /// 管理多人员切换的核心状态。
 /// 负责加载人员列表、持久化当前选择的人员，并提供隔离后的数据过滤基准。
+///
+/// ## 修复记录
+/// - [issue#14] 优化 `currentPerson` provider，使用 `firstOrNull` 替代 `try-catch`；为 `selectPerson` 增加错误捕捉与日志记录。
 library;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/person.dart';
 import 'core_providers.dart';
+import 'logging_provider.dart';
 
 part 'person_provider.g.dart';
 
@@ -44,9 +48,14 @@ class CurrentPersonIdController extends _$CurrentPersonIdController {
 
   /// 切换当前选中的人员
   Future<void> selectPerson(String id) async {
-    final metaRepo = ref.read(appMetaRepositoryProvider);
-    await metaRepo.setCurrentPersonId(id);
-    state = AsyncData(id);
+    try {
+      final metaRepo = ref.read(appMetaRepositoryProvider);
+      await metaRepo.setCurrentPersonId(id);
+      state = AsyncData(id);
+    } catch (e, stack) {
+      ref.read(talkerProvider).handle(e, stack, '[CurrentPersonIdController] Failed to select person');
+      rethrow;
+    }
   }
 }
 
@@ -59,9 +68,5 @@ Future<Person?> currentPerson(Ref ref) async {
   if (id == null) return null;
 
   final persons = await ref.watch(allPersonsProvider.future);
-  try {
-    return persons.firstWhere((p) => p.id == id);
-  } catch (_) {
-    return null;
-  }
+  return persons.where((p) => p.id == id).firstOrNull;
 }

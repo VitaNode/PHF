@@ -60,7 +60,9 @@ MasterKeyManager masterKeyManager(Ref ref) {
 SQLCipherDatabaseService databaseService(Ref ref) {
   final km = ref.watch(masterKeyManagerProvider);
   final pp = ref.watch(pathProviderServiceProvider);
-  return SQLCipherDatabaseService(keyManager: km, pathService: pp);
+  final service = SQLCipherDatabaseService(keyManager: km, pathService: pp);
+  ref.onDispose(() => service.close());
+  return service;
 }
 
 @Riverpod(keepAlive: true)
