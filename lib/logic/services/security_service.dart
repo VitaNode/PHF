@@ -7,6 +7,11 @@
 /// - **PIN Hashing**: 使用 SHA-256 对 PIN 进行哈希处理，不存储明文。
 /// - **Secure Storage**: 所有安全标志位（Hash, Biometric Flag）均存储在 Keychain (iOS) / Keystore (Android)。
 /// - **Memory Safety**: PIN 码明文仅在局部变量中短期存在。
+///
+/// ## 修复记录
+/// - 引入 `Talker` 日志记录，增强可追溯性。
+/// - 为关键方法增加 `try-catch` 错误处理。
+/// - 在 `_hashPin` 中显式清理字节数组内存，提升安全性。
 library;
 
 import 'dart:convert';
@@ -91,7 +96,6 @@ class SecurityService implements ISecurityService {
   @override
   Future<bool> enableBiometrics() async {
     try {
-      // 兼容较旧版本的 local_auth API 或特定配置
       // ignore: deprecated_member_use
       final authenticated = await _localAuth.authenticate(
         localizedReason: '验证身份以启用指纹/面容解锁',
@@ -114,7 +118,12 @@ class SecurityService implements ISecurityService {
 
   @override
   Future<void> disableBiometrics() async {
-    await _secureStorage.delete(key: _keyBioEnabled);
+    try {
+      await _secureStorage.delete(key: _keyBioEnabled);
+      _talker.info('Biometrics disabled');
+    } catch (e, st) {
+      _talker.handle(e, st, 'Error disabling biometrics');
+    }
   }
 
   @override
@@ -137,12 +146,6 @@ class SecurityService implements ISecurityService {
       _talker.handle(e, st, 'Error checking if lock exists');
       return false;
     }
-  }
-
-  @override
-  Future<bool> hasLock() async {
-    final storedHash = await _secureStorage.read(key: _keyPinHash);
-    return storedHash != null;
   }
 
   String _hashPin(String pin) {

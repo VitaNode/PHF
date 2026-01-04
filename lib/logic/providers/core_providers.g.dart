@@ -642,7 +642,7 @@ final class SecurityServiceProvider
   }
 }
 
-String _$securityServiceHash() => r'fd747b834d5232b26f9380318d53377bbf5ce551';
+String _$securityServiceHash() => r'3ba8057ba9f041ce114389b53e92d18f21379df2';
 
 @ProviderFor(tagRepository)
 final tagRepositoryProvider = TagRepositoryProvider._();

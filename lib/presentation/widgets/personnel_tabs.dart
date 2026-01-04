@@ -46,10 +46,10 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
       data: (persons) => currentIdAsync.when(
         data: (currentId) => _buildTabs(context, persons, currentId),
         loading: () => const SizedBox(height: 56),
-        error: (error, stack) => const SizedBox.shrink(),
+        error: (err, st) => const SizedBox.shrink(),
       ),
       loading: () => const SizedBox(height: 56),
-      error: (error, stack) => const SizedBox.shrink(),
+      error: (err, st) => const SizedBox.shrink(),
     );
   }
 
@@ -59,10 +59,6 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
     String? currentId,
   ) {
     if (persons.isEmpty) return const SizedBox.shrink();
-
-    // 确定当前选中的索引，默认为 0
-    // final selectedIndex = persons.indexWhere((p) => p.id == currentId);
-    // TODO: Scroll to selectedIndex
 
     return Container(
       height: 56,
