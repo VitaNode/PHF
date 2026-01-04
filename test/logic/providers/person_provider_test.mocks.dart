@@ -75,6 +75,24 @@ class MockIPersonRepository extends _i1.Mock implements _i2.IPersonRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
+
+  @override
+  _i3.Future<_i4.Person?> getDefaultPerson() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDefaultPerson, []),
+            returnValue: _i3.Future<_i4.Person?>.value(),
+            returnValueForMissingStub: _i3.Future<_i4.Person?>.value(),
+          )
+          as _i3.Future<_i4.Person?>);
+
+  @override
+  _i3.Future<_i4.Person?> getPerson(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#getPerson, [id]),
+            returnValue: _i3.Future<_i4.Person?>.value(),
+            returnValueForMissingStub: _i3.Future<_i4.Person?>.value(),
+          )
+          as _i3.Future<_i4.Person?>);
 }
 
 /// A class which mocks [AppMetaRepository].

@@ -29,6 +29,34 @@ class PersonRepository implements IPersonRepository {
   }
 
   @override
+  Future<Person?> getDefaultPerson() async {
+    final db = await _dbService.database;
+    final results = await db.query(
+      'persons',
+      where: 'is_default = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    if (results.isEmpty) return null;
+    return _mapToPerson(results.first);
+  }
+
+  @override
+  Future<Person?> getPerson(String id) async {
+    final db = await _dbService.database;
+    final results = await db.query(
+      'persons',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (results.isEmpty) return null;
+    return _mapToPerson(results.first);
+  }
+
+  @override
   Future<void> createPerson(Person person) async {
     final db = await _dbService.database;
     await db.insert(
@@ -64,20 +92,6 @@ class PersonRepository implements IPersonRepository {
     if (count != null && count > 0) {
       throw Exception('Cannot delete person with existing records.');
     }
-
-    // Allow delete if only 'deleted' records exist?
-    // Usually we keep 'deleted' records for sync/audit but orphan them or hard delete them?
-    // Constitution says "Cascade Delete".
-    // Spec says "Deletion Constraint: Forbid deletion if the person has records".
-    // "Deletion constraint: If person has records, forbid deletion." implies active records.
-    // If records are logically deleted, maybe we should allow?
-    // Let's assume strict check: No records at all. Or check non-deleted records.
-    // The query above checks `status != 'deleted'`. So logically deleted records won't block.
-    // However, the FK has ON DELETE CASCADE. So if we delete person, records will be deleted.
-    // The requirement is to PREVENT accidental deletion of valuable data.
-
-    // If strict requirement "Forbid deletion if the person has records", it usually means valid records.
-    // So `status != 'deleted'` is correct.
 
     await db.delete('persons', where: 'id = ?', whereArgs: [id]);
   }
