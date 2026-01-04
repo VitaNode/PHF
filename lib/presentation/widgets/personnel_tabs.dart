@@ -13,6 +13,7 @@
 /// ## Security
 /// - **Privacy**: 仅显示人员昵称，不涉及敏感医疗数据。
 /// - **Memory**: 使用 Riverpod 驱动，确保资源及时释放。
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,10 +46,10 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
       data: (persons) => currentIdAsync.when(
         data: (currentId) => _buildTabs(context, persons, currentId),
         loading: () => const SizedBox(height: 56),
-        error: (_, __) => const SizedBox.shrink(),
+        error: (error, stack) => const SizedBox.shrink(),
       ),
       loading: () => const SizedBox(height: 56),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 
@@ -60,8 +61,8 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
     if (persons.isEmpty) return const SizedBox.shrink();
 
     // 确定当前选中的索引，默认为 0
-    final selectedIndex = persons.indexWhere((p) => p.id == currentId);
-    final safeIndex = selectedIndex != -1 ? selectedIndex : 0;
+    // final selectedIndex = persons.indexWhere((p) => p.id == currentId);
+    // TODO: Scroll to selectedIndex
 
     return Container(
       height: 56,
