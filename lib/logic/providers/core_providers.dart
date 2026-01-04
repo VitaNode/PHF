@@ -102,11 +102,13 @@ IBackupService backupService(Ref ref) {
   final crypto = ref.watch(cryptoServiceProvider);
   final path = ref.watch(pathProviderServiceProvider);
   final key = ref.watch(masterKeyManagerProvider);
+  final db = ref.watch(databaseServiceProvider);
   final talker = ref.watch(talkerProvider);
   return BackupService(
     cryptoService: crypto,
     pathService: path,
     keyManager: key,
+    dbService: db,
     talker: talker,
   );
 }

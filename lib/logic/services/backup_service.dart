@@ -5,6 +5,7 @@
 ///
 /// ## 修复记录
 /// - [issue#15] 优化内存管理：导入时使用 `InputFileStream` 避免 OOM；增强临时文件清理的可靠性；集成 `Talker` 记录关键链路日志。
+/// - [issue#16] 优化恢复逻辑：导入前先行关闭数据库连接 (T3.3.3)；使用 `extractFileToDisk` 实现流式解压，彻底解决 OOM 隐患。
 library;
 
 import 'dart:io';
@@ -15,6 +16,7 @@ import 'package:path/path.dart' as p;
 import 'package:talker_flutter/talker_flutter.dart';
 import '../../core/security/master_key_manager.dart';
 import '../../core/services/path_provider_service.dart';
+import '../../data/datasources/local/database_service.dart';
 import 'interfaces/backup_service.dart';
 import 'interfaces/crypto_service.dart';
 
@@ -22,16 +24,19 @@ class BackupService implements IBackupService {
   final ICryptoService _cryptoService;
   final PathProviderService _pathService;
   final MasterKeyManager _keyManager;
+  final SQLCipherDatabaseService _dbService;
   final Talker? _talker;
 
   BackupService({
     required ICryptoService cryptoService,
     required PathProviderService pathService,
     required MasterKeyManager keyManager,
+    required SQLCipherDatabaseService dbService,
     Talker? talker,
   }) : _cryptoService = cryptoService,
        _pathService = pathService,
        _keyManager = keyManager,
+       _dbService = dbService,
        _talker = talker;
 
   @override
@@ -111,28 +116,16 @@ class BackupService implements IBackupService {
         key: key,
       );
 
-      // 4. 解压并覆盖
-      final bytes = await File(decryptedZipPath).readAsBytes();
-      final archive = ZipDecoder().decodeBytes(bytes);
+      // 4. 重启数据库连接准备：先行关闭现有连接，防止文件占用导致覆盖失败
+      _talker?.info('[BackupService] Closing database before restore');
+      await _dbService.close();
 
+      // 5. 使用 extractFileToDisk 实现流式解压 (OOM 安全)
       final sandboxRoot = _pathService.sandboxRoot;
+      _talker?.info('[BackupService] Extracting files to $sandboxRoot');
 
-      for (final file in archive) {
-        final filename = file.name;
-        if (file.isFile) {
-          final outFile = File(p.join(sandboxRoot, filename));
-          await outFile.create(recursive: true);
-
-          // 如果文件较大，这里仍然可能 OOM，但 InputFileStream 已经缓解了 archive 对象的占用
-          // 对于特定的大附件，未来可以考虑分块解压
-          final data = file.content as List<int>;
-          await outFile.writeAsBytes(data);
-        } else {
-          await Directory(
-            p.join(sandboxRoot, filename),
-          ).create(recursive: true);
-        }
-      }
+      // archive_io 的 extractFileToDisk 在某些版本中可能返回 Future 或同步
+      await extractFileToDisk(decryptedZipPath, sandboxRoot);
 
       _talker?.info('[BackupService] Backup import completed successfully');
     } catch (e, stack) {
