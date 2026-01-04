@@ -52,7 +52,11 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
     );
   }
 
-  Widget _buildTabs(BuildContext context, List<Person> persons, String? currentId) {
+  Widget _buildTabs(
+    BuildContext context,
+    List<Person> persons,
+    String? currentId,
+  ) {
     if (persons.isEmpty) return const SizedBox.shrink();
 
     // 确定当前选中的索引，默认为 0
@@ -64,9 +68,7 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: const BoxDecoration(
         color: AppTheme.bgWhite,
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E5EA), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 1)),
       ),
       child: ListView.builder(
         controller: _scrollController,
@@ -88,7 +90,9 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
   }
 
   Future<void> _onTabSelected(String personId, int index) async {
-    await ref.read(currentPersonIdControllerProvider.notifier).selectPerson(personId);
+    await ref
+        .read(currentPersonIdControllerProvider.notifier)
+        .selectPerson(personId);
     // TODO: 自动滚动使选中项居中
   }
 }

@@ -20,7 +20,6 @@ import 'package:talker_flutter/talker_flutter.dart';
 import '../../../logic/providers/logging_provider.dart';
 import '../../widgets/personnel_tabs.dart';
 
-
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
