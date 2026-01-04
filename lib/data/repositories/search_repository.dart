@@ -17,7 +17,6 @@
 library;
 
 import 'dart:convert';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/image.dart';
 import '../models/record.dart';
 import 'base_repository.dart';

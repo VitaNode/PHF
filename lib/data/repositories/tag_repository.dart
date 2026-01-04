@@ -93,7 +93,7 @@ class TagRepository implements ITagRepository {
         if (tagsStr == null) continue;
 
         try {
-          final List<dynamic> currentTags = jsonDecode(tagsStr);
+          final currentTags = jsonDecode(tagsStr) as List<dynamic>;
           final newTags = currentTags.where((t) => t != id).toList();
 
           if (newTags.length != currentTags.length) {
