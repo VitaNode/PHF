@@ -2,9 +2,9 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ phase3, develop ]
+    branches: [ develop ]
   pull_request:
-    branches: [ phase3, develop ]
+    branches: [ develop ]
   merge_group:
 
 concurrency:
