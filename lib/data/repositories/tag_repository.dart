@@ -9,6 +9,9 @@
 /// ## Logic
 /// - **Sync**: 删除标签时，需手动更新 `images.tags` 字段，因为该字段是 JSON 缓存。
 /// - **Filtering**: 支持 `personId` 隔离。
+///
+/// ## 修复记录
+/// - [issue#14] 重构 `deleteTag` 逻辑，消除 `dynamic` 类型的使用，增强类型安全性，符合 Constitution 规范。
 library;
 
 import 'dart:convert';
@@ -93,7 +96,10 @@ class TagRepository implements ITagRepository {
         if (tagsStr == null) continue;
 
         try {
-          final currentTags = jsonDecode(tagsStr) as List<dynamic>;
+          final decoded = jsonDecode(tagsStr);
+          if (decoded is! List) continue;
+          
+          final currentTags = decoded.map((e) => e.toString()).toList();
           final newTags = currentTags.where((t) => t != id).toList();
 
           if (newTags.length != currentTags.length) {

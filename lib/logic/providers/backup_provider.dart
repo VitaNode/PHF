@@ -46,14 +46,18 @@ class BackupController extends _$BackupController {
     state = await AsyncValue.guard(() async {
       final service = ref.read(backupServiceProvider);
 
+      talker.info('[BackupController] Closing database connection...');
+      // 断开数据库连接以允许文件覆盖
+      ref.invalidate(databaseServiceProvider);
+
       talker.info('[BackupController] Starting import from $path');
       await service.importBackup(path, pin);
 
       talker.info(
-        '[BackupController] Import successful. Invalidating database.',
+        '[BackupController] Import successful. Re-initializing database.',
       );
 
-      // 重置数据库连接，强制重新初始化
+      // 再次重置，确保后续读取获得最新连接
       ref.invalidate(databaseServiceProvider);
       // 同时可能需要重置其他依赖数据库的 Provider
       // 简单起见，可以提示用户重启应用或利用 Riverpod 的依赖关系自动传播
