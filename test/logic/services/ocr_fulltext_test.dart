@@ -61,7 +61,7 @@ void main() {
       'CREATE TABLE ocr_queue (id TEXT PRIMARY KEY, image_id TEXT REFERENCES images(id) ON DELETE CASCADE, status TEXT, retry_count INTEGER, last_error TEXT, created_at_ms INTEGER, updated_at_ms INTEGER)',
     );
     await db.execute(
-      'CREATE VIRTUAL TABLE ocr_search_index USING fts5(record_id UNINDEXED, content)',
+      'CREATE VIRTUAL TABLE ocr_search_index USING fts5(record_id UNINDEXED, hospital_name, tags, ocr_text, notes, content)',
     );
 
     when(mockDbService.database).thenAnswer((_) async => db);
