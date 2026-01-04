@@ -132,11 +132,9 @@ void main() {
   group('TagRepository Tests', () {
     test('createTag and filtering', () async {
       // Create person first to satisfy FK
-      await personRepo.createPerson(Person(
-        id: 'p1',
-        nickname: 'N',
-        createdAt: DateTime.now(),
-      ));
+      await personRepo.createPerson(
+        Person(id: 'p1', nickname: 'N', createdAt: DateTime.now()),
+      );
 
       final t1 = Tag(
         id: 't1',
