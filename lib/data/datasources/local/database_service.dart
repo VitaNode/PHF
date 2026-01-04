@@ -32,6 +32,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart'; // for visibleForTesting
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../../core/security/master_key_manager.dart';
@@ -118,8 +119,10 @@ class SQLCipherDatabaseService {
 
     // 开启 WAL 模式 (重要：解决跨 Isolate 读写同步延迟)
     // 注意：某些 Android 版本要求使用 rawQuery 执行会有返回值的 PRAGMA
-    await db.rawQuery('PRAGMA journal_mode = WAL');
-    await db.rawQuery('PRAGMA synchronous = NORMAL');
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      await db.rawQuery('PRAGMA journal_mode = WAL');
+      await db.rawQuery('PRAGMA synchronous = NORMAL');
+    }
 
     // 显式设置安全参数 (SQLCipher 4 Defaults but made explicit for future-proofing)
     // 4096 bytes page size aligns with most filesystems
