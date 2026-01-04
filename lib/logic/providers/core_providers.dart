@@ -26,6 +26,8 @@ import '../../data/repositories/interfaces/ocr_queue_repository.dart';
 import '../../data/repositories/ocr_queue_repository.dart';
 import '../../data/models/tag.dart';
 import 'person_provider.dart';
+import '../services/interfaces/backup_service.dart';
+import '../services/backup_service.dart';
 import '../services/crypto_service.dart';
 import '../services/security_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -90,6 +92,18 @@ IRecordRepository recordRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 ICryptoService cryptoService(Ref ref) {
   return CryptoService();
+}
+
+@Riverpod(keepAlive: true)
+IBackupService backupService(Ref ref) {
+  final crypto = ref.watch(cryptoServiceProvider);
+  final path = ref.watch(pathProviderServiceProvider);
+  final key = ref.watch(masterKeyManagerProvider);
+  return BackupService(
+    cryptoService: crypto,
+    pathService: path,
+    keyManager: key,
+  );
 }
 
 @Riverpod(keepAlive: true)

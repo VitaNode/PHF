@@ -417,6 +417,47 @@ final class CryptoServiceProvider
 
 String _$cryptoServiceHash() => r'7bf1c14754df33bf2bac1d9430f02e51b3c70e8d';
 
+@ProviderFor(backupService)
+final backupServiceProvider = BackupServiceProvider._();
+
+final class BackupServiceProvider
+    extends $FunctionalProvider<IBackupService, IBackupService, IBackupService>
+    with $Provider<IBackupService> {
+  BackupServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IBackupService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IBackupService create(Ref ref) {
+    return backupService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IBackupService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IBackupService>(value),
+    );
+  }
+}
+
+String _$backupServiceHash() => r'986170c730f3b2cd420e42abea7a80dee1c8ec68';
+
 @ProviderFor(imageRepository)
 final imageRepositoryProvider = ImageRepositoryProvider._();
 
