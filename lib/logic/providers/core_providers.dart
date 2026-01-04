@@ -15,6 +15,8 @@ import '../../data/repositories/image_repository.dart';
 import '../../data/repositories/interfaces/image_repository.dart';
 import '../../data/repositories/interfaces/record_repository.dart';
 import '../../data/repositories/record_repository.dart';
+import '../../data/repositories/interfaces/person_repository.dart';
+import '../../data/repositories/person_repository.dart';
 import '../../data/repositories/app_meta_repository.dart';
 import '../../data/repositories/interfaces/tag_repository.dart';
 import '../../data/repositories/tag_repository.dart';
@@ -23,6 +25,7 @@ import '../../data/repositories/search_repository.dart';
 import '../../data/repositories/interfaces/ocr_queue_repository.dart';
 import '../../data/repositories/ocr_queue_repository.dart';
 import '../../data/models/tag.dart';
+import 'person_provider.dart';
 import '../services/crypto_service.dart';
 import '../services/security_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -96,6 +99,12 @@ IImageRepository imageRepository(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+IPersonRepository personRepository(Ref ref) {
+  final db = ref.watch(databaseServiceProvider);
+  return PersonRepository(db);
+}
+
+@Riverpod(keepAlive: true)
 AppMetaRepository appMetaRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
   return AppMetaRepository(db);
@@ -130,6 +139,7 @@ IOCRQueueRepository ocrQueueRepository(Ref ref) {
 
 @riverpod
 Future<List<Tag>> allTags(Ref ref) async {
+  final personId = await ref.watch(currentPersonIdControllerProvider.future);
   final repo = ref.watch(tagRepositoryProvider);
-  return repo.getAllTags();
+  return repo.getAllTags(personId: personId);
 }

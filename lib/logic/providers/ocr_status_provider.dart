@@ -14,6 +14,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'core_providers.dart';
 import 'logging_provider.dart';
+import 'person_provider.dart';
 
 part 'ocr_status_provider.g.dart';
 
@@ -21,6 +22,8 @@ part 'ocr_status_provider.g.dart';
 Stream<int> ocrPendingCount(Ref ref) async* {
   final repo = ref.watch(ocrQueueRepositoryProvider);
   final talker = ref.watch(talkerProvider);
+  // 监听当前人员，切换人员时自动重置轮询
+  final personId = await ref.watch(currentPersonIdControllerProvider.future);
 
   // 保持订阅状态
   // ignore: unused_local_variable
@@ -30,7 +33,7 @@ Stream<int> ocrPendingCount(Ref ref) async* {
 
   while (true) {
     try {
-      final count = await repo.getPendingCount();
+      final count = await repo.getPendingCount(personId: personId);
 
       // 只有当数字变化时才 yield，减少 UI 无谓重绘
       if (count != lastCount) {

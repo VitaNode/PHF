@@ -40,4 +40,4 @@ final class OcrPendingCountProvider
   }
 }
 
-String _$ocrPendingCountHash() => r'e15b6886b8075597f9042d7934687e873d6ce898';
+String _$ocrPendingCountHash() => r'4fc872a9796b64a99db8fd1347a5d353b97535a5';

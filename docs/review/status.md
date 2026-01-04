@@ -42,6 +42,11 @@ Phase 3 (Governance & Store Readiness) has started.
     - `ocr_search_index`: Optimized FTS5 structure (hospital, tags, ocr_text, notes).
     - `DatabaseSeeder`: Enhanced default seed data.
     - Entities updated and `build_runner` executed.
+- [x] **T3.3.1**: Multi-Person Isolation Provider.
+    - Implemented `currentPersonIdControllerProvider` and `currentPersonProvider` in Riverpod.
+    - Updated `TimelineController`, `SearchController`, and `ReviewListController` to automatically isolate data by `person_id`.
+    - Refactored `ocrPendingCountProvider` and `allTagsProvider` to be responsive to the current personnel context.
+    - Updated `AppMetaRepository` to persist the selected user ID across app restarts.
 
 ## 🟢 Phase 2 Complete
 All Phase 2 tasks (T17-T20) are implemented and verified. The system now supports:
