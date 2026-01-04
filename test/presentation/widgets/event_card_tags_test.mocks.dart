@@ -328,4 +328,15 @@ class MockITagRepository extends _i1.Mock implements _i9.ITagRepository {
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+
+  @override
+  _i5.Future<List<_i10.Tag>> suggestTags(String? text, {String? personId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#suggestTags, [text], {#personId: personId}),
+            returnValue: _i5.Future<List<_i10.Tag>>.value(<_i10.Tag>[]),
+            returnValueForMissingStub: _i5.Future<List<_i10.Tag>>.value(
+              <_i10.Tag>[],
+            ),
+          )
+          as _i5.Future<List<_i10.Tag>>);
 }
