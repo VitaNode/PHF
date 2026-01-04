@@ -4,15 +4,32 @@
 /// 标签数据仓库接口。
 ///
 /// ## Methods
-/// - `getAllTags`: 获取所有可用标签。
-/// - `createTag`: 创建新标签（Phase 2）。
+/// - `getAllTags`: 获取标签。支持按 `personId` 过滤（返回全局标签 + 个人标签）。
+/// - `createTag`: 创建新标签。
+/// - `updateTag`: 更新标签（如重命名、排序）。
+/// - `deleteTag`: 删除标签，并级联更新关联数据。
 library;
 
 import '../../../data/models/tag.dart';
 
 abstract class ITagRepository {
-  /// 获取所有可用标签，按 `order_index` 排序
-  Future<List<Tag>> getAllTags();
+  /// 获取标签
+  ///
+  /// 如果 [personId] 为 null，返回所有标签（或视策略而定）。
+  /// 如果 [personId] 不为 null，返回该用户的标签以及全局标签 (`person_id IS NULL`)。
+  Future<List<Tag>> getAllTags({String? personId});
 
-  // Future<String> createTag(...) // Phase 2
+  /// 创建新标签
+  Future<void> createTag(Tag tag);
+
+  /// 更新标签
+  Future<void> updateTag(Tag tag);
+
+  /// 删除标签
+  ///
+  /// 触发级联操作：
+  /// 1. 物理删除 `tags` 表记录。
+  /// 2. 级联删除 `image_tags` (DB Foreign Key).
+  /// 3. 更新 `images.tags` 缓存字段。
+  Future<void> deleteTag(String id);
 }
