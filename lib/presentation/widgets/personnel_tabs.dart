@@ -46,10 +46,10 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
       data: (persons) => currentIdAsync.when(
         data: (currentId) => _buildTabs(context, persons, currentId),
         loading: () => const SizedBox(height: 56),
-        error: (err, st) => const SizedBox.shrink(),
+        error: (err, stack) => const SizedBox.shrink(),
       ),
       loading: () => const SizedBox(height: 56),
-      error: (err, st) => const SizedBox.shrink(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 

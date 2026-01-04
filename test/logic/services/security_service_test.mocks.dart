@@ -500,6 +500,24 @@ class MockAppMetaRepository extends _i1.Mock implements _i10.AppMetaRepository {
             returnValueForMissingStub: _i5.Future<void>.value(),
           )
           as _i5.Future<void>);
+
+  @override
+  _i5.Future<bool> isDisclaimerAccepted() =>
+      (super.noSuchMethod(
+            Invocation.method(#isDisclaimerAccepted, []),
+            returnValue: _i5.Future<bool>.value(false),
+            returnValueForMissingStub: _i5.Future<bool>.value(false),
+          )
+          as _i5.Future<bool>);
+
+  @override
+  _i5.Future<void> setDisclaimerAccepted(bool? accepted) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDisclaimerAccepted, [accepted]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 }
 
 /// A class which mocks [Talker].
