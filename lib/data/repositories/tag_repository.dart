@@ -98,7 +98,6 @@ class TagRepository implements ITagRepository {
         try {
           final decoded = jsonDecode(tagsStr);
           if (decoded is! List) continue;
-          
           final currentTags = decoded.map((e) => e.toString()).toList();
           final newTags = currentTags.where((t) => t != id).toList();
 
