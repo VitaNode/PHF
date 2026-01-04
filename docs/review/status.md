@@ -36,6 +36,11 @@
 Phase 3 (Governance & Store Readiness) has started.
 
 ### Completed (Phase 3)
+- [x] **T3.3.5**: Security Settings Service.
+    - Implemented `ISecurityService` interface and refined `SecurityService`.
+    - Added PIN modification logic with old PIN validation.
+    - Added biometric persistence and toggle logic.
+    - Implemented `SecuritySettingsController` for reactive UI updates.
 - [x] **T3.1**: Infrastructure & Schema (V7 Migration).
     - `persons` table: Added `order_index`, `profile_color`.
     - `tags` table: Added `is_custom`, `order_index`.
@@ -47,6 +52,10 @@ Phase 3 (Governance & Store Readiness) has started.
     - Updated `TimelineController`, `SearchController`, and `ReviewListController` to automatically isolate data by `person_id`.
     - Refactored `ocrPendingCountProvider` and `allTagsProvider` to be responsive to the current personnel context.
     - Updated `AppMetaRepository` to persist the selected user ID across app restarts.
+- [x] **T3.4.1**: UI - PersonnelTabs Component.
+    - Implemented capsule-style sliding tabs for person switching.
+    - Integrated with `currentPersonIdControllerProvider` for persistence and isolation.
+    - Follows `Constitution` UI standards (Teal, Monospace, specific radii).
 
 ## 🟢 Phase 2 Complete
 All Phase 2 tasks (T17-T20) are implemented and verified. The system now supports:
