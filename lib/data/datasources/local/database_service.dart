@@ -417,10 +417,14 @@ class SQLCipherDatabaseService {
 
       // 1. Update persons table
       try {
-        await db.execute('ALTER TABLE persons ADD COLUMN order_index INTEGER DEFAULT 0');
+        await db.execute(
+          'ALTER TABLE persons ADD COLUMN order_index INTEGER DEFAULT 0',
+        );
         await db.execute('ALTER TABLE persons ADD COLUMN profile_color TEXT');
         // Set default color for existing users
-        await db.execute("UPDATE persons SET profile_color = '#009688' WHERE profile_color IS NULL");
+        await db.execute(
+          "UPDATE persons SET profile_color = '#009688' WHERE profile_color IS NULL",
+        );
       } catch (_) {}
 
       // 2. Ensure tags table has is_custom (it was added in v2 but let's be sure)
@@ -440,7 +444,7 @@ class SQLCipherDatabaseService {
           content
         )
       ''');
-      
+
       // Note: Data will be re-populated by the background processor or on next sync.
       // In a real app, we might want to migrate data from the old FTS5 or the main tables.
       // Given the 'content' was the only thing there, and it likely came from ocr_text,
