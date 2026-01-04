@@ -42,6 +42,40 @@ final class HasLockProvider
 
 String _$hasLockHash() => r'e67d146f32cfeeb365ccda93bee351016d7e9ed7';
 
+@ProviderFor(isDisclaimerAccepted)
+final isDisclaimerAcceptedProvider = IsDisclaimerAcceptedProvider._();
+
+final class IsDisclaimerAcceptedProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  IsDisclaimerAcceptedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isDisclaimerAcceptedProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isDisclaimerAcceptedHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return isDisclaimerAccepted(ref);
+  }
+}
+
+String _$isDisclaimerAcceptedHash() =>
+    r'ab688b4039db219711b1d2a51bf1d24a308bfef2';
+
 @ProviderFor(AuthStateController)
 final authStateControllerProvider = AuthStateControllerProvider._();
 

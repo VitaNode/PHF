@@ -11,6 +11,12 @@ Future<bool> hasLock(Ref ref) async {
 }
 
 @Riverpod(keepAlive: true)
+Future<bool> isDisclaimerAccepted(Ref ref) async {
+  final repo = ref.watch(appMetaRepositoryProvider);
+  return repo.isDisclaimerAccepted();
+}
+
+@Riverpod(keepAlive: true)
 class AuthStateController extends _$AuthStateController
     with WidgetsBindingObserver {
   @override
