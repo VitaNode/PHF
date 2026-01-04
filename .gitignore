@@ -42,3 +42,4 @@ android/gradlew.bat
 # Agent Tools
 .gemini/tmp/
 .qwen/tmp/
+.pub-cache/

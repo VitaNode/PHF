@@ -22,6 +22,8 @@ import '../../data/repositories/interfaces/search_repository.dart';
 import '../../data/repositories/search_repository.dart';
 import '../../data/repositories/interfaces/ocr_queue_repository.dart';
 import '../../data/repositories/ocr_queue_repository.dart';
+import '../../data/repositories/interfaces/person_repository.dart';
+import '../../data/repositories/person_repository.dart';
 import '../../data/models/tag.dart';
 import '../services/crypto_service.dart';
 import '../services/security_service.dart';
@@ -126,6 +128,12 @@ ISearchRepository searchRepository(Ref ref) {
 IOCRQueueRepository ocrQueueRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
   return OCRQueueRepository(db);
+}
+
+@Riverpod(keepAlive: true)
+IPersonRepository personRepository(Ref ref) {
+  final db = ref.watch(databaseServiceProvider);
+  return PersonRepository(db);
 }
 
 @riverpod

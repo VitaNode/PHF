@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/models/record.dart';
 import 'core_providers.dart';
 import 'ocr_status_provider.dart';
+import 'user_provider.dart';
 
 part 'review_list_provider.g.dart';
 
@@ -23,9 +24,13 @@ class ReviewListController extends _$ReviewListController {
 
   Future<List<MedicalRecord>> _fetchRecords() async {
     final repo = ref.read(recordRepositoryProvider);
-    // TODO: Phase 2 Get Person ID from User Session
-    const currentPersonId = 'def_me';
-    return repo.getReviewRecords(currentPersonId);
+    final user = await ref.watch(currentUserProvider.future);
+
+    if (user == null) {
+      return [];
+    }
+
+    return repo.getReviewRecords(user.id);
   }
 
   Future<void> refresh() async {

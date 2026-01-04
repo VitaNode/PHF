@@ -688,6 +688,53 @@ final class OcrQueueRepositoryProvider
 String _$ocrQueueRepositoryHash() =>
     r'4aae7f48301a7a6107e82afcbf09f45dfc4036df';
 
+@ProviderFor(personRepository)
+final personRepositoryProvider = PersonRepositoryProvider._();
+
+final class PersonRepositoryProvider
+    extends
+        $FunctionalProvider<
+          IPersonRepository,
+          IPersonRepository,
+          IPersonRepository
+        >
+    with $Provider<IPersonRepository> {
+  PersonRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'personRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$personRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<IPersonRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  IPersonRepository create(Ref ref) {
+    return personRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IPersonRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IPersonRepository>(value),
+    );
+  }
+}
+
+String _$personRepositoryHash() => r'3e777378932b2ac4e9af168b9a23aa91e14631bf';
+
 @ProviderFor(allTags)
 final allTagsProvider = AllTagsProvider._();
 
