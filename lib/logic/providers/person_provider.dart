@@ -53,11 +53,13 @@ class CurrentPersonIdController extends _$CurrentPersonIdController {
       await metaRepo.setCurrentPersonId(id);
       state = AsyncData(id);
     } catch (e, stack) {
-      ref.read(talkerProvider).handle(
-        e,
-        stack,
-        '[CurrentPersonIdController] Failed to select person',
-      );
+      ref
+          .read(talkerProvider)
+          .handle(
+            e,
+            stack,
+            '[CurrentPersonIdController] Failed to select person',
+          );
       rethrow;
     }
   }
