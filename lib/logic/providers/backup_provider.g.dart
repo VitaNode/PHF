@@ -41,7 +41,7 @@ final class BackupControllerProvider
   }
 }
 
-String _$backupControllerHash() => r'9af9768e3dc577a6b92742448707b4460be589f0';
+String _$backupControllerHash() => r'1c330576c9b2c71aa37131499dc125ce59afb7b3';
 
 abstract class _$BackupController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

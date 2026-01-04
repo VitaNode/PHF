@@ -81,7 +81,7 @@ final class CurrentPersonIdControllerProvider
 }
 
 String _$currentPersonIdControllerHash() =>
-    r'e7deb2c73180fb52b57da5aab5603010d64da012';
+    r'64f3bc61edf55946d49087070ad5f9f412c84b69';
 
 /// 当前选中的人员 ID Provider (持久化)
 
@@ -145,4 +145,4 @@ final class CurrentPersonProvider
   }
 }
 
-String _$currentPersonHash() => r'46cb6e631b76d307e27e859e9db00f0aa36bf7df';
+String _$currentPersonHash() => r'e06216edbad452b12e831f6b33d85ab1de6ee6bc';
