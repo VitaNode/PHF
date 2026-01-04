@@ -2,9 +2,14 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ feat/phase3 ]
+    branches: [ phase3, develop ]
   pull_request:
-    branches: [ feat/phase3 ]
+    branches: [ phase3, develop ]
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality-check:
