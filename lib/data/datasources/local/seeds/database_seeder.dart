@@ -28,6 +28,8 @@ class DatabaseSeeder {
       'id': defaultPersonId,
       'nickname': '本人',
       'is_default': 1,
+      'order_index': 0,
+      'profile_color': '#009688', // Default Teal
       'created_at_ms': now,
     });
 

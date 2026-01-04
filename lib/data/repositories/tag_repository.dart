@@ -27,12 +27,9 @@ class TagRepository implements ITagRepository {
       id: row['id'] as String,
       personId: row['person_id'] as String?,
       name: row['name'] as String,
-      // 容错处理：如果数据库中 color 为 NULL，提供默认 Teal 色
       color: (row['color'] as String?) ?? '#008080',
-      // 数据库存储 0/1，转换为 bool。
-      // 注意：Model 中字段名为 isSystem，DB 为 is_custom (逻辑反向或命名对齐需求)
-      // 种子数据中 is_custom=0 表示系统标签，这里我们根据实际语义对齐
-      isSystem: (row['is_custom'] as int? ?? 0) == 0,
+      orderIndex: row['order_index'] as int? ?? 0,
+      isCustom: (row['is_custom'] as int? ?? 0) == 1,
       createdAt: DateTime.fromMillisecondsSinceEpoch(
         row['created_at_ms'] as int,
       ),

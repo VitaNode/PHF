@@ -1,6 +1,6 @@
 # Database Schema Documentation
 
-**Version**: 1.0 (Phase 1)
+**Version**: 7.0 (Phase 3.1)
 **Database Engine**: SQLite 3.x with SQLCipher (AES-256-GCM/CBC)
 **Page Size**: 4096 bytes
 **Foreign Keys**: Enabled (`PRAGMA foreign_keys = ON`)
@@ -16,6 +16,8 @@
 | `nickname` | TEXT | NOT NULL | 显示名称 (e.g., "我", "爷爷") |
 | `avatar_path` | TEXT | | 加密头像路径 (Optional) |
 | `is_default` | INTEGER | DEFAULT 0 | 1 = 默认选中用户 |
+| `order_index` | INTEGER | DEFAULT 0 | 排序索引 |
+| `profile_color` | TEXT | | 档案配色 |
 | `created_at_ms` | INTEGER | NOT NULL | 创建时间戳 |
 
 ### `records` (就诊记录)
@@ -96,4 +98,8 @@
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `record_id` | UNINDEXED | 关联的 Record ID |
-| `content` | TEXT | OCR 识别的全文内容 |
+| `hospital_name`| TEXT | 医院名称 |
+| `tags` | TEXT | 标签内容 |
+| `ocr_text` | TEXT | OCR 识别文本 |
+| `notes` | TEXT | 备注 |
+| `content` | TEXT | 兼容性全文内容 |

@@ -8,7 +8,8 @@
 /// - `personId`: 所属用户 ID (系统标签为 null).
 /// - `name`: 标签名称.
 /// - `color`: 标签颜色 (Hex String, e.g., "#008080").
-/// - `isSystem`: 是否为系统内置标签.
+/// - `orderIndex`: 排序索引.
+/// - `isCustom`: 是否为用户自定义标签.
 /// - `createdAt`: 创建时间.
 ///
 /// ## Implementation Rules
@@ -22,14 +23,19 @@ part 'tag.g.dart';
 
 @freezed
 abstract class Tag with _$Tag {
+  const Tag._();
+
   const factory Tag({
     required String id,
     String? personId,
     required String name,
     required String color,
-    @Default(false) bool isSystem,
+    @Default(0) int orderIndex,
+    @Default(false) bool isCustom,
     required DateTime createdAt,
   }) = _Tag;
+
+  bool get isSystem => !isCustom;
 
   factory Tag.fromJson(Map<String, dynamic> json) => _$TagFromJson(json);
 }

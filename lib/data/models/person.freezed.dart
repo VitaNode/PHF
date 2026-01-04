@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Person {
 
- String get id; String get nickname; String? get avatarPath; bool get isDefault; DateTime get createdAt;
+ String get id; String get nickname; String? get avatarPath; bool get isDefault; int get orderIndex; String? get profileColor; DateTime get createdAt;
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PersonCopyWith<Person> get copyWith => _$PersonCopyWithImpl<Person>(this as Per
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Person&&(identical(other.id, id) || other.id == id)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.avatarPath, avatarPath) || other.avatarPath == avatarPath)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Person&&(identical(other.id, id) || other.id == id)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.avatarPath, avatarPath) || other.avatarPath == avatarPath)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.orderIndex, orderIndex) || other.orderIndex == orderIndex)&&(identical(other.profileColor, profileColor) || other.profileColor == profileColor)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nickname,avatarPath,isDefault,createdAt);
+int get hashCode => Object.hash(runtimeType,id,nickname,avatarPath,isDefault,orderIndex,profileColor,createdAt);
 
 @override
 String toString() {
-  return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, createdAt: $createdAt)';
+  return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, orderIndex: $orderIndex, profileColor: $profileColor, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PersonCopyWith<$Res>  {
   factory $PersonCopyWith(Person value, $Res Function(Person) _then) = _$PersonCopyWithImpl;
 @useResult
 $Res call({
- String id, String nickname, String? avatarPath, bool isDefault, DateTime createdAt
+ String id, String nickname, String? avatarPath, bool isDefault, int orderIndex, String? profileColor, DateTime createdAt
 });
 
 
@@ -65,13 +65,15 @@ class _$PersonCopyWithImpl<$Res>
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nickname = null,Object? avatarPath = freezed,Object? isDefault = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? nickname = null,Object? avatarPath = freezed,Object? isDefault = null,Object? orderIndex = null,Object? profileColor = freezed,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nickname: null == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
 as String,avatarPath: freezed == avatarPath ? _self.avatarPath : avatarPath // ignore: cast_nullable_to_non_nullable
 as String?,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as bool,orderIndex: null == orderIndex ? _self.orderIndex : orderIndex // ignore: cast_nullable_to_non_nullable
+as int,profileColor: freezed == profileColor ? _self.profileColor : profileColor // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -157,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  int orderIndex,  String? profileColor,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
-return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.createdAt);case _:
+return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.orderIndex,_that.profileColor,_that.createdAt);case _:
   return orElse();
 
 }
@@ -178,10 +180,10 @@ return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  int orderIndex,  String? profileColor,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Person():
-return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.createdAt);case _:
+return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.orderIndex,_that.profileColor,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +200,10 @@ return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String nickname,  String? avatarPath,  bool isDefault,  int orderIndex,  String? profileColor,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
-return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.createdAt);case _:
+return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.orderIndex,_that.profileColor,_that.createdAt);case _:
   return null;
 
 }
@@ -213,13 +215,15 @@ return $default(_that.id,_that.nickname,_that.avatarPath,_that.isDefault,_that.c
 @JsonSerializable()
 
 class _Person implements Person {
-  const _Person({required this.id, required this.nickname, this.avatarPath, this.isDefault = false, required this.createdAt});
+  const _Person({required this.id, required this.nickname, this.avatarPath, this.isDefault = false, this.orderIndex = 0, this.profileColor, required this.createdAt});
   factory _Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
 @override final  String id;
 @override final  String nickname;
 @override final  String? avatarPath;
 @override@JsonKey() final  bool isDefault;
+@override@JsonKey() final  int orderIndex;
+@override final  String? profileColor;
 @override final  DateTime createdAt;
 
 /// Create a copy of Person
@@ -235,16 +239,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Person&&(identical(other.id, id) || other.id == id)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.avatarPath, avatarPath) || other.avatarPath == avatarPath)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Person&&(identical(other.id, id) || other.id == id)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.avatarPath, avatarPath) || other.avatarPath == avatarPath)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.orderIndex, orderIndex) || other.orderIndex == orderIndex)&&(identical(other.profileColor, profileColor) || other.profileColor == profileColor)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nickname,avatarPath,isDefault,createdAt);
+int get hashCode => Object.hash(runtimeType,id,nickname,avatarPath,isDefault,orderIndex,profileColor,createdAt);
 
 @override
 String toString() {
-  return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, createdAt: $createdAt)';
+  return 'Person(id: $id, nickname: $nickname, avatarPath: $avatarPath, isDefault: $isDefault, orderIndex: $orderIndex, profileColor: $profileColor, createdAt: $createdAt)';
 }
 
 
@@ -255,7 +259,7 @@ abstract mixin class _$PersonCopyWith<$Res> implements $PersonCopyWith<$Res> {
   factory _$PersonCopyWith(_Person value, $Res Function(_Person) _then) = __$PersonCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String nickname, String? avatarPath, bool isDefault, DateTime createdAt
+ String id, String nickname, String? avatarPath, bool isDefault, int orderIndex, String? profileColor, DateTime createdAt
 });
 
 
@@ -272,13 +276,15 @@ class __$PersonCopyWithImpl<$Res>
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nickname = null,Object? avatarPath = freezed,Object? isDefault = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? nickname = null,Object? avatarPath = freezed,Object? isDefault = null,Object? orderIndex = null,Object? profileColor = freezed,Object? createdAt = null,}) {
   return _then(_Person(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,nickname: null == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
 as String,avatarPath: freezed == avatarPath ? _self.avatarPath : avatarPath // ignore: cast_nullable_to_non_nullable
 as String?,isDefault: null == isDefault ? _self.isDefault : isDefault // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as bool,orderIndex: null == orderIndex ? _self.orderIndex : orderIndex // ignore: cast_nullable_to_non_nullable
+as int,profileColor: freezed == profileColor ? _self.profileColor : profileColor // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
