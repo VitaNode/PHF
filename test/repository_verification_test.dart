@@ -235,6 +235,10 @@ void main() {
       expect(suggestions.length, 1);
       expect(suggestions.first.name, 'Blood');
 
+      final caseInsensitive = await tagRepo.suggestTags('found blood analysis');
+      expect(caseInsensitive.length, 1);
+      expect(caseInsensitive.first.name, 'Blood');
+
       final none = await tagRepo.suggestTags('Nothing here');
       expect(none.isEmpty, true);
     });
