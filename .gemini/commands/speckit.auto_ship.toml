@@ -1,20 +1,2 @@
 description = "Sync, Build, Test, Push and Auto-merge"
-
-prompt = """
-Execute the following auto-ship workflow by running the sequence of shell commands provided:
-
-1. **Sync**: Fetch and rebase from origin develop.
-2. **Build**: Run build_runner to generate files.
-3. **Format**: Format the code.
-4. **Test/Analyze**: Run flutter analyze.
-5. **Commit**: Stage changes and commit with 'chore: auto sync and pre-flight'.
-6. **Push**: Force push to origin HEAD.
-7. **Merge**: Auto-merge the PR using GitHub CLI.
-
-**Workflow Command**:
-```bash
-git fetch origin develop && git rebase origin/develop && dart run build_runner build --delete-conflicting-outputs && dart format . && flutter analyze && git add . && git commit -m 'chore: auto sync and pre-flight' && git push origin HEAD --force-with-lease && gh pr merge --auto --squash
-```
-
-Please execute this sequence using `run_shell_command`. Ensure each step succeeds before proceeding to the next.
-"""
+command = "git fetch origin develop && git rebase origin/develop && dart run build_runner build --delete-conflicting-outputs && dart format . && flutter analyze && git add . && git commit -m 'chore: auto sync and pre-flight' && git push origin HEAD --force-with-lease && gh pr merge --auto --squash"
