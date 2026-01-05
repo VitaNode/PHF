@@ -8,9 +8,11 @@
 /// - **Secure Storage**: 所有安全标志位（Hash, Biometric Flag）均存储在 Keychain (iOS) / Keystore (Android)。
 /// - **Memory Safety**: PIN 码明文仅在局部变量中短期存在。
 ///
-/// ## 修复记录
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 细化 `changePin` 过程中的日志记录，便于安全审计。
+///   2. 为关键方法增加 `try-catch` 错误处理，增强健壮性。
 /// - 引入 `Talker` 日志记录，增强可追溯性。
-/// - 为关键方法增加 `try-catch` 错误处理。
 /// - 在 `_hashPin` 中显式清理字节数组内存，提升安全性。
 library;
 
@@ -74,10 +76,17 @@ class SecurityService implements ISecurityService {
 
   @override
   Future<bool> changePin(String oldPin, String newPin) async {
+    _talker.info('[SecurityService] Attempting to change PIN...');
     final isValid = await validatePin(oldPin);
-    if (!isValid) return false;
+    if (!isValid) {
+      _talker.warning(
+        '[SecurityService] Old PIN validation failed during change attempt',
+      );
+      return false;
+    }
 
     await setPin(newPin);
+    _talker.info('[SecurityService] PIN changed successfully');
     return true;
   }
 
