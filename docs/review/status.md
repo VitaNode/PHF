@@ -94,10 +94,9 @@ Phase 3 (Governance & Store Readiness) has started.
     - Added reactive state management for security settings using Riverpod.
     - **Review & Reinforcement (2026-01-05)**: Standardized error SnackBar styling (`AppTheme.errorRed`), applied Monospace font to security dialogs, and enhanced `SecurityService` with detailed logging for audit trails.
 - [x] **T3.7.1**: Store - Static Privacy Policy (Issue #30).
-    - Integrated `flutter_markdown_plus` for offline policy rendering.
-    - Added `assets/privacy_policy.md` containing core privacy commitments.
-    - Implemented `PrivacyPolicyPage` with themed Markdown styling.
-    - Integrated entry point into `SettingsPage` under a new "About" section.
+    - Implemented `PrivacyPolicyPage` with offline Markdown rendering.
+    - Integrated with settings navigation.
+    - **Review & Reinforcement (2026-01-05)**: Enforced `fontFamily: AppTheme.fontPool` (Inconsolata) for all Markdown elements to comply with the UI/UX constitution for important text. Optimized rendering styles.
 - [x] **T3.7.2**: Store - Asset Adaptation (Issue #31).
     - Integrated `flutter_launcher_icons` and `flutter_native_splash` for automated asset generation.
     - Configured multi-platform icon specs and Android 12+ adaptive support.
