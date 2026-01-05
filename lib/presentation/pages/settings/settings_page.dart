@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'backup_page.dart';
 import 'personnel_management_page.dart';
+import 'security_settings_page.dart';
 import 'tag_management_page.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -51,9 +52,12 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.security_outlined,
             title: '隐私与安全',
             subtitle: '修改 PIN 码及生物识别',
-            onTap: () {
-              // TODO: Implement in T3.6.4
-            },
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const SecuritySettingsPage(),
+              ),
+            ),
           ),
           _buildListTile(
             context,

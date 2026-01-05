@@ -87,6 +87,11 @@ Phase 3 (Governance & Store Readiness) has started.
     - Integrated `file_picker` for backup restoration.
     - Reused `PinKeyboard` for secure PIN entry during backup operations.
     - Added comprehensive widget tests for the backup interface.
+- [x] **T3.6.4**: UI - Privacy & Security Settings (Issue #29).
+    - Implemented `SecuritySettingsPage` for app lock management.
+    - Added PIN modification flow with old PIN verification and confirmation.
+    - Integrated biometric authentication toggle (fingerprint/face).
+    - Added reactive state management for security settings using Riverpod.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.
