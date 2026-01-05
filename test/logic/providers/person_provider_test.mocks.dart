@@ -152,4 +152,22 @@ class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isDisclaimerAccepted() =>
+      (super.noSuchMethod(
+            Invocation.method(#isDisclaimerAccepted, []),
+            returnValue: _i3.Future<bool>.value(false),
+            returnValueForMissingStub: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setDisclaimerAccepted(bool? accepted) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDisclaimerAccepted, [accepted]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }
