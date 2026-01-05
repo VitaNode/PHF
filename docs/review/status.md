@@ -72,6 +72,10 @@ Phase 3 (Governance & Store Readiness) has started.
     - Integrated `TagRepository.createTag` with UUID generation.
     - Updated `RecordDetailPage` to handle new tag creation callback.
     - **Review & Reinforcement (2026-01-05)**: Enforced strict UI/UX (8px radius), added robustness (Try-Catch in UI/Repo), and integrated `Talker` logging.
+- [x] **T3.6.2**: UI - Tag Library Center.
+    - Implemented `TagManagementPage` with personnel context.
+    - Supported CRUD for custom tags and drag-sorting.
+    - Integrated with `SettingsPage`.
 - [x] **T3.6.1**: UI - Personnel Management Page (Issue #26).
     - Implemented `PersonnelManagementPage` with CRUD and ReorderableListView.
     - Added entry point in `PersonnelTabs` (Settings Icon).
