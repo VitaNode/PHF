@@ -66,7 +66,9 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 value: state.isBiometricsEnabled,
                 activeThumbColor: AppTheme.primaryTeal,
                 activeTrackColor: AppTheme.primaryTeal.withAlpha(100),
-                onChanged: state.isLoading ? null : (val) => _handleToggleBiometrics(val),
+                onChanged: state.isLoading
+                    ? null
+                    : (val) => _handleToggleBiometrics(val),
               ),
             ],
             const SizedBox(height: 24),
