@@ -76,6 +76,16 @@ Phase 3 (Governance & Store Readiness) has started.
     - Integrated with `allPersonsProvider` for real-time updates.
     - Added deletion constraint check (records must be empty).
     - **Review & Reinforcement (2026-01-05)**: Applied Monospace font to nicknames, added full error handling/logging (Talker) in Repository and UI, and fixed `orderIndex` logic for new entries.
+- [x] **T3.6.3**: UI - Backup & Restore Interface (Issue #28).
+    - Implemented `BackupPage` with secure export/import workflows.
+    - Added confirmation dialogs for data-destructive operations.
+    - Integrated `file_picker` for backup restoration.
+    - Reused `PinKeyboard` for secure PIN entry during backup operations.
+    - Added comprehensive widget tests for the backup interface.
+- [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
+    - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
+    - Integrated with `share_plus` for encrypted backup distribution.
+    - Implemented atomic restore logic with database connection management in `BackupController`.
 
 ## 🟢 Phase 2 Complete
 All Phase 2 tasks (T17-T20) are implemented and verified. The system now supports:

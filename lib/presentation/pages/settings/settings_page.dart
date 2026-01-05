@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'backup_page.dart';
 import 'personnel_management_page.dart';
 import 'tag_management_page.dart';
 
@@ -59,9 +60,10 @@ class SettingsPage extends StatelessWidget {
             icon: Icons.backup_outlined,
             title: '备份与恢复',
             subtitle: '导出加密备份文件',
-            onTap: () {
-              // TODO: Implement in T3.6.3
-            },
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(builder: (_) => const BackupPage()),
+            ),
           ),
         ],
       ),

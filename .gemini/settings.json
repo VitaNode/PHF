@@ -14,8 +14,13 @@
             "always_allow": true
         }
     },
+    "ui": {
+        "showCommandOutput": "minimal",
+        "suppressDebugLog": true
+    },
     "agent": {
         "max_iterations": 50,
-        "mode": "autonomous"
+        "mode": "autonomous",
+        "logLevel": "error"
     }
 }
