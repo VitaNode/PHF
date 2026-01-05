@@ -81,6 +81,7 @@ Phase 3 (Governance & Store Readiness) has started.
     - Integrated `file_picker` for backup restoration.
     - Reused `PinKeyboard` for secure PIN entry during backup operations.
     - Added comprehensive widget tests for the backup interface.
+    - **Review & Reinforcement (2026-01-05)**: Applied Monospace font to security dialogs, unified error SnackBar styling (`AppTheme.errorRed`), and enhanced fine-grained logging for the backup/restore sequence.
 - [x] **T3.6.4**: UI - Privacy & Security Settings (Issue #29).
     - Implemented `SecuritySettingsPage` for app lock management.
     - Added PIN modification flow with old PIN verification and confirmation.

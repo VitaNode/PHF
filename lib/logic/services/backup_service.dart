@@ -3,7 +3,10 @@
 /// ## Description
 /// 实现基于 ZIP + AES-256-GCM 的离线安全备份。
 ///
-/// ## 修复记录
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 增强备份/恢复链路的 Talker 日志细粒度，便于离线排查。
+///   2. 优化异常描述，确保用户侧错误提示更具引导性。
 /// - [issue#15] 优化内存管理：导入时使用 `InputFileStream` 避免 OOM；增强临时文件清理的可靠性；集成 `Talker` 记录关键链路日志。
 /// - [issue#16] 优化恢复逻辑：导入前先行关闭数据库连接 (T3.3.3)；使用 `extractFileToDisk` 实现流式解压，彻底解决 OOM 隐患。
 library;
@@ -41,7 +44,7 @@ class BackupService implements IBackupService {
 
   @override
   Future<String> exportBackup(String pin) async {
-    _talker?.info('[BackupService] Starting backup export...');
+    _talker?.info('[BackupService] Starting backup export sequence...');
     // 1. 派生备份密钥
     final key = await _deriveKey(pin);
 
@@ -55,6 +58,7 @@ class BackupService implements IBackupService {
 
     try {
       // 3. 执行打包 (ZIP)
+      _talker?.info('[BackupService] Bundling files into ZIP...');
       final encoder = ZipFileEncoder();
       encoder.create(zipPath);
 
@@ -78,6 +82,7 @@ class BackupService implements IBackupService {
       await encoder.close();
 
       // 4. 对 ZIP 文件执行加密
+      _talker?.info('[BackupService] Encrypting ZIP with AES-256-GCM...');
       await _cryptoService.encryptFile(
         sourcePath: zipPath,
         destPath: backupPath,
@@ -100,7 +105,7 @@ class BackupService implements IBackupService {
 
   @override
   Future<void> importBackup(String backupFilePath, String pin) async {
-    _talker?.info('[BackupService] Starting backup import...');
+    _talker?.info('[BackupService] Starting backup import sequence...');
     // 1. 派生密钥
     final key = await _deriveKey(pin);
 
@@ -110,6 +115,7 @@ class BackupService implements IBackupService {
 
     try {
       // 3. 尝试解密
+      _talker?.info('[BackupService] Decrypting backup file...');
       await _cryptoService.decryptFile(
         sourcePath: backupFilePath,
         destPath: decryptedZipPath,
@@ -131,7 +137,7 @@ class BackupService implements IBackupService {
     } catch (e, stack) {
       _talker?.handle(e, stack, '[BackupService] Import failed');
       // 解密失败通常意味着 PIN 错误或文件损坏
-      throw Exception('备份恢复失败，请检查 PIN 码是否正确或文件是否完整。');
+      throw Exception('备份恢复失败：请检查加密 PIN 码是否正确，或文件是否损坏。');
     } finally {
       // 清理临时文件
       final f = File(decryptedZipPath);

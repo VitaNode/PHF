@@ -1,3 +1,15 @@
+/// # BackupPage Component
+///
+/// ## Description
+/// 数据备份与恢复页面，提供加密导出与全量覆盖式恢复。
+///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 统一错误提示 SnackBar 的背景色为 `AppTheme.errorRed`。
+///   2. 优化 `_PinInputDialog` 标题字体，确保符合等宽字体 (Monospace) 规范。
+///   3. 增强 UI 健壮性，确保所有异常捕获路径均有显式反馈。
+library;
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,9 +68,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.primaryTeal.withAlpha(20),
+        color: AppTheme.primaryTeal.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.primaryTeal.withAlpha(50)),
+        border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +122,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   Widget _buildExportTile() {
     return Card(
       elevation: 0,
-      color: AppTheme.bgGray.withAlpha(128),
+      color: AppTheme.bgGray.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: const Icon(
@@ -128,7 +140,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   Widget _buildImportTile() {
     return Card(
       elevation: 0,
-      color: AppTheme.bgGray.withAlpha(128),
+      color: AppTheme.bgGray.withValues(alpha: 0.5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: const Icon(
@@ -150,9 +162,12 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       final isValid = await securityService.validatePin(pin);
       if (!isValid) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('PIN 码错误')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('PIN 码错误'),
+              backgroundColor: AppTheme.errorRed,
+            ),
+          );
         }
         return;
       }
@@ -166,9 +181,12 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('导出失败: $e'),
+              backgroundColor: AppTheme.errorRed,
+            ),
+          );
         }
       }
     }
@@ -190,7 +208,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
             child: const Text('确认覆盖'),
           ),
         ],
@@ -234,9 +252,12 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('恢复失败: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('恢复失败: $e'),
+              backgroundColor: AppTheme.errorRed,
+            ),
+          );
         }
       }
     }
@@ -292,7 +313,11 @@ class _PinInputDialogState extends State<_PinInputDialog> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: AppTheme.fontPool,
+              ),
             ),
             const SizedBox(height: 32),
             Row(
