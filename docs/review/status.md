@@ -1,8 +1,8 @@
 ```
 # Project Review Status Summary
 
-**Last Updated**: 2025-12-31
-**Coverage**: T0 - T20.2 (OCR Review UI)
+**Last Updated**: 2026-01-05
+**Coverage**: T0 - T3.4.4 (Global Search)
 
 ## Approved Features (Highlights)
 - [x] **T20.4**: 全局搜索 (FTS5 + Highlight).
@@ -36,6 +36,11 @@
 Phase 3 (Governance & Store Readiness) has started.
 
 ### Completed (Phase 3)
+- [x] **T3.4.4**: UI - Global Full-screen Search.
+    - Refactored `GlobalSearchPage` for improved "Full-screen" UX.
+    - Integrated with `AppCard` and `AppTheme` standards.
+    - Enhanced FTS5 highlighting logic and added personnel context indicator.
+    - Implemented debounced search and better empty/initial states.
 - [x] **T3.3.5**: Security Settings Service.
     - Implemented `ISecurityService` interface and refined `SecurityService`.
     - Added PIN modification logic with old PIN validation.
