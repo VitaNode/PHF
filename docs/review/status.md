@@ -92,6 +92,7 @@ Phase 3 (Governance & Store Readiness) has started.
     - Added PIN modification flow with old PIN verification and confirmation.
     - Integrated biometric authentication toggle (fingerprint/face).
     - Added reactive state management for security settings using Riverpod.
+    - **Review & Reinforcement (2026-01-05)**: Standardized error SnackBar styling (`AppTheme.errorRed`), applied Monospace font to security dialogs, and enhanced `SecurityService` with detailed logging for audit trails.
 - [x] **T3.7.1**: Store - Static Privacy Policy (Issue #30).
     - Integrated `flutter_markdown_plus` for offline policy rendering.
     - Added `assets/privacy_policy.md` containing core privacy commitments.

@@ -1,3 +1,15 @@
+/// # SecuritySettingsPage Component
+///
+/// ## Description
+/// 隐私与安全设置页面，管理应用锁（PIN 码及生物识别）。
+///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 统一安全操作的错误提示 SnackBar 背景色为 `AppTheme.errorRed`。
+///   2. 优化 `_PinInputDialog` 标题字体，应用等宽字体 (Monospace) 规范。
+///   3. 增强 UI 健壮性，完善 PIN 码修改流程中的异常捕获与用户反馈。
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../logic/providers/security_settings_provider.dart';
@@ -65,7 +77,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                 ),
                 value: state.isBiometricsEnabled,
                 activeThumbColor: AppTheme.primaryTeal,
-                activeTrackColor: AppTheme.primaryTeal.withAlpha(100),
+                activeTrackColor: AppTheme.primaryTeal.withValues(alpha: 0.4),
                 onChanged: state.isLoading
                     ? null
                     : (val) => _handleToggleBiometrics(val),
@@ -122,7 +134,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.bgGray.withAlpha(128),
+        color: AppTheme.bgGray.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Row(
@@ -151,7 +163,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         .toggleBiometrics(enabled);
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(enabled ? '启用生物识别失败' : '禁用生物识别失败')),
+        SnackBar(
+          content: Text(enabled ? '启用生物识别失败' : '禁用生物识别失败'),
+          backgroundColor: AppTheme.errorRed,
+        ),
       );
     }
   }
@@ -170,9 +185,12 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
 
     if (newPin != confirmPin) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('两次输入的新 PIN 码不一致')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('两次输入的新 PIN 码不一致'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
       }
       return;
     }
@@ -182,7 +200,10 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         .changePin(oldPin, newPin);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(success ? 'PIN 码修改成功' : '当前 PIN 码错误，修改失败')),
+        SnackBar(
+          content: Text(success ? 'PIN 码修改成功' : '当前 PIN 码错误，修改失败'),
+          backgroundColor: success ? AppTheme.successGreen : AppTheme.errorRed,
+        ),
       );
     }
   }
@@ -237,7 +258,11 @@ class _PinInputDialogState extends State<_PinInputDialog> {
           children: [
             Text(
               widget.title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: AppTheme.fontPool,
+              ),
             ),
             const SizedBox(height: 32),
             Row(
