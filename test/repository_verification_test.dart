@@ -9,6 +9,7 @@ import 'package:phf/data/models/person.dart';
 import 'package:phf/data/models/tag.dart';
 import 'package:phf/core/security/master_key_manager.dart';
 import 'package:phf/core/services/path_provider_service.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 // Mock Classes
 class MockMasterKeyManager extends Mock implements MasterKeyManager {
@@ -45,7 +46,10 @@ void main() {
     );
 
     personRepo = PersonRepository(dbService);
-    tagRepo = TagRepository(dbService);
+    tagRepo = TagRepository(
+      dbService,
+      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
 
     // Ensure DB is created and tables exist
     final db = await dbService.database;

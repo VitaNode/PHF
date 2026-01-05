@@ -3,19 +3,23 @@
 /// ## Description
 /// `ITagRepository` 具体实现。
 ///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 引入 `Talker` 实例进行日志记录，移除隐式错误吞没。
+///   2. 为所有异步操作添加 try-catch 块，确保异常被捕获并记录，符合健壮性要求。
+/// - [issue#14] 重构 `deleteTag` 逻辑，消除 `dynamic` 类型的使用，增强类型安全性，符合 Constitution 规范。
+/// - [issue#17] 优化 `suggestTags` 逻辑：支持不区分大小写的匹配，提升关键词提取的准确性 (T3.3.4)。
+///
 /// ## Security
 /// - SQLCipher 加密存储。
 ///
 /// ## Logic
 /// - **Sync**: 删除标签时，需手动更新 `images.tags` 字段，因为该字段是 JSON 缓存。
 /// - **Filtering**: 支持 `personId` 隔离。
-///
-/// ## 修复记录
-/// - [issue#14] 重构 `deleteTag` 逻辑，消除 `dynamic` 类型的使用，增强类型安全性，符合 Constitution 规范。
-/// - [issue#17] 优化 `suggestTags` 逻辑：支持不区分大小写的匹配，提升关键词提取的准确性 (T3.3.4)。
 library;
 
 import 'dart:convert';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../datasources/local/database_service.dart';
 import '../models/tag.dart';
@@ -23,114 +27,140 @@ import 'interfaces/tag_repository.dart';
 
 class TagRepository implements ITagRepository {
   final SQLCipherDatabaseService _dbService;
+  final Talker _talker;
 
-  TagRepository(this._dbService);
+  TagRepository(this._dbService, this._talker);
 
   @override
   Future<List<Tag>> getAllTags({String? personId}) async {
-    final db = await _dbService.database;
-    final List<Map<String, dynamic>> maps;
+    try {
+      final db = await _dbService.database;
+      final List<Map<String, dynamic>> maps;
 
-    if (personId != null) {
-      maps = await db.query(
-        'tags',
-        where: 'person_id = ? OR person_id IS NULL',
-        whereArgs: [personId],
-        orderBy: 'order_index ASC, created_at_ms DESC',
-      );
-    } else {
-      // Return all tags if no person specified? Or just global?
-      // Usually admin or debug mode might want all.
-      maps = await db.query(
-        'tags',
-        orderBy: 'order_index ASC, created_at_ms DESC',
-      );
+      if (personId != null) {
+        maps = await db.query(
+          'tags',
+          where: 'person_id = ? OR person_id IS NULL',
+          whereArgs: [personId],
+          orderBy: 'order_index ASC, created_at_ms DESC',
+        );
+      } else {
+        // Return all tags if no person specified? Or just global?
+        // Usually admin or debug mode might want all.
+        maps = await db.query(
+          'tags',
+          orderBy: 'order_index ASC, created_at_ms DESC',
+        );
+      }
+
+      return maps.map((row) => _mapToTag(row)).toList();
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.getAllTags');
+      rethrow;
     }
-
-    return maps.map((row) => _mapToTag(row)).toList();
   }
 
   @override
   Future<void> createTag(Tag tag) async {
-    final db = await _dbService.database;
-    await db.insert(
-      'tags',
-      _mapToDb(tag),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      final db = await _dbService.database;
+      await db.insert(
+        'tags',
+        _mapToDb(tag),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.createTag');
+      rethrow;
+    }
   }
 
   @override
   Future<void> updateTag(Tag tag) async {
-    final db = await _dbService.database;
-    await db.update(
-      'tags',
-      _mapToDb(tag),
-      where: 'id = ?',
-      whereArgs: [tag.id],
-    );
+    try {
+      final db = await _dbService.database;
+      await db.update(
+        'tags',
+        _mapToDb(tag),
+        where: 'id = ?',
+        whereArgs: [tag.id],
+      );
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.updateTag');
+      rethrow;
+    }
   }
 
   @override
   Future<void> deleteTag(String id) async {
-    final db = await _dbService.database;
+    try {
+      final db = await _dbService.database;
 
-    await db.transaction((txn) async {
-      // 1. Delete from tags table
-      // Foreign key constraints on 'image_tags' should handle the link table if configured with ON DELETE CASCADE.
-      // SQLCipherDatabaseService has 'PRAGMA foreign_keys = ON' and 'ON DELETE CASCADE' in schema.
-      await txn.delete('tags', where: 'id = ?', whereArgs: [id]);
+      await db.transaction((txn) async {
+        // 1. Delete from tags table
+        // Foreign key constraints on 'image_tags' should handle the link table if configured with ON DELETE CASCADE.
+        // SQLCipherDatabaseService has 'PRAGMA foreign_keys = ON' and 'ON DELETE CASCADE' in schema.
+        await txn.delete('tags', where: 'id = ?', whereArgs: [id]);
 
-      // 2. Cascade update 'images.tags' cache
-      // Fetch all images that *might* contain this tag.
-      // Since 'tags' column is a JSON list of IDs like ["id1", "id2"], use LIKE to find candidates.
-      final candidates = await txn.query(
-        'images',
-        columns: ['id', 'tags'],
-        where: 'tags LIKE ?',
-        whereArgs: ['%"$id"%'],
-      );
+        // 2. Cascade update 'images.tags' cache
+        // Fetch all images that *might* contain this tag.
+        // Since 'tags' column is a JSON list of IDs like ["id1", "id2"], use LIKE to find candidates.
+        final candidates = await txn.query(
+          'images',
+          columns: ['id', 'tags'],
+          where: 'tags LIKE ?',
+          whereArgs: ['%"$id"%'],
+        );
 
-      for (var row in candidates) {
-        final imageId = row['id'] as String;
-        final tagsStr = row['tags'] as String?;
-        if (tagsStr == null) continue;
+        for (var row in candidates) {
+          final imageId = row['id'] as String;
+          final tagsStr = row['tags'] as String?;
+          if (tagsStr == null) continue;
 
-        try {
-          final decoded = jsonDecode(tagsStr);
-          if (decoded is! List) continue;
-          final currentTags = decoded.map((e) => e.toString()).toList();
-          final newTags = currentTags.where((t) => t != id).toList();
+          try {
+            final decoded = jsonDecode(tagsStr);
+            if (decoded is! List) continue;
+            final currentTags = decoded.map((e) => e.toString()).toList();
+            final newTags = currentTags.where((t) => t != id).toList();
 
-          if (newTags.length != currentTags.length) {
-            await txn.update(
-              'images',
-              {'tags': jsonEncode(newTags)},
-              where: 'id = ?',
-              whereArgs: [imageId],
-            );
+            if (newTags.length != currentTags.length) {
+              await txn.update(
+                'images',
+                {'tags': jsonEncode(newTags)},
+                where: 'id = ?',
+                whereArgs: [imageId],
+              );
+            }
+          } catch (_) {
+            // Ignore JSON parse errors, skip
           }
-        } catch (_) {
-          // Ignore JSON parse errors, skip
         }
-      }
-    });
+      });
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.deleteTag');
+      rethrow;
+    }
   }
 
   @override
   Future<List<Tag>> suggestTags(String text, {String? personId}) async {
-    final allTags = await getAllTags(personId: personId);
-    if (text.isEmpty) return [];
+    try {
+      final allTags = await getAllTags(personId: personId);
+      if (text.isEmpty) return [];
 
-    final suggestions = <Tag>[];
-    final lowercaseText = text.toLowerCase();
+      final suggestions = <Tag>[];
+      final lowercaseText = text.toLowerCase();
 
-    for (final tag in allTags) {
-      if (lowercaseText.contains(tag.name.toLowerCase())) {
-        suggestions.add(tag);
+      for (final tag in allTags) {
+        if (lowercaseText.contains(tag.name.toLowerCase())) {
+          suggestions.add(tag);
+        }
       }
+      return suggestions;
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.suggestTags');
+      rethrow;
     }
-    return suggestions;
   }
 
   // --- Mappers ---

@@ -3,6 +3,11 @@
 /// ## Description
 /// 标签选择与排序组件，支持搜索、创建、高亮选中以及拖拽排序。
 ///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 修正 `FilterChip` 圆角为 8px 以符合 UI/UX 规范 (Unified 8px)。
+///   2. 为 `onCreate` 操作添加 try-catch 异常捕获与 SnackBar 提示，增强健壮性。
+///
 /// ## Core Components
 /// - **Search & Create**: 支持按名称搜索标签，若不存在则提示创建。
 /// - **Quick Selection**: 展示过滤后的标签库。
@@ -126,9 +131,20 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
             onTap: () async {
               final newName = _searchQuery.trim();
               if (newName.isNotEmpty) {
-                await widget.onCreate?.call(newName);
-                _searchCtrl.clear();
-                setState(() => _searchQuery = '');
+                try {
+                  await widget.onCreate?.call(newName);
+                  _searchCtrl.clear();
+                  setState(() => _searchQuery = '');
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('创建标签失败: $e'),
+                        backgroundColor: AppTheme.errorRed,
+                      ),
+                    );
+                  }
+                }
               }
             },
             borderRadius: BorderRadius.circular(8),
@@ -183,7 +199,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(8),
                   side: BorderSide(
                     color: isSelected ? AppTheme.primaryTeal : AppTheme.bgGrey,
                     width: 1,

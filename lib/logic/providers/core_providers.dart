@@ -146,7 +146,8 @@ ISecurityService securityService(Ref ref) {
 @Riverpod(keepAlive: true)
 ITagRepository tagRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
-  return TagRepository(db);
+  final talker = ref.watch(talkerProvider);
+  return TagRepository(db, talker);
 }
 
 @Riverpod(keepAlive: true)

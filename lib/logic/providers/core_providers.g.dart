@@ -683,7 +683,7 @@ final class TagRepositoryProvider
   }
 }
 
-String _$tagRepositoryHash() => r'93305b9c45a923381656be0c101fcbd6339d8d48';
+String _$tagRepositoryHash() => r'bcf601ea2a034d1e7eb6e93c16313f016fdda5ff';
 
 @ProviderFor(searchRepository)
 final searchRepositoryProvider = SearchRepositoryProvider._();

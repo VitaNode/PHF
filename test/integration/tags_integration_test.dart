@@ -12,6 +12,7 @@ import 'package:phf/core/services/path_provider_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'
     show sqfliteFfiInit, databaseFactoryFfi;
@@ -79,7 +80,10 @@ void main() {
     await dbService.database;
 
     imageRepo = ImageRepository(dbService);
-    tagRepo = TagRepository(dbService);
+    tagRepo = TagRepository(
+      dbService,
+      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
   });
 
   tearDown(() async {
