@@ -85,6 +85,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('未找到'), findsOneWidget);
+    expect(find.textContaining('未找到相关内容', findRichText: true), findsOneWidget);
   });
 }
