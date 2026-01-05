@@ -3,6 +3,13 @@
 /// ## Description
 /// 人员管理页面，支持 CRUD 操作、拖拽排序及约束删除。
 ///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 统一 Nickname 显示为 Monospace 字体，符合 Constitution 规范。
+///   2. 补全 Dialog 保存操作的错误捕获与用户提示，避免异常吞没。
+///   3. 修正新建人员的 `orderIndex` 逻辑，默认追加至列表末尾。
+///   4. 统一错误提示 SnackBar 的背景色为 `AppTheme.errorRed`。
+///
 /// ## Features
 /// - **List**: 展示所有人员，支持拖拽排序 (`ReorderableListView`).
 /// - **Create**: 必须提供昵称，可选颜色。
@@ -138,6 +145,7 @@ class _PersonnelManagementPageState
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
+            fontFamily: AppTheme.fontPool,
           ),
         ),
         subtitle: person.isDefault
@@ -182,9 +190,12 @@ class _PersonnelManagementPageState
       ref.invalidate(allPersonsProvider);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('排序失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('排序失败: $e'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
       }
     }
   }
@@ -302,7 +313,8 @@ class _PersonnelManagementPageState
               ),
               ElevatedButton(
                 onPressed: () async {
-                  if (nameCtrl.text.trim().isEmpty) {
+                  final nickname = nameCtrl.text.trim();
+                  if (nickname.isEmpty) {
                     return;
                   }
                   try {
@@ -310,28 +322,33 @@ class _PersonnelManagementPageState
                     if (person != null) {
                       await personRepo.updatePerson(
                         person.copyWith(
-                          nickname: nameCtrl.text.trim(),
+                          nickname: nickname,
                           profileColor: selectedColor,
                         ),
                       );
                     } else {
+                      final allPersons =
+                          ref.read(allPersonsProvider).value ?? [];
                       final newPerson = Person(
                         id: const Uuid().v4(),
-                        nickname: nameCtrl.text.trim(),
+                        nickname: nickname,
                         profileColor: selectedColor,
                         createdAt: DateTime.now(),
-                        // New persons are not default by default
-                        // Order index will be 0 by default, repository logic might not handle reordering on insert,
-                        // but UI sorts by orderIndex. New items might need to be appended.
-                        // We can fetch max orderIndex or just let it be 0 and user reorders.
-                        // Better: Set orderIndex to list length.
+                        orderIndex: allPersons.length,
                       );
                       await personRepo.createPerson(newPerson);
                     }
                     ref.invalidate(allPersonsProvider);
                     if (context.mounted) Navigator.pop(context);
                   } catch (e) {
-                    // Error handling
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('保存失败: $e'),
+                          backgroundColor: AppTheme.errorRed,
+                        ),
+                      );
+                    }
                   }
                 },
                 child: const Text('保存'),

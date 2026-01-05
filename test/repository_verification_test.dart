@@ -45,7 +45,10 @@ void main() {
       dbFactory: databaseFactoryFfi,
     );
 
-    personRepo = PersonRepository(dbService);
+    personRepo = PersonRepository(
+      dbService,
+      Talker(settings: TalkerSettings(useConsoleLogs: false)),
+    );
     tagRepo = TagRepository(
       dbService,
       Talker(settings: TalkerSettings(useConsoleLogs: false)),
