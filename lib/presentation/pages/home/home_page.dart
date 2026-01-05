@@ -67,7 +67,7 @@ class HomePage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              // TODO: Settings Route in Phase 2/3
+              Navigator.of(context).pushNamed('/settings');
             },
           ),
           const SizedBox(width: 8),
