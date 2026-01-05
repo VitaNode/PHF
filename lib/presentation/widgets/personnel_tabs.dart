@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/person.dart';
 import '../../logic/providers/person_provider.dart';
+import '../pages/settings/personnel_management_page.dart';
 import '../theme/app_theme.dart';
 
 class PersonnelTabs extends ConsumerStatefulWidget {
@@ -67,21 +68,46 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
         color: AppTheme.bgWhite,
         border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 1)),
       ),
-      child: ListView.builder(
-        controller: _scrollController,
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: persons.length,
-        itemBuilder: (context, index) {
-          final person = persons[index];
-          final isSelected = person.id == currentId;
+      child: Row(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: persons.length,
+              itemBuilder: (context, index) {
+                final person = persons[index];
+                final isSelected = person.id == currentId;
 
-          return _PersonnelTabItem(
-            person: person,
-            isSelected: isSelected,
-            onTap: () => _onTabSelected(person.id, index),
-          );
-        },
+                return _PersonnelTabItem(
+                  person: person,
+                  isSelected: isSelected,
+                  onTap: () => _onTabSelected(person.id, index),
+                );
+              },
+            ),
+          ),
+          const VerticalDivider(
+            indent: 8,
+            endIndent: 8,
+            color: AppTheme.bgGrey,
+            width: 1,
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: AppTheme.textHint),
+            tooltip: '管理档案',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const PersonnelManagementPage(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
     );
   }
