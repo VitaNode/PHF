@@ -87,6 +87,11 @@ Phase 3 (Governance & Store Readiness) has started.
     - Added PIN modification flow with old PIN verification and confirmation.
     - Integrated biometric authentication toggle (fingerprint/face).
     - Added reactive state management for security settings using Riverpod.
+- [x] **T3.7.1**: Store - Static Privacy Policy (Issue #30).
+    - Integrated `flutter_markdown_plus` for offline policy rendering.
+    - Added `assets/privacy_policy.md` containing core privacy commitments.
+    - Implemented `PrivacyPolicyPage` with themed Markdown styling.
+    - Integrated entry point into `SettingsPage` under a new "About" section.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.
