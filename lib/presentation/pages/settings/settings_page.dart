@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'backup_page.dart';
 import 'personnel_management_page.dart';
+import 'privacy_policy_page.dart';
 import 'security_settings_page.dart';
 import 'tag_management_page.dart';
 
@@ -68,6 +69,25 @@ class SettingsPage extends StatelessWidget {
               context,
               MaterialPageRoute<void>(builder: (_) => const BackupPage()),
             ),
+          ),
+          const Divider(),
+          _buildSectionTitle('关于'),
+          _buildListTile(
+            context,
+            icon: Icons.privacy_tip_outlined,
+            title: '隐私政策',
+            subtitle: '查看应用隐私保护声明',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const PrivacyPolicyPage(),
+              ),
+            ),
+          ),
+          const ListTile(
+            leading: Icon(Icons.info_outline, color: AppTheme.primaryTeal),
+            title: Text('版本信息', style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text('PaperHealth v1.0.0'),
           ),
         ],
       ),
