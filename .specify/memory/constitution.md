@@ -130,6 +130,7 @@ SYNC IMPACT REPORT
   - **简洁性**: 直接输出代码或方案，除非被询问，否则不要进行过多的礼貌性寒暄
   - **安全性**: 在处理敏感信息（如 API Key）时，必须提醒用户使用环境变量
   - **纠错机制**: 如果你发现之前的方案有误，请直接承认并提供修正后的最优解
+  - **复杂冲突处理**: 在处理 Git 合并冲突或复杂的架构重构时，Agent 应优先调用 `delegate_to_agent(agent_name: 'codebase_investigator')` 进行全量分析，严禁在未理清依赖关系的情况下盲目修改。
 
 #### 9. 错误处理与日志规范 (Error Handling & Logging)
 - **原则**: 确保应用的健壮性和可维护性，提供清晰的错误信息和日志记录
@@ -171,11 +172,14 @@ SYNC IMPACT REPORT
 #### 14. 本地预检与 CI 自动化 (Pre-flight Checks & CI Automation)
 - **原则**: Agent 在推送代码前必须确保代码质量，并对 CI 反馈负责。
 - **实现**:
+  - **推送前强制同步 (Sync-Before-Push)**: 在多 Agent 协作环境下，Push 前必须执行以下同步流程：
+    1. `git fetch origin develop`
+    2. `git rebase origin/develop` (若有冲突，参考 Section 8 调用调查员)
   - **强制本地预检**: 在执行 `git push` 前，Agent 必须自主按序完成以下步骤：
-    1. `dart run build_runner build --delete-conflicting-outputs` (若修改了含有注解的 Model/Entity)。
+    1. `dart run build_runner build --delete-conflicting-outputs` (若同步后代码有变，必须重跑)。
     2. `dart format .` (确保格式符合工程规范)。
     3. `flutter analyze` (确保零警告、零错误)。
-    4. `flutter test` (至少运行与当前改动相关的测试用例，确保无回归问题)。
+    4. `flutter test` (可选：若环境支持则必须运行；若环境如 Jules 不支持，可跳过本地测试，但必须确保通过 GitHub CI 校验)。
   - **CI 闭环责任**:
     - 如果收到来自 GitHub Actions 的报错评论（PR Comment），Agent 必须立即根据评论中的日志和堆栈信息进行修正。
     - 持续修正并推送，直到评论消失或 CI 状态变为绿色。

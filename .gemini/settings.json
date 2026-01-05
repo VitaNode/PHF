@@ -8,5 +8,14 @@
                 "/Users/lanzf/Projects/PHF"
             ]
         }
+    },
+    "tools": {
+        "run_shell_command": {
+            "always_allow": true
+        }
+    },
+    "agent": {
+        "max_iterations": 50,
+        "mode": "autonomous"
     }
 }

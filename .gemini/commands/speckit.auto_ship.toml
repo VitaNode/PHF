@@ -1,0 +1,2 @@
+description = "Sync, Build, Test, Push and Auto-merge"
+command = "git fetch origin develop && git rebase origin/develop && dart run build_runner build --delete-conflicting-outputs && dart format . && flutter analyze && git add . && git commit -m 'chore: auto sync and pre-flight' && git push origin HEAD --force-with-lease && gh pr merge --auto --squash"
