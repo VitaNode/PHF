@@ -1,11 +1,23 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/search_result.dart';
 import '../../../logic/providers/search_provider.dart';
+import '../../../logic/providers/person_provider.dart';
 import '../../theme/app_theme.dart';
 import '../timeline/record_detail_page.dart';
+import '../../widgets/app_card.dart';
 
+/// # GlobalSearchPage
+///
+/// ## Description
+/// 全屏搜索页面，支持基于 FTS5 的全文检索及结果高亮显示。
+///
+/// ## Features
+/// - **FTS5 Search**: 检索医院、标签、备注及 OCR 文本。
+/// - **Highlighting**: 自动解析并高亮显示匹配关键词。
+/// - **Personnel Isolated**: 仅搜索当前选中成员的记录。
 class GlobalSearchPage extends ConsumerStatefulWidget {
   const GlobalSearchPage({super.key});
 
@@ -15,23 +27,23 @@ class GlobalSearchPage extends ConsumerStatefulWidget {
 
 class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   final _searchController = TextEditingController();
-  // Simple debounce
+  Timer? _debounce;
   String _lastQuery = '';
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged(String query) {
     if (query == _lastQuery) return;
     _lastQuery = query;
-    // Debounce is good, but for now simple trigger
-    // Using a delay or Stream would be better, but let's just trigger after 500ms
-    Future.delayed(const Duration(milliseconds: 500), () {
+
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      if (query != _lastQuery) return; // Query changed during delay
       ref.read(searchControllerProvider.notifier).search(query);
     });
   }
@@ -39,38 +51,86 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   @override
   Widget build(BuildContext context) {
     final searchAsync = ref.watch(searchControllerProvider);
+    final currentPerson = ref.watch(currentPersonProvider).value;
 
     return Scaffold(
-      backgroundColor: AppTheme.bgWhite,
+      backgroundColor: AppTheme.bgGrey,
       appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: '搜索 OCR 内容、医院或备注...',
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            hintStyle: TextStyle(color: AppTheme.textHint),
+        titleSpacing: 0,
+        title: Container(
+          height: 40,
+          margin: const EdgeInsets.only(right: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.bgGrey,
+            borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           ),
-          style: const TextStyle(fontSize: 18),
-          onChanged: _onSearchChanged,
-          textInputAction: TextInputAction.search,
-          onSubmitted: (val) =>
-              ref.read(searchControllerProvider.notifier).search(val),
-        ),
-        backgroundColor: AppTheme.bgWhite,
-        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
-        actions: [
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                _onSearchChanged('');
-              },
+          child: TextField(
+            controller: _searchController,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: '搜索 OCR 内容、医院或备注...',
+              hintStyle: const TextStyle(
+                color: AppTheme.textHint,
+                fontSize: 14,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                size: 20,
+                color: AppTheme.textGrey,
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(
+                        Icons.cancel,
+                        size: 20,
+                        color: AppTheme.textGrey,
+                      ),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                        _onSearchChanged('');
+                      },
+                    )
+                  : null,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
             ),
-        ],
+            style: const TextStyle(fontSize: 16),
+            onChanged: (val) {
+              setState(() {});
+              _onSearchChanged(val);
+            },
+            textInputAction: TextInputAction.search,
+            onSubmitted: (val) =>
+                ref.read(searchControllerProvider.notifier).search(val),
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(30),
+          child: Container(
+            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.person_outline,
+                  size: 14,
+                  color: AppTheme.textHint,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '正在搜索: ${currentPerson?.nickname ?? "加载中..."}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textHint,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: searchAsync.when(
         data: (results) {
@@ -78,26 +138,74 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
             return _buildEmptyState();
           }
           if (results.isEmpty) {
-            return const Center(
-              child: Text(
-                '输入关键词开始搜索',
-                style: TextStyle(color: AppTheme.textHint),
-              ),
-            );
+            return _buildInitialState();
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: results.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              return _SearchResultCard(result: results[index]);
-            },
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(
+                  '找到 ${results.length} 条结果',
+                  style: AppTheme.monoStyle.copyWith(
+                    fontSize: 12,
+                    color: AppTheme.textHint,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: results.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _SearchResultCard(result: results[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryTeal),
         ),
-        error: (err, stack) => Center(child: Text('搜索出错: $err')),
+        error: (err, stack) => Center(
+          child: Text(
+            '搜索出错: $err',
+            style: const TextStyle(color: AppTheme.errorRed),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitialState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_rounded,
+            size: 80,
+            color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '支持搜索病历内容、医院或标签',
+            style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '试试搜索 "血常规" 或 "省立医院"',
+            style: TextStyle(color: AppTheme.textHint, fontSize: 12),
+          ),
+        ],
       ),
     );
   }
@@ -107,11 +215,34 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off, size: 64, color: AppTheme.textHint),
+          const Icon(
+            Icons.sentiment_dissatisfied,
+            size: 64,
+            color: AppTheme.textHint,
+          ),
           const SizedBox(height: 16),
-          Text(
-            '未找到相关内容 "${_searchController.text}"',
-            style: const TextStyle(color: AppTheme.textHint, fontSize: 16),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 16,
+              ),
+              children: [
+                const TextSpan(text: '未找到相关内容 '),
+                TextSpan(
+                  text: '"${_searchController.text}"',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryTeal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '请尝试更换关键词或检查拼写',
+            style: TextStyle(color: AppTheme.textHint, fontSize: 14),
           ),
         ],
       ),
@@ -126,7 +257,8 @@ class _SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppCard(
+      padding: EdgeInsets.zero,
       onTap: () {
         Navigator.push(
           context,
@@ -135,113 +267,128 @@ class _SearchResultCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.bgGrey),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.local_hospital,
+                  size: 16,
+                  color: AppTheme.primaryTeal,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    result.record.hospitalName ?? '未填写医院',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  DateFormat('yyyy-MM-dd').format(result.record.notedAt),
+                  style: AppTheme.monoStyle.copyWith(
+                    fontSize: 12,
+                    color: AppTheme.textHint,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header (Hospital + Date)
+          ),
+          const Divider(height: 1, color: AppTheme.bgGrey),
+          // Snippet Content
+          if (result.snippet.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.local_hospital,
-                    size: 16,
-                    color: AppTheme.primaryTeal,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Icon(
+                      Icons.notes,
+                      size: 14,
+                      color: AppTheme.textHint,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      result.record.hospitalName ?? '未填写',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                    child: RichText(
+                      text: _parseSnippet(result.snippet),
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('yyyy-MM-dd').format(result.record.notedAt),
-                    style: AppTheme.monoStyle.copyWith(
-                      fontSize: 12,
-                      color: AppTheme.textHint,
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
-            // Snippet Content
-            if (result.snippet.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.text_snippet_outlined,
-                      size: 16,
-                      color: AppTheme.textHint,
+          // Tags hint if cached
+          if (result.record.tagsCache != null &&
+              result.record.tagsCache!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Wrap(
+                spacing: 4,
+                children: result.record.tagsCache!.split(',').take(3).map((
+                  tag,
+                ) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: RichText(text: _parseSnippet(result.snippet)),
+                    decoration: BoxDecoration(
+                      color: AppTheme.bgGrey,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  ],
-                ),
+                    child: Text(
+                      '#$tag',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
 
   TextSpan _parseSnippet(String snippet) {
-    // FTS5 snippet format: ... foo <b>bar</b> baz ...
-    // We need to parse <b> and </b> tags.
-    // Simple regex parser.
     final List<TextSpan> spans = [];
-    final RegExp exp = RegExp(r'(.*?)<b>(.*?)</b>');
-
-    // This simple loop might miss trailing text or complex nesting (FTS5 doesn't nest).
-    // Better strategy: split by <b> then </b>.
-    // Or use splitMapJoin logic manually.
-
-    // Let's iterate using split.
-    // "prefix <b>match</b> suffix <b>match2</b> tail"
+    final RegExp exp = RegExp(r'(.*?)<b>(.*?)</b>', dotAll: true);
 
     int lastIndex = 0;
-    // Find all matches
     for (final match in exp.allMatches(snippet)) {
-      // Add text before <b>
+      // Normal text
       if (match.start > lastIndex) {
         spans.add(
           TextSpan(
-            text: snippet.substring(lastIndex, match.start),
+            text: snippet
+                .substring(lastIndex, match.start)
+                .replaceAll('\n', ' '),
             style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
         );
       }
-      // Add text inside <b>
+      // Highlighted text
       spans.add(
         TextSpan(
-          text: match.group(2), // The content inside <b>...</b>
+          text: match.group(2),
           style: const TextStyle(
             color: AppTheme.primaryTeal,
             fontWeight: FontWeight.bold,
-            backgroundColor: Color(0xFFE0F2F1), // Light teal bg
+            backgroundColor: Color(0x20008080), // 12% opacity teal
             fontSize: 13,
           ),
         ),
@@ -249,11 +396,11 @@ class _SearchResultCard extends StatelessWidget {
       lastIndex = match.end;
     }
 
-    // Add remaining text
+    // Remaining text
     if (lastIndex < snippet.length) {
       spans.add(
         TextSpan(
-          text: snippet.substring(lastIndex),
+          text: snippet.substring(lastIndex).replaceAll('\n', ' '),
           style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
         ),
       );

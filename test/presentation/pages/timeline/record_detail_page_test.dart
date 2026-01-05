@@ -170,6 +170,9 @@ void main() {
     await tester.pumpWidget(createSubject(recordId));
     await tester.pump(const Duration(milliseconds: 500));
 
+    // Verify Collapsible card is present
+    expect(find.text('OCR 识别文本'), findsOneWidget);
+
     // Find OCR button and tap
     final ocrButton = find.byTooltip('查看识别文本');
     expect(ocrButton, findsOneWidget);
@@ -178,7 +181,8 @@ void main() {
 
     // Verify Bottom Sheet content
     expect(find.text('OCR 识别结果'), findsOneWidget);
-    expect(find.text('Recognized Text Content'), findsOneWidget);
+    // There are now 2 instances: one in CollapsibleOcrCard and one in Bottom Sheet
+    expect(find.text('Recognized Text Content'), findsNWidgets(2));
   });
 
   testWidgets('RecordDetailPage allows editing and saving metadata', (

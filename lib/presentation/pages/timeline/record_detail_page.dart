@@ -25,6 +25,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/secure_image.dart';
 import '../../widgets/tag_selector.dart';
 import '../../widgets/full_image_viewer.dart';
+import 'widgets/collapsible_ocr_card.dart';
 
 class RecordDetailPage extends ConsumerStatefulWidget {
   final String recordId;
@@ -492,6 +493,8 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 .map((tid) => _TagNameChip(tagId: tid))
                 .toList(),
           ),
+        const SizedBox(height: 24),
+        CollapsibleOcrCard(text: img.ocrText ?? ''),
         const SizedBox(height: 40),
         const Divider(),
         const SizedBox(height: 16),
