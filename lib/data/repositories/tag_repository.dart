@@ -7,6 +7,7 @@
 /// - [2026-01-05] 修复：
 ///   1. 引入 `Talker` 实例进行日志记录，移除隐式错误吞没。
 ///   2. 为所有异步操作添加 try-catch 块，确保异常被捕获并记录，符合健壮性要求。
+///   3. 新增 `updateOrder` 批量更新排序方法，优化拖拽排序性能与事务性。
 /// - [issue#14] 重构 `deleteTag` 逻辑，消除 `dynamic` 类型的使用，增强类型安全性，符合 Constitution 规范。
 /// - [issue#17] 优化 `suggestTags` 逻辑：支持不区分大小写的匹配，提升关键词提取的准确性 (T3.3.4)。
 ///
@@ -87,6 +88,26 @@ class TagRepository implements ITagRepository {
       );
     } catch (e, st) {
       _talker.handle(e, st, 'TagRepository.updateTag');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateOrder(List<Tag> tags) async {
+    try {
+      final db = await _dbService.database;
+      await db.transaction((txn) async {
+        for (int i = 0; i < tags.length; i++) {
+          await txn.update(
+            'tags',
+            {'order_index': i},
+            where: 'id = ?',
+            whereArgs: [tags[i].id],
+          );
+        }
+      });
+    } catch (e, st) {
+      _talker.handle(e, st, 'TagRepository.updateOrder');
       rethrow;
     }
   }

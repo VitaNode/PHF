@@ -33,6 +33,9 @@ abstract class ITagRepository {
   /// 3. 更新 `images.tags` 缓存字段。
   Future<void> deleteTag(String id);
 
+  /// 批量更新标签排序
+  Future<void> updateOrder(List<Tag> tags);
+
   /// 根据文本内容建议标签
   ///
   /// 简单的关键词匹配：如果标签名称出现在 [text] 中，则建议该标签。

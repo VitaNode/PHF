@@ -4,6 +4,13 @@
 /// 标签管理中心，支持基于人员的标签 CRUD、拖拽排序及级联删除。
 /// 遵循 `Constitution#VI. UI/UX` 准则，保持 Teal/White 色调与等宽字体。
 ///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 统一标签名称显示为 Monospace 字体，符合 Constitution 规范。
+///   2. 补全对话框保存操作的错误捕获与用户提示，避免异常吞没。
+///   3. 修正新建标签的 `orderIndex` 逻辑，默认追加至当前人员列表末尾。
+///   4. 优化拖拽排序逻辑，使用 `TagRepository.updateOrder` 批量提交。
+///
 /// ## Features
 /// - **Personnel Tabs**: 顶部展示人员切换，自动过滤标签列表。
 /// - **Tag List**: 展示当前人员可见的所有标签（含系统内置与自定义）。
@@ -138,12 +145,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
 
     try {
       final repo = ref.read(tagRepositoryProvider);
-      // Repository updateTag is used for single tag, but we might need bulk updateOrder
-      // Check if TagRepository has updateOrder. It doesn't seem to have one in the interface I read.
-      // Let's check TagRepository again.
-      for (int i = 0; i < tags.length; i++) {
-        await repo.updateTag(tags[i].copyWith(orderIndex: i));
-      }
+      await repo.updateOrder(tags);
       ref.invalidate(allTagsProvider);
     } catch (e) {
       if (mounted) {
@@ -230,6 +232,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                 if (isEditing) {
                   await repo.updateTag(tag.copyWith(name: name));
                 } else {
+                  final currentTags = ref.read(allTagsProvider).value ?? [];
                   final personId = await ref.read(
                     currentPersonIdControllerProvider.future,
                   );
@@ -239,6 +242,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                     color: '#008080', // Default Teal
                     personId: personId,
                     isCustom: true,
+                    orderIndex: currentTags.length,
                     createdAt: DateTime.now(),
                   );
                   await repo.createTag(newTag);
@@ -246,7 +250,14 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                 ref.invalidate(allTagsProvider);
                 if (context.mounted) Navigator.pop(context);
               } catch (e) {
-                // Error handled in repository/talker, but UI can show snackbar
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('保存失败: $e'),
+                      backgroundColor: AppTheme.errorRed,
+                    ),
+                  );
+                }
               }
             },
             child: const Text('保存'),
