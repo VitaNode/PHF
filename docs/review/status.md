@@ -29,8 +29,9 @@
 - **Intelligence (Phase 2)**: `SmartExtractor` (T19.1) and `OCRProcessor` (T19.2) reviewed. Core extraction and background orchestration logic verified.
 - **Background (Phase 2)**: `BackgroundWorkerService` (T19.3 - Android) implemented and verified.
 - **Background (Phase 2)**: iOS `BGTaskScheduler` & Headless Plugin Registry (T19.4) implemented and verified.
-- **UI (Phase 2)**: Detail View OCR Viewer (T20.3) implemented and robust.
-- **UI (Phase 2)**: `GlobalSearchPage` (T20.4) implemented with FTS5 highlighting.
+- [x] **UI (Phase 2)**: Detail View OCR Viewer (T20.3) implemented and robust.
+- [x] **UI (Phase 2)**: `GlobalSearchPage` (T20.4) implemented with FTS5 highlighting.
+    - [x] **Review & Reinforcement (2026-01-05)**: Added FTS5 query sanitization and improved Monospace font application.
 
 ## 🟢 Phase 3 In Progress
 Phase 3 (Governance & Store Readiness) has started.

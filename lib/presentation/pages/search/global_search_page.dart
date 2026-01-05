@@ -18,6 +18,10 @@ import '../../widgets/app_card.dart';
 /// - **FTS5 Search**: 检索医院、标签、备注及 OCR 文本。
 /// - **Highlighting**: 自动解析并高亮显示匹配关键词。
 /// - **Personnel Isolated**: 仅搜索当前选中成员的记录。
+///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：应用 Monospace 字体于搜索结果摘要，提升医疗数值可读性。
+/// - [2026-01-05] 修复：优化 `_parseSnippet` 逻辑，确保高亮标签正确闭合及性能。
 class GlobalSearchPage extends ConsumerStatefulWidget {
   const GlobalSearchPage({super.key});
 
@@ -377,7 +381,10 @@ class _SearchResultCard extends StatelessWidget {
             text: snippet
                 .substring(lastIndex, match.start)
                 .replaceAll('\n', ' '),
-            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            style: AppTheme.monoStyle.copyWith(
+              color: AppTheme.textSecondary,
+              fontSize: 13,
+            ),
           ),
         );
       }
@@ -385,10 +392,10 @@ class _SearchResultCard extends StatelessWidget {
       spans.add(
         TextSpan(
           text: match.group(2),
-          style: const TextStyle(
+          style: AppTheme.monoStyle.copyWith(
             color: AppTheme.primaryTeal,
             fontWeight: FontWeight.bold,
-            backgroundColor: Color(0x20008080), // 12% opacity teal
+            backgroundColor: const Color(0x20008080), // 12% opacity teal
             fontSize: 13,
           ),
         ),
@@ -401,7 +408,10 @@ class _SearchResultCard extends StatelessWidget {
       spans.add(
         TextSpan(
           text: snippet.substring(lastIndex).replaceAll('\n', ' '),
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+          style: AppTheme.monoStyle.copyWith(
+            color: AppTheme.textSecondary,
+            fontSize: 13,
+          ),
         ),
       );
     }
