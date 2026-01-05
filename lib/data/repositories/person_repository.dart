@@ -3,6 +3,12 @@
 /// ## Description
 /// `IPersonRepository` 的具体实现。
 ///
+/// ## Repair Logs
+/// - [2026-01-05] 修复：
+///   1. 注入 `Talker` 实例进行日志记录，增强可观测性。
+///   2. 为所有异步操作添加 try-catch 块，确保异常被捕获并记录，符合健壮性要求。
+///   3. 优化错误处理，确保在删除受限人员时记录详细日志。
+///
 /// ## Security
 /// - 基于 SQLCipher 加密环境。
 ///
@@ -11,104 +17,148 @@
 library;
 
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import '../datasources/local/database_service.dart';
 import '../models/person.dart';
 import 'interfaces/person_repository.dart';
 
 class PersonRepository implements IPersonRepository {
   final SQLCipherDatabaseService _dbService;
+  final Talker _talker;
 
-  PersonRepository(this._dbService);
+  PersonRepository(this._dbService, this._talker);
 
   @override
   Future<List<Person>> getAllPersons() async {
-    final db = await _dbService.database;
-    final maps = await db.query('persons', orderBy: 'order_index ASC');
+    try {
+      final db = await _dbService.database;
+      final maps = await db.query('persons', orderBy: 'order_index ASC');
 
-    return maps.map((row) => _mapToPerson(row)).toList();
+      return maps.map((row) => _mapToPerson(row)).toList();
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.getAllPersons');
+      rethrow;
+    }
   }
 
   @override
   Future<Person?> getDefaultPerson() async {
-    final db = await _dbService.database;
-    final results = await db.query(
-      'persons',
-      where: 'is_default = ?',
-      whereArgs: [1],
-      limit: 1,
-    );
+    try {
+      final db = await _dbService.database;
+      final results = await db.query(
+        'persons',
+        where: 'is_default = ?',
+        whereArgs: [1],
+        limit: 1,
+      );
 
-    if (results.isEmpty) return null;
-    return _mapToPerson(results.first);
+      if (results.isEmpty) return null;
+      return _mapToPerson(results.first);
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.getDefaultPerson');
+      rethrow;
+    }
   }
 
   @override
   Future<Person?> getPerson(String id) async {
-    final db = await _dbService.database;
-    final results = await db.query(
-      'persons',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
+    try {
+      final db = await _dbService.database;
+      final results = await db.query(
+        'persons',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
 
-    if (results.isEmpty) return null;
-    return _mapToPerson(results.first);
+      if (results.isEmpty) return null;
+      return _mapToPerson(results.first);
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.getPerson');
+      rethrow;
+    }
   }
 
   @override
   Future<void> createPerson(Person person) async {
-    final db = await _dbService.database;
-    await db.insert(
-      'persons',
-      _mapToDb(person),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      final db = await _dbService.database;
+      await db.insert(
+        'persons',
+        _mapToDb(person),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.createPerson');
+      rethrow;
+    }
   }
 
   @override
   Future<void> updatePerson(Person person) async {
-    final db = await _dbService.database;
-    await db.update(
-      'persons',
-      _mapToDb(person),
-      where: 'id = ?',
-      whereArgs: [person.id],
-    );
+    try {
+      final db = await _dbService.database;
+      await db.update(
+        'persons',
+        _mapToDb(person),
+        where: 'id = ?',
+        whereArgs: [person.id],
+      );
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.updatePerson');
+      rethrow;
+    }
   }
 
   @override
   Future<void> deletePerson(String id) async {
-    final db = await _dbService.database;
+    try {
+      final db = await _dbService.database;
 
-    // Check constraints
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(*) FROM records WHERE person_id = ? AND status != ?',
-        [id, 'deleted'],
-      ),
-    );
+      // Check constraints
+      final count = Sqflite.firstIntValue(
+        await db.rawQuery(
+          'SELECT COUNT(*) FROM records WHERE person_id = ? AND status != ?',
+          [id, 'deleted'],
+        ),
+      );
 
-    if (count != null && count > 0) {
-      throw Exception('Cannot delete person with existing records.');
+      if (count != null && count > 0) {
+        final err = Exception('无法删除：该档案下仍有存量记录，请先清理记录。');
+        _talker.error(
+          'PersonRepository.deletePerson: constraint violation for id=$id',
+          err,
+        );
+        throw err;
+      }
+
+      await db.delete('persons', where: 'id = ?', whereArgs: [id]);
+    } catch (e, st) {
+      if (e is! Exception) {
+        _talker.handle(e, st, 'PersonRepository.deletePerson');
+      }
+      rethrow;
     }
-
-    await db.delete('persons', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
   Future<void> updateOrder(List<Person> persons) async {
-    final db = await _dbService.database;
-    await db.transaction((txn) async {
-      for (int i = 0; i < persons.length; i++) {
-        await txn.update(
-          'persons',
-          {'order_index': i},
-          where: 'id = ?',
-          whereArgs: [persons[i].id],
-        );
-      }
-    });
+    try {
+      final db = await _dbService.database;
+      await db.transaction((txn) async {
+        for (int i = 0; i < persons.length; i++) {
+          await txn.update(
+            'persons',
+            {'order_index': i},
+            where: 'id = ?',
+            whereArgs: [persons[i].id],
+          );
+        }
+      });
+    } catch (e, st) {
+      _talker.handle(e, st, 'PersonRepository.updateOrder');
+      rethrow;
+    }
   }
 
   // --- Mappers ---
