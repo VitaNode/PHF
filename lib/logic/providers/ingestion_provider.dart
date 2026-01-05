@@ -21,6 +21,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/image.dart';
+import 'person_provider.dart';
 import '../../data/models/record.dart';
 import '../services/background_worker_service.dart';
 import '../utils/secure_wipe_helper.dart';
@@ -160,7 +161,12 @@ class IngestionController extends _$IngestionController {
       final imageProcessing = ref.read(imageProcessingServiceProvider);
       final pathService = ref.read(pathProviderServiceProvider);
 
-      const currentPersonId = 'def_me'; // Phase 1 Single User
+      final currentPersonId = await ref.read(
+        currentPersonIdControllerProvider.future,
+      );
+      if (currentPersonId == null) {
+        throw Exception('Cannot submit record without a valid person ID.');
+      }
 
       final defaultHospital = state.hospitalName ?? '未命名记录';
       final defaultDate = state.visitDate ?? DateTime.now();
