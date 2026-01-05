@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import '../../../data/models/image.dart';
 import '../../../data/models/ocr_result.dart';
 import '../../../data/models/record.dart';
@@ -20,6 +21,7 @@ import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/timeline_provider.dart';
 import '../../../logic/providers/logging_provider.dart';
 import '../../../logic/providers/ocr_status_provider.dart';
+import '../../../logic/providers/person_provider.dart';
 import '../../../logic/services/background_worker_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/secure_image.dart';
@@ -252,6 +254,54 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         ).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
       }
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleCreateTag(String name) async {
+    final tagRepo = ref.read(tagRepositoryProvider);
+    final personId = await ref.read(currentPersonIdControllerProvider.future);
+
+    final newTag = Tag(
+      id: const Uuid().v4(),
+      name: name,
+      personId: personId,
+      color: '#009688', // Default teal
+      createdAt: DateTime.now(),
+      isCustom: true,
+    );
+
+    try {
+      await tagRepo.createTag(newTag);
+
+      // Refresh tags list so TagSelector sees it
+      ref.invalidate(allTagsProvider);
+
+      // Add to current image
+      final currentIds = [..._images[_currentIndex].tagIds, newTag.id];
+      setState(() {
+        _images[_currentIndex] = _images[_currentIndex].copyWith(
+          tagIds: currentIds,
+        );
+      });
+
+      await ref
+          .read(imageRepositoryProvider)
+          .updateImageTags(_images[_currentIndex].id, currentIds);
+
+      // Notify Timeline
+      await ref.read(timelineControllerProvider.notifier).refresh();
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('已创建标签 "${newTag.name}"')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('创建标签失败: $e')));
+      }
     }
   }
 
@@ -490,7 +540,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             spacing: 8,
             runSpacing: 8,
             children: img.tagIds
-                .map((tid) => _TagNameChip(tagId: tid))
+                .map<Widget>((tid) => _TagNameChip(tagId: tid))
                 .toList(),
           ),
         const SizedBox(height: 24),
@@ -734,6 +784,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               }
             }
           },
+          onCreate: _handleCreateTag, // Add this
         ),
         const SizedBox(height: 32),
         SizedBox(
