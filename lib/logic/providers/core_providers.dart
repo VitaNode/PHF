@@ -123,7 +123,8 @@ IImageRepository imageRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 IPersonRepository personRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
-  return PersonRepository(db);
+  final talker = ref.watch(talkerProvider);
+  return PersonRepository(db, talker);
 }
 
 @Riverpod(keepAlive: true)
