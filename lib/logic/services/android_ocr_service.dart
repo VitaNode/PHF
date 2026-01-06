@@ -24,7 +24,7 @@ class AndroidOCRService implements IOCRService {
   static const MethodChannel _channel = MethodChannel('com.example.phf/ocr');
 
   @override
-  Future<OCRResult> recognizeText(
+  Future<OcrResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
     String language = 'zh',
@@ -53,7 +53,7 @@ class AndroidOCRService implements IOCRService {
       final dynamic decoded = jsonDecode(jsonResult);
       final Map<String, dynamic> resultMap = decoded as Map<String, dynamic>;
 
-      return OCRResult.fromJson(resultMap);
+      return OcrResult.fromJson(resultMap);
     } catch (e, stack) {
       log(
         'Android OCR Failed: $e',

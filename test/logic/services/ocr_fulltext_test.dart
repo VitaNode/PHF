@@ -142,7 +142,7 @@ void main() {
       when(
         mockOcrService.recognizeText(any, mimeType: anyNamed('mimeType')),
       ).thenAnswer(
-        (_) async => const OCRResult(text: 'Alpha content', confidence: 0.95),
+        (_) async => const OcrResult(text: 'Alpha content', confidence: 0.95),
       );
 
       await processor.processNextItem();
@@ -156,7 +156,7 @@ void main() {
       when(
         mockOcrService.recognizeText(any, mimeType: anyNamed('mimeType')),
       ).thenAnswer(
-        (_) async => const OCRResult(text: 'Beta keyword', confidence: 0.95),
+        (_) async => const OcrResult(text: 'Beta keyword', confidence: 0.95),
       );
 
       await processor.processNextItem();

@@ -127,10 +127,10 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                     onPageChanged: _onImageChanged,
                     itemBuilder: (context, index) {
                       final img = images[index];
-                      OCRResult? currentOcr;
+                      OcrResult? currentOcr;
                       if (img.ocrRawJson != null) {
                         try {
-                          currentOcr = OCRResult.fromJson(
+                          currentOcr = OcrResult.fromJson(
                             jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
                           );
                         } catch (_) {}
