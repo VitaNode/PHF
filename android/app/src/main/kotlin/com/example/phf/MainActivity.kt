@@ -36,6 +36,8 @@ class MainActivity: FlutterActivity() {
         try {
             val file = File(imagePath)
             val image = InputImage.fromFilePath(this, Uri.fromFile(file))
+            val imageWidth = image.width.toDouble()
+            val imageHeight = image.height.toDouble()
             val recognizer = TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
 
             recognizer.process(image)
@@ -50,15 +52,52 @@ class MainActivity: FlutterActivity() {
                         
                         val rect: Rect? = block.boundingBox
                         if (rect != null) {
-                            blockJson.put("left", rect.left.toDouble())
-                            blockJson.put("top", rect.top.toDouble())
-                            blockJson.put("width", rect.width().toDouble())
-                            blockJson.put("height", rect.height().toDouble())
+                            blockJson.put("x", rect.left.toDouble() / imageWidth)
+                            blockJson.put("y", rect.top.toDouble() / imageHeight)
+                            blockJson.put("w", rect.width().toDouble() / imageWidth)
+                            blockJson.put("h", rect.height().toDouble() / imageHeight)
                         }
+                        
+                        // Added Lines and Elements (V2)
+                        val linesArray = JSONArray()
+                        for (line in block.lines) {
+                            val lineJson = JSONObject()
+                            lineJson.put("text", line.text)
+                            val lRect = line.boundingBox
+                            if (lRect != null) {
+                                lineJson.put("x", lRect.left.toDouble() / imageWidth)
+                                lineJson.put("y", lRect.top.toDouble() / imageHeight)
+                                lineJson.put("w", lRect.width().toDouble() / imageWidth)
+                                lineJson.put("h", lRect.height().toDouble() / imageHeight)
+                            }
+                            lineJson.put("confidence", 1.0)
+                            
+                            val elementsArray = JSONArray()
+                            for (element in line.elements) {
+                                val elemJson = JSONObject()
+                                elemJson.put("text", element.text)
+                                val eRect = element.boundingBox
+                                if (eRect != null) {
+                                    elemJson.put("x", eRect.left.toDouble() / imageWidth)
+                                    elemJson.put("y", eRect.top.toDouble() / imageHeight)
+                                    elemJson.put("w", eRect.width().toDouble() / imageWidth)
+                                    elemJson.put("h", eRect.height().toDouble() / imageHeight)
+                                }
+                                elemJson.put("confidence", 1.0)
+                                elementsArray.put(elemJson)
+                            }
+                            lineJson.put("elements", elementsArray)
+                            linesArray.put(lineJson)
+                        }
+                        blockJson.put("lines", linesArray)
                         blocksArray.put(blockJson)
                     }
                     jsonResult.put("blocks", blocksArray)
-                    jsonResult.put("confidence", 1.0) // ML Kit doesn't provide global confidence easily
+                    jsonResult.put("confidence", 1.0)
+                    jsonResult.put("source", "google_mlkit")
+                    jsonResult.put("language", "zh")
+                    jsonResult.put("version", 2)
+                    jsonResult.put("timestamp", System.currentTimeMillis())
 
                     result.success(jsonResult.toString())
                 }

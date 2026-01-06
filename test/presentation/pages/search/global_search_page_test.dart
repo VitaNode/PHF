@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:phf/data/models/record.dart';
 import 'package:phf/data/models/search_result.dart';
+import 'package:phf/data/models/person.dart';
 import 'package:phf/data/repositories/interfaces/search_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/person_provider.dart';
@@ -33,6 +34,16 @@ void main() {
         searchRepositoryProvider.overrideWithValue(mockSearchRepo),
         currentPersonIdControllerProvider.overrideWith(
           () => MockCurrentPersonIdController('p1'),
+        ),
+        currentPersonProvider.overrideWith(
+          (ref) => Future.value(
+            Person(
+              id: 'p1',
+              nickname: 'Me',
+              isDefault: true,
+              createdAt: DateTime.now(),
+            ),
+          ),
         ),
       ],
       child: const MaterialApp(home: GlobalSearchPage()),
@@ -73,8 +84,6 @@ void main() {
 
     // Check results
     expect(find.text('Result Hospital'), findsOneWidget);
-    // RichText checking is complex, but snippet parsing logic can be unit tested separately.
-    // Here we ensure the card renders.
   });
 
   testWidgets('GlobalSearchPage shows empty state', (tester) async {

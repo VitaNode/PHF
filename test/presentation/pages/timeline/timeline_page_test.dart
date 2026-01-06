@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:phf/data/models/record.dart';
+import 'package:phf/data/models/person.dart';
 import 'package:phf/data/repositories/interfaces/image_repository.dart';
 import 'package:phf/data/repositories/interfaces/record_repository.dart';
+import 'package:phf/data/repositories/interfaces/tag_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/ocr_status_provider.dart';
 import 'package:phf/logic/providers/person_provider.dart';
@@ -16,6 +18,7 @@ import 'package:phf/presentation/widgets/event_card.dart';
 @GenerateNiceMocks([
   MockSpec<IRecordRepository>(),
   MockSpec<IImageRepository>(),
+  MockSpec<ITagRepository>(),
 ])
 import 'timeline_page_test.mocks.dart';
 
@@ -29,10 +32,16 @@ class MockCurrentPersonIdController extends CurrentPersonIdController {
 void main() {
   late MockIRecordRepository mockRecordRepo;
   late MockIImageRepository mockImageRepo;
+  late MockITagRepository mockTagRepo;
 
   setUp(() {
     mockRecordRepo = MockIRecordRepository();
     mockImageRepo = MockIImageRepository();
+    mockTagRepo = MockITagRepository();
+
+    when(
+      mockTagRepo.getAllTags(personId: anyNamed('personId')),
+    ).thenAnswer((_) async => []);
   });
 
   Widget createSubject({int pendingCount = 0}) {
@@ -40,8 +49,19 @@ void main() {
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepo),
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
+        tagRepositoryProvider.overrideWithValue(mockTagRepo),
         currentPersonIdControllerProvider.overrideWith(
           () => MockCurrentPersonIdController('p1'),
+        ),
+        currentPersonProvider.overrideWith(
+          (ref) => Future.value(
+            Person(
+              id: 'p1',
+              nickname: 'Me',
+              isDefault: true,
+              createdAt: DateTime.now(),
+            ),
+          ),
         ),
         ocrPendingCountProvider.overrideWith(
           (ref) => Stream.value(pendingCount),
@@ -75,7 +95,7 @@ void main() {
     when(mockImageRepo.getImagesForRecord(any)).thenAnswer((_) async => []);
 
     await tester.pumpWidget(createSubject());
-    await tester.pumpAndSettle(); // Wait for FutureBuilder
+    await tester.pumpAndSettle();
 
     expect(find.byType(EventCard), findsOneWidget);
     expect(find.text('Test Hospital'), findsOneWidget);
@@ -148,8 +168,19 @@ void main() {
       overrides: [
         recordRepositoryProvider.overrideWithValue(mockRecordRepo),
         imageRepositoryProvider.overrideWithValue(mockImageRepo),
+        tagRepositoryProvider.overrideWithValue(mockTagRepo),
         currentPersonIdControllerProvider.overrideWith(
           () => MockCurrentPersonIdController('p1'),
+        ),
+        currentPersonProvider.overrideWith(
+          (ref) => Future.value(
+            Person(
+              id: 'p1',
+              nickname: 'Me',
+              isDefault: true,
+              createdAt: DateTime.now(),
+            ),
+          ),
         ),
         ocrPendingCountProvider.overrideWith((ref) => Stream.value(0)),
       ],
