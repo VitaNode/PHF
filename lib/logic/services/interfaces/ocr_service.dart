@@ -22,7 +22,11 @@ abstract interface class IOCRService {
   /// [mimeType]: 图片的 MIME 类型 (如 image/jpeg, image/png)。
   ///
   /// 返回识别成功的 [OCRResult]。
-  Future<OCRResult> recognizeText(Uint8List imageBytes, {String? mimeType});
+  Future<OCRResult> recognizeText(
+    Uint8List imageBytes, {
+    String? mimeType,
+    String language = 'zh',
+  });
 
   /// 释放服务资源 (如 OCR 引擎实例)
   Future<void> dispose();

@@ -27,11 +27,12 @@ class AndroidOCRService implements IOCRService {
   Future<OCRResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
+    String language = 'zh',
   }) async {
     File? tempFile;
     try {
       log(
-        'Starting Native Android OCR for image size: ${imageBytes.length} bytes',
+        'Starting Native Android OCR ($language) for image size: ${imageBytes.length} bytes',
         name: 'AndroidOCRService',
       );
 
@@ -44,6 +45,7 @@ class AndroidOCRService implements IOCRService {
       // 2. Call Native Bridge
       final dynamic result = await _channel.invokeMethod('recognizeText', {
         'imagePath': tempFile.path,
+        'language': language,
       });
       final String jsonResult = result as String;
 

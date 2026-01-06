@@ -408,12 +408,13 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
   _i6.Future<_i2.OCRResult> recognizeText(
     _i15.Uint8List? imageBytes, {
     String? mimeType,
+    String? language = 'zh',
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #recognizeText,
               [imageBytes],
-              {#mimeType: mimeType},
+              {#mimeType: mimeType, #language: language},
             ),
             returnValue: _i6.Future<_i2.OCRResult>.value(
               _FakeOCRResult_0(
@@ -421,7 +422,7 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
                 Invocation.method(
                   #recognizeText,
                   [imageBytes],
-                  {#mimeType: mimeType},
+                  {#mimeType: mimeType, #language: language},
                 ),
               ),
             ),
@@ -431,7 +432,7 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
                 Invocation.method(
                   #recognizeText,
                   [imageBytes],
-                  {#mimeType: mimeType},
+                  {#mimeType: mimeType, #language: language},
                 ),
               ),
             ),
