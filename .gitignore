@@ -43,3 +43,4 @@ android/gradlew.bat
 .gemini/tmp/
 .qwen/tmp/
 .pub-cache/
+.worktrees/

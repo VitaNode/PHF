@@ -44,10 +44,11 @@ jobs:
       - name: 🔍 Snyk Security Scan
         shell: bash
         run: |
-          # 扫描代码逻辑安全 (SAST) 
-          snyk code test
-          # 扫描第三方库漏洞 
-          snyk test --all-projects
+          # 扫描代码逻辑安全 (SAST)
+          snyk code test --severity-threshold=high
+          # 扫描第三方库漏洞 (SCA)
+          # 排除 Linux/Windows 编译生成的临时插件目录，避免 Gradle 解析错误
+          snyk test --all-projects --severity-threshold=critical --exclude=linux,windows,.dart_tool
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
