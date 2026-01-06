@@ -98,9 +98,21 @@ class MainActivity: FlutterActivity() {
                             linesArray.put(lineJson)
                         }
                         blockJson.put("lines", linesArray)
+                        blockJson.put("confidence", 1.0)
                         blocksArray.put(blockJson)
                     }
-                    jsonResult.put("blocks", blocksArray)
+
+                    val pageJson = JSONObject()
+                    pageJson.put("pageNumber", 0)
+                    pageJson.put("blocks", blocksArray)
+                    pageJson.put("confidence", 1.0)
+                    pageJson.put("width", imageWidth)
+                    pageJson.put("height", imageHeight)
+
+                    val pagesArray = JSONArray()
+                    pagesArray.put(pageJson)
+
+                    jsonResult.put("pages", pagesArray)
                     jsonResult.put("confidence", 1.0)
                     jsonResult.put("source", "google_mlkit")
                     jsonResult.put("language", language)

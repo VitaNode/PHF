@@ -4,7 +4,7 @@ import '../../../../presentation/theme/app_theme.dart';
 
 class OCRHighlightView extends StatelessWidget {
   final ImageProvider imageProvider;
-  final OCRResult? ocrResult;
+  final OcrResult? ocrResult;
   final Size? actualImageSize; // 原始图片的实际尺寸 (width, height)
 
   const OCRHighlightView({
@@ -38,7 +38,7 @@ class OCRHighlightView extends StatelessWidget {
 }
 
 class _OCRHighlightPainter extends CustomPainter {
-  final OCRResult result;
+  final OcrResult result;
   final Size actualImageSize;
   final BoxFit fit;
 

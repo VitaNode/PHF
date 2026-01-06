@@ -21,8 +21,8 @@ abstract interface class IOCRService {
   /// [imageBytes]: 待识别图片的原始字节流。
   /// [mimeType]: 图片的 MIME 类型 (如 image/jpeg, image/png)。
   ///
-  /// 返回识别成功的 [OCRResult]。
-  Future<OCRResult> recognizeText(
+  /// 返回识别成功的 [OcrResult]。
+  Future<OcrResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
     String language = 'zh',

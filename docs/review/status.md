@@ -110,10 +110,12 @@ Phase 3 (Governance & Store Readiness) has started.
     - Integrated metadata (source, language, timestamp) into models.
     - Updated native code in `AppDelegate.swift` and `MainActivity.kt` to support V2.
 - [x] **T3.8.2**: OCR - Platform Adapter Refactoring (Issue #82).
-    - Refactored `IOCRService` to support explicit `language` parameters.
-    - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision).
-    - Implemented platform-specific language mapping (e.g., `zh-Hans` for iOS vs `zh` for Android).
-    - Verified cross-platform consistency of `OCRResult` outputs.
+    - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision) with 0.0-1.0 normalization.
+    - Integrated `talker` logging system into `AndroidOCRService` and `IOSOCRService`.
+    - Standardized all OCR-related classes to **PascalCase** (`OcrResult`, `OcrBlock`, etc.) across the codebase.
+    - Registered `ocrServiceProvider` in `core_providers.dart` with platform-specific instantiation.
+    - Verified cross-platform consistency of Schema V2 (Pages) outputs.
+    - Refactored `OcrEnhancer` to support multi-page structures.
 - [x] **T3.8.3**: OCR - Heuristic Semantic Enhancement (Issue #83).
     - Implemented `OCREnhancer` for post-recognition semantic augmentation.
     - Added Key-Value splitting logic for lines containing colons (label/value).

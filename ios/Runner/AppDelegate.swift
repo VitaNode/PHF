@@ -70,7 +70,6 @@ import workmanager_apple
 
               let boundingBox = observation.boundingBox
               
-              // V2 structure: each observation is treated as a block containing one line
               let line: [String: Any] = [
                   "text": topCandidate.string,
                   "x": boundingBox.origin.x,
@@ -87,14 +86,23 @@ import workmanager_apple
                   "y": 1 - boundingBox.origin.y - boundingBox.height,
                   "w": boundingBox.width,
                   "h": boundingBox.height,
-                  "lines": [line]
+                  "lines": [line],
+                  "confidence": topCandidate.confidence
               ]
               blocks.append(block)
           }
 
+          let page: [String: Any] = [
+              "pageNumber": 0,
+              "blocks": blocks,
+              "confidence": 1.0,
+              "width": Double(cgImage.width),
+              "height": Double(cgImage.height)
+          ]
+
           let responseData: [String: Any] = [
               "text": fullText,
-              "blocks": blocks,
+              "pages": [page],
               "confidence": 1.0,
               "source": "ios_vision",
               "language": language,

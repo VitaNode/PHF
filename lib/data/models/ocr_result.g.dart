@@ -6,20 +6,19 @@ part of 'ocr_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_OCRTextElement _$OCRTextElementFromJson(Map<String, dynamic> json) =>
-    _OCRTextElement(
-      text: json['text'] as String,
-      x: (_readX(json, 'x') as num).toDouble(),
-      y: (_readY(json, 'y') as num).toDouble(),
-      w: (_readW(json, 'w') as num).toDouble(),
-      h: (_readH(json, 'h') as num).toDouble(),
-      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
-      type:
-          $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
-          OCRSemanticType.normal,
-    );
+_OcrElement _$OcrElementFromJson(Map<String, dynamic> json) => _OcrElement(
+  text: json['text'] as String,
+  x: (_readX(json, 'x') as num).toDouble(),
+  y: (_readY(json, 'y') as num).toDouble(),
+  w: (_readW(json, 'w') as num).toDouble(),
+  h: (_readH(json, 'h') as num).toDouble(),
+  confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
+  type:
+      $enumDecodeNullable(_$OcrSemanticTypeEnumMap, json['type']) ??
+      OcrSemanticType.normal,
+);
 
-Map<String, dynamic> _$OCRTextElementToJson(_OCRTextElement instance) =>
+Map<String, dynamic> _$OcrElementToJson(_OcrElement instance) =>
     <String, dynamic>{
       'text': instance.text,
       'x': instance.x,
@@ -27,17 +26,17 @@ Map<String, dynamic> _$OCRTextElementToJson(_OCRTextElement instance) =>
       'w': instance.w,
       'h': instance.h,
       'confidence': instance.confidence,
-      'type': _$OCRSemanticTypeEnumMap[instance.type]!,
+      'type': _$OcrSemanticTypeEnumMap[instance.type]!,
     };
 
-const _$OCRSemanticTypeEnumMap = {
-  OCRSemanticType.normal: 'normal',
-  OCRSemanticType.label: 'label',
-  OCRSemanticType.value: 'value',
-  OCRSemanticType.sectionTitle: 'section_title',
+const _$OcrSemanticTypeEnumMap = {
+  OcrSemanticType.normal: 'normal',
+  OcrSemanticType.label: 'label',
+  OcrSemanticType.value: 'value',
+  OcrSemanticType.sectionTitle: 'section_title',
 };
 
-_OCRLine _$OCRLineFromJson(Map<String, dynamic> json) => _OCRLine(
+_OcrLine _$OcrLineFromJson(Map<String, dynamic> json) => _OcrLine(
   text: json['text'] as String,
   x: (_readX(json, 'x') as num).toDouble(),
   y: (_readY(json, 'y') as num).toDouble(),
@@ -45,16 +44,16 @@ _OCRLine _$OCRLineFromJson(Map<String, dynamic> json) => _OCRLine(
   h: (_readH(json, 'h') as num).toDouble(),
   elements:
       (json['elements'] as List<dynamic>?)
-          ?.map((e) => OCRTextElement.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => OcrElement.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
   confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
   type:
-      $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
-      OCRSemanticType.normal,
+      $enumDecodeNullable(_$OcrSemanticTypeEnumMap, json['type']) ??
+      OcrSemanticType.normal,
 );
 
-Map<String, dynamic> _$OCRLineToJson(_OCRLine instance) => <String, dynamic>{
+Map<String, dynamic> _$OcrLineToJson(_OcrLine instance) => <String, dynamic>{
   'text': instance.text,
   'x': instance.x,
   'y': instance.y,
@@ -62,10 +61,10 @@ Map<String, dynamic> _$OCRLineToJson(_OCRLine instance) => <String, dynamic>{
   'h': instance.h,
   'elements': instance.elements.map((e) => e.toJson()).toList(),
   'confidence': instance.confidence,
-  'type': _$OCRSemanticTypeEnumMap[instance.type]!,
+  'type': _$OcrSemanticTypeEnumMap[instance.type]!,
 };
 
-_OCRBlock _$OCRBlockFromJson(Map<String, dynamic> json) => _OCRBlock(
+_OcrBlock _$OcrBlockFromJson(Map<String, dynamic> json) => _OcrBlock(
   text: json['text'] as String,
   x: (_readX(json, 'x') as num).toDouble(),
   y: (_readY(json, 'y') as num).toDouble(),
@@ -73,29 +72,51 @@ _OCRBlock _$OCRBlockFromJson(Map<String, dynamic> json) => _OCRBlock(
   h: (_readH(json, 'h') as num).toDouble(),
   lines:
       (json['lines'] as List<dynamic>?)
-          ?.map((e) => OCRLine.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => OcrLine.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
   type:
-      $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
-      OCRSemanticType.normal,
+      $enumDecodeNullable(_$OcrSemanticTypeEnumMap, json['type']) ??
+      OcrSemanticType.normal,
 );
 
-Map<String, dynamic> _$OCRBlockToJson(_OCRBlock instance) => <String, dynamic>{
+Map<String, dynamic> _$OcrBlockToJson(_OcrBlock instance) => <String, dynamic>{
   'text': instance.text,
   'x': instance.x,
   'y': instance.y,
   'w': instance.w,
   'h': instance.h,
   'lines': instance.lines.map((e) => e.toJson()).toList(),
-  'type': _$OCRSemanticTypeEnumMap[instance.type]!,
+  'confidence': instance.confidence,
+  'type': _$OcrSemanticTypeEnumMap[instance.type]!,
 };
 
-_OCRResult _$OCRResultFromJson(Map<String, dynamic> json) => _OCRResult(
-  text: json['text'] as String,
+_OcrPage _$OcrPageFromJson(Map<String, dynamic> json) => _OcrPage(
+  pageNumber: (json['pageNumber'] as num?)?.toInt() ?? 0,
   blocks:
       (json['blocks'] as List<dynamic>?)
-          ?.map((e) => OCRBlock.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => OcrBlock.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
+  width: (json['width'] as num?)?.toDouble() ?? 0.0,
+  height: (json['height'] as num?)?.toDouble() ?? 0.0,
+);
+
+Map<String, dynamic> _$OcrPageToJson(_OcrPage instance) => <String, dynamic>{
+  'pageNumber': instance.pageNumber,
+  'blocks': instance.blocks.map((e) => e.toJson()).toList(),
+  'confidence': instance.confidence,
+  'width': instance.width,
+  'height': instance.height,
+};
+
+_OcrResult _$OcrResultFromJson(Map<String, dynamic> json) => _OcrResult(
+  text: json['text'] as String,
+  pages:
+      (_readPages(json, 'pages') as List<dynamic>?)
+          ?.map((e) => OcrPage.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
   confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
@@ -104,13 +125,13 @@ _OCRResult _$OCRResultFromJson(Map<String, dynamic> json) => _OCRResult(
   timestamp: json['timestamp'] == null
       ? null
       : DateTime.parse(json['timestamp'] as String),
-  version: (json['version'] as num?)?.toInt() ?? 1,
+  version: (json['version'] as num?)?.toInt() ?? 2,
 );
 
-Map<String, dynamic> _$OCRResultToJson(_OCRResult instance) =>
+Map<String, dynamic> _$OcrResultToJson(_OcrResult instance) =>
     <String, dynamic>{
       'text': instance.text,
-      'blocks': instance.blocks.map((e) => e.toJson()).toList(),
+      'pages': instance.pages.map((e) => e.toJson()).toList(),
       'confidence': instance.confidence,
       'source': instance.source,
       'language': instance.language,

@@ -41,8 +41,8 @@ import 'package:phf/logic/services/interfaces/ocr_service.dart' as _i14;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeOCRResult_0 extends _i1.SmartFake implements _i2.OCRResult {
-  _FakeOCRResult_0(Object parent, Invocation parentInvocation)
+class _FakeOcrResult_0 extends _i1.SmartFake implements _i2.OcrResult {
+  _FakeOcrResult_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -405,7 +405,7 @@ class MockISearchRepository extends _i1.Mock implements _i12.ISearchRepository {
 /// See the documentation for Mockito's code generation for more information.
 class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
   @override
-  _i6.Future<_i2.OCRResult> recognizeText(
+  _i6.Future<_i2.OcrResult> recognizeText(
     _i15.Uint8List? imageBytes, {
     String? mimeType,
     String? language = 'zh',
@@ -416,8 +416,8 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
               [imageBytes],
               {#mimeType: mimeType, #language: language},
             ),
-            returnValue: _i6.Future<_i2.OCRResult>.value(
-              _FakeOCRResult_0(
+            returnValue: _i6.Future<_i2.OcrResult>.value(
+              _FakeOcrResult_0(
                 this,
                 Invocation.method(
                   #recognizeText,
@@ -426,8 +426,8 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
                 ),
               ),
             ),
-            returnValueForMissingStub: _i6.Future<_i2.OCRResult>.value(
-              _FakeOCRResult_0(
+            returnValueForMissingStub: _i6.Future<_i2.OcrResult>.value(
+              _FakeOcrResult_0(
                 this,
                 Invocation.method(
                   #recognizeText,
@@ -437,7 +437,7 @@ class MockIOCRService extends _i1.Mock implements _i14.IOCRService {
               ),
             ),
           )
-          as _i6.Future<_i2.OCRResult>);
+          as _i6.Future<_i2.OcrResult>);
 
   @override
   _i6.Future<void> dispose() =>

@@ -39,9 +39,25 @@ import '../services/interfaces/crypto_service.dart';
 import '../services/interfaces/gallery_service.dart';
 import '../services/interfaces/image_service.dart';
 
+import 'dart:io';
+import '../services/interfaces/ocr_service.dart';
+import '../services/android_ocr_service.dart';
+import '../services/ios_ocr_service.dart';
+
 part 'core_providers.g.dart';
 
 // --- Infrastructure Services ---
+
+@Riverpod(keepAlive: true)
+IOCRService ocrService(Ref ref) {
+  final talker = ref.watch(talkerProvider);
+  if (Platform.isAndroid) {
+    return AndroidOCRService(talker: talker);
+  } else if (Platform.isIOS) {
+    return IOSOCRService(talker: talker);
+  }
+  throw UnimplementedError('OCR not supported on ${Platform.operatingSystem}');
+}
 
 @Riverpod(keepAlive: true)
 PathProviderService pathProviderService(Ref ref) {

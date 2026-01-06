@@ -107,9 +107,9 @@ class BackgroundWorkerService {
 
     IOCRService ocrService;
     if (defaultTargetPlatform == TargetPlatform.android) {
-      ocrService = AndroidOCRService();
+      ocrService = AndroidOCRService(talker: talker);
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      ocrService = IOSOCRService();
+      ocrService = IOSOCRService(talker: talker);
     } else {
       throw UnsupportedError('Unsupported platform');
     }
