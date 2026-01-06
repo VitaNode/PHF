@@ -11,34 +11,44 @@
 /// ## Security
 /// - 纯函数设计，不涉及敏感资产或持久化操作。
 /// - 符合 `Constitution#IV. Security & Privacy`。
+///
+/// ## Repair Logs
+/// [2026-01-06] 修复：支持 OcrResult V2 (Pages) 结构，统一 PascalCase 命名。
 library;
 
 import '../../data/models/ocr_result.dart';
 
-class OCREnhancer {
+class OcrEnhancer {
   /// 增强 OCR 结果
-  static OCRResult enhance(OCRResult original) {
-    final enhancedBlocks = original.blocks.map(_enhanceBlock).toList();
-    return original.copyWith(blocks: enhancedBlocks);
+  static OcrResult enhance(OcrResult original) {
+    if (original.pages.isEmpty) return original;
+
+    final enhancedPages = original.pages.map(_enhancePage).toList();
+    return original.copyWith(pages: enhancedPages);
   }
 
-  static OCRBlock _enhanceBlock(OCRBlock block) {
+  static OcrPage _enhancePage(OcrPage page) {
+    final enhancedBlocks = page.blocks.map(_enhanceBlock).toList();
+    return page.copyWith(blocks: enhancedBlocks);
+  }
+
+  static OcrBlock _enhanceBlock(OcrBlock block) {
     var enhancedLines = block.lines.map(_enhanceLine).toList();
 
     // Heuristic: 如果 Block 只有一行且符合标题特征，标记为 sectionTitle
-    OCRSemanticType blockType = OCRSemanticType.normal;
+    OcrSemanticType blockType = OcrSemanticType.normal;
     if (enhancedLines.length == 1) {
       final line = enhancedLines.first;
       if (_isPotentialSectionTitle(line.text)) {
-        blockType = OCRSemanticType.sectionTitle;
-        enhancedLines = [line.copyWith(type: OCRSemanticType.sectionTitle)];
+        blockType = OcrSemanticType.sectionTitle;
+        enhancedLines = [line.copyWith(type: OcrSemanticType.sectionTitle)];
       }
     }
 
     return block.copyWith(lines: enhancedLines, type: blockType);
   }
 
-  static OCRLine _enhanceLine(OCRLine line) {
+  static OcrLine _enhanceLine(OcrLine line) {
     final text = line.text.trim();
 
     // 1. Key-Value Splitting
@@ -52,33 +62,33 @@ class OCREnhancer {
       final totalWidth = line.w;
       final splitRatio = colonIndex / text.length;
 
-      final keyElement = OCRTextElement(
+      final keyElement = OcrElement(
         text: keyText,
         x: line.x,
         y: line.y,
         w: totalWidth * splitRatio,
         h: line.h,
-        type: OCRSemanticType.label,
+        type: OcrSemanticType.label,
       );
 
-      final valueElement = OCRTextElement(
+      final valueElement = OcrElement(
         text: valueText,
         x: line.x + totalWidth * splitRatio,
         y: line.y,
         w: totalWidth * (1 - splitRatio),
         h: line.h,
-        type: OCRSemanticType.value,
+        type: OcrSemanticType.value,
       );
 
       return line.copyWith(
         elements: [keyElement, valueElement],
-        type: OCRSemanticType.normal, // 这一行包含了 KV，整体仍标记为 normal 或根据需求调整
+        type: OcrSemanticType.normal, // 这一行包含了 KV，整体仍标记为 normal 或根据需求调整
       );
     }
 
     // 2. Section Title Check (Line level)
     if (_isPotentialSectionTitle(text)) {
-      return line.copyWith(type: OCRSemanticType.sectionTitle);
+      return line.copyWith(type: OcrSemanticType.sectionTitle);
     }
 
     return line;

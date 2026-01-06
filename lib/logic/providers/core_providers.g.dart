@@ -9,6 +9,47 @@ part of 'core_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(ocrService)
+final ocrServiceProvider = OcrServiceProvider._();
+
+final class OcrServiceProvider
+    extends $FunctionalProvider<IOCRService, IOCRService, IOCRService>
+    with $Provider<IOCRService> {
+  OcrServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'ocrServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$ocrServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IOCRService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IOCRService create(Ref ref) {
+    return ocrService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IOCRService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IOCRService>(value),
+    );
+  }
+}
+
+String _$ocrServiceHash() => r'd333db047377729d8c086813a93c41e5f1882b45';
+
 @ProviderFor(pathProviderService)
 final pathProviderServiceProvider = PathProviderServiceProvider._();
 

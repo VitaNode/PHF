@@ -13,22 +13,22 @@ part of 'ocr_result.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$OCRTextElement {
+mixin _$OcrElement {
 
- String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; double get confidence; OCRSemanticType get type;
-/// Create a copy of OCRTextElement
+ String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; double get confidence; OcrSemanticType get type;
+/// Create a copy of OcrElement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$OCRTextElementCopyWith<OCRTextElement> get copyWith => _$OCRTextElementCopyWithImpl<OCRTextElement>(this as OCRTextElement, _$identity);
+$OcrElementCopyWith<OcrElement> get copyWith => _$OcrElementCopyWithImpl<OcrElement>(this as OcrElement, _$identity);
 
-  /// Serializes this OCRTextElement to a JSON map.
+  /// Serializes this OcrElement to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OCRTextElement&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OcrElement&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,18 +37,18 @@ int get hashCode => Object.hash(runtimeType,text,x,y,w,h,confidence,type);
 
 @override
 String toString() {
-  return 'OCRTextElement(text: $text, x: $x, y: $y, w: $w, h: $h, confidence: $confidence, type: $type)';
+  return 'OcrElement(text: $text, x: $x, y: $y, w: $w, h: $h, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $OCRTextElementCopyWith<$Res>  {
-  factory $OCRTextElementCopyWith(OCRTextElement value, $Res Function(OCRTextElement) _then) = _$OCRTextElementCopyWithImpl;
+abstract mixin class $OcrElementCopyWith<$Res>  {
+  factory $OcrElementCopyWith(OcrElement value, $Res Function(OcrElement) _then) = _$OcrElementCopyWithImpl;
 @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, double confidence, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, double confidence, OcrSemanticType type
 });
 
 
@@ -56,14 +56,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$OCRTextElementCopyWithImpl<$Res>
-    implements $OCRTextElementCopyWith<$Res> {
-  _$OCRTextElementCopyWithImpl(this._self, this._then);
+class _$OcrElementCopyWithImpl<$Res>
+    implements $OcrElementCopyWith<$Res> {
+  _$OcrElementCopyWithImpl(this._self, this._then);
 
-  final OCRTextElement _self;
-  final $Res Function(OCRTextElement) _then;
+  final OcrElement _self;
+  final $Res Function(OcrElement) _then;
 
-/// Create a copy of OCRTextElement
+/// Create a copy of OcrElement
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? confidence = null,Object? type = null,}) {
   return _then(_self.copyWith(
@@ -74,15 +74,15 @@ as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as OcrSemanticType,
   ));
 }
 
 }
 
 
-/// Adds pattern-matching-related methods to [OCRTextElement].
-extension OCRTextElementPatterns on OCRTextElement {
+/// Adds pattern-matching-related methods to [OcrElement].
+extension OcrElementPatterns on OcrElement {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -95,10 +95,10 @@ extension OCRTextElementPatterns on OCRTextElement {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OCRTextElement value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OcrElement value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _OCRTextElement() when $default != null:
+case _OcrElement() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -117,10 +117,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OCRTextElement value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OcrElement value)  $default,){
 final _that = this;
 switch (_that) {
-case _OCRTextElement():
+case _OcrElement():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -138,10 +138,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OCRTextElement value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OcrElement value)?  $default,){
 final _that = this;
 switch (_that) {
-case _OCRTextElement() when $default != null:
+case _OcrElement() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -159,9 +159,9 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OCRSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OcrSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _OCRTextElement() when $default != null:
+case _OcrElement() when $default != null:
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_that.type);case _:
   return orElse();
 
@@ -180,9 +180,9 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OCRSemanticType type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OcrSemanticType type)  $default,) {final _that = this;
 switch (_that) {
-case _OCRTextElement():
+case _OcrElement():
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_that.type);case _:
   throw StateError('Unexpected subclass');
 
@@ -200,9 +200,9 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OCRSemanticType type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  double confidence,  OcrSemanticType type)?  $default,) {final _that = this;
 switch (_that) {
-case _OCRTextElement() when $default != null:
+case _OcrElement() when $default != null:
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_that.type);case _:
   return null;
 
@@ -214,9 +214,9 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.confidence,_tha
 /// @nodoc
 @JsonSerializable()
 
-class _OCRTextElement implements OCRTextElement {
-  const _OCRTextElement({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, this.confidence = 0.0, this.type = OCRSemanticType.normal});
-  factory _OCRTextElement.fromJson(Map<String, dynamic> json) => _$OCRTextElementFromJson(json);
+class _OcrElement implements OcrElement {
+  const _OcrElement({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, this.confidence = 0.0, this.type = OcrSemanticType.normal});
+  factory _OcrElement.fromJson(Map<String, dynamic> json) => _$OcrElementFromJson(json);
 
 @override final  String text;
 @override@JsonKey(readValue: _readX) final  double x;
@@ -224,22 +224,22 @@ class _OCRTextElement implements OCRTextElement {
 @override@JsonKey(readValue: _readW) final  double w;
 @override@JsonKey(readValue: _readH) final  double h;
 @override@JsonKey() final  double confidence;
-@override@JsonKey() final  OCRSemanticType type;
+@override@JsonKey() final  OcrSemanticType type;
 
-/// Create a copy of OCRTextElement
+/// Create a copy of OcrElement
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$OCRTextElementCopyWith<_OCRTextElement> get copyWith => __$OCRTextElementCopyWithImpl<_OCRTextElement>(this, _$identity);
+_$OcrElementCopyWith<_OcrElement> get copyWith => __$OcrElementCopyWithImpl<_OcrElement>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$OCRTextElementToJson(this, );
+  return _$OcrElementToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OCRTextElement&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OcrElement&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -248,18 +248,18 @@ int get hashCode => Object.hash(runtimeType,text,x,y,w,h,confidence,type);
 
 @override
 String toString() {
-  return 'OCRTextElement(text: $text, x: $x, y: $y, w: $w, h: $h, confidence: $confidence, type: $type)';
+  return 'OcrElement(text: $text, x: $x, y: $y, w: $w, h: $h, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$OCRTextElementCopyWith<$Res> implements $OCRTextElementCopyWith<$Res> {
-  factory _$OCRTextElementCopyWith(_OCRTextElement value, $Res Function(_OCRTextElement) _then) = __$OCRTextElementCopyWithImpl;
+abstract mixin class _$OcrElementCopyWith<$Res> implements $OcrElementCopyWith<$Res> {
+  factory _$OcrElementCopyWith(_OcrElement value, $Res Function(_OcrElement) _then) = __$OcrElementCopyWithImpl;
 @override @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, double confidence, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, double confidence, OcrSemanticType type
 });
 
 
@@ -267,17 +267,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$OCRTextElementCopyWithImpl<$Res>
-    implements _$OCRTextElementCopyWith<$Res> {
-  __$OCRTextElementCopyWithImpl(this._self, this._then);
+class __$OcrElementCopyWithImpl<$Res>
+    implements _$OcrElementCopyWith<$Res> {
+  __$OcrElementCopyWithImpl(this._self, this._then);
 
-  final _OCRTextElement _self;
-  final $Res Function(_OCRTextElement) _then;
+  final _OcrElement _self;
+  final $Res Function(_OcrElement) _then;
 
-/// Create a copy of OCRTextElement
+/// Create a copy of OcrElement
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? confidence = null,Object? type = null,}) {
-  return _then(_OCRTextElement(
+  return _then(_OcrElement(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
 as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
@@ -285,7 +285,7 @@ as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as OcrSemanticType,
   ));
 }
 
@@ -294,22 +294,22 @@ as OCRSemanticType,
 
 
 /// @nodoc
-mixin _$OCRLine {
+mixin _$OcrLine {
 
- String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; List<OCRTextElement> get elements; double get confidence; OCRSemanticType get type;
-/// Create a copy of OCRLine
+ String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; List<OcrElement> get elements; double get confidence; OcrSemanticType get type;
+/// Create a copy of OcrLine
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$OCRLineCopyWith<OCRLine> get copyWith => _$OCRLineCopyWithImpl<OCRLine>(this as OCRLine, _$identity);
+$OcrLineCopyWith<OcrLine> get copyWith => _$OcrLineCopyWithImpl<OcrLine>(this as OcrLine, _$identity);
 
-  /// Serializes this OCRLine to a JSON map.
+  /// Serializes this OcrLine to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OCRLine&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other.elements, elements)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OcrLine&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other.elements, elements)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -318,18 +318,18 @@ int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEqu
 
 @override
 String toString() {
-  return 'OCRLine(text: $text, x: $x, y: $y, w: $w, h: $h, elements: $elements, confidence: $confidence, type: $type)';
+  return 'OcrLine(text: $text, x: $x, y: $y, w: $w, h: $h, elements: $elements, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $OCRLineCopyWith<$Res>  {
-  factory $OCRLineCopyWith(OCRLine value, $Res Function(OCRLine) _then) = _$OCRLineCopyWithImpl;
+abstract mixin class $OcrLineCopyWith<$Res>  {
+  factory $OcrLineCopyWith(OcrLine value, $Res Function(OcrLine) _then) = _$OcrLineCopyWithImpl;
 @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OCRTextElement> elements, double confidence, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OcrElement> elements, double confidence, OcrSemanticType type
 });
 
 
@@ -337,14 +337,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$OCRLineCopyWithImpl<$Res>
-    implements $OCRLineCopyWith<$Res> {
-  _$OCRLineCopyWithImpl(this._self, this._then);
+class _$OcrLineCopyWithImpl<$Res>
+    implements $OcrLineCopyWith<$Res> {
+  _$OcrLineCopyWithImpl(this._self, this._then);
 
-  final OCRLine _self;
-  final $Res Function(OCRLine) _then;
+  final OcrLine _self;
+  final $Res Function(OcrLine) _then;
 
-/// Create a copy of OCRLine
+/// Create a copy of OcrLine
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? elements = null,Object? confidence = null,Object? type = null,}) {
   return _then(_self.copyWith(
@@ -354,17 +354,17 @@ as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
 as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,elements: null == elements ? _self.elements : elements // ignore: cast_nullable_to_non_nullable
-as List<OCRTextElement>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as List<OcrElement>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as OcrSemanticType,
   ));
 }
 
 }
 
 
-/// Adds pattern-matching-related methods to [OCRLine].
-extension OCRLinePatterns on OCRLine {
+/// Adds pattern-matching-related methods to [OcrLine].
+extension OcrLinePatterns on OcrLine {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -377,10 +377,10 @@ extension OCRLinePatterns on OCRLine {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OCRLine value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OcrLine value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _OCRLine() when $default != null:
+case _OcrLine() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -399,10 +399,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OCRLine value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OcrLine value)  $default,){
 final _that = this;
 switch (_that) {
-case _OCRLine():
+case _OcrLine():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -420,10 +420,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OCRLine value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OcrLine value)?  $default,){
 final _that = this;
 switch (_that) {
-case _OCRLine() when $default != null:
+case _OcrLine() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -441,9 +441,9 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRTextElement> elements,  double confidence,  OCRSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrElement> elements,  double confidence,  OcrSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _OCRLine() when $default != null:
+case _OcrLine() when $default != null:
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.confidence,_that.type);case _:
   return orElse();
 
@@ -462,9 +462,9 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRTextElement> elements,  double confidence,  OCRSemanticType type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrElement> elements,  double confidence,  OcrSemanticType type)  $default,) {final _that = this;
 switch (_that) {
-case _OCRLine():
+case _OcrLine():
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.confidence,_that.type);case _:
   throw StateError('Unexpected subclass');
 
@@ -482,9 +482,9 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRTextElement> elements,  double confidence,  OCRSemanticType type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrElement> elements,  double confidence,  OcrSemanticType type)?  $default,) {final _that = this;
 switch (_that) {
-case _OCRLine() when $default != null:
+case _OcrLine() when $default != null:
 return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.confidence,_that.type);case _:
   return null;
 
@@ -496,39 +496,39 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.elements,_that.
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _OCRLine implements OCRLine {
-  const _OCRLine({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, final  List<OCRTextElement> elements = const [], this.confidence = 0.0, this.type = OCRSemanticType.normal}): _elements = elements;
-  factory _OCRLine.fromJson(Map<String, dynamic> json) => _$OCRLineFromJson(json);
+class _OcrLine implements OcrLine {
+  const _OcrLine({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, final  List<OcrElement> elements = const [], this.confidence = 0.0, this.type = OcrSemanticType.normal}): _elements = elements;
+  factory _OcrLine.fromJson(Map<String, dynamic> json) => _$OcrLineFromJson(json);
 
 @override final  String text;
 @override@JsonKey(readValue: _readX) final  double x;
 @override@JsonKey(readValue: _readY) final  double y;
 @override@JsonKey(readValue: _readW) final  double w;
 @override@JsonKey(readValue: _readH) final  double h;
- final  List<OCRTextElement> _elements;
-@override@JsonKey() List<OCRTextElement> get elements {
+ final  List<OcrElement> _elements;
+@override@JsonKey() List<OcrElement> get elements {
   if (_elements is EqualUnmodifiableListView) return _elements;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_elements);
 }
 
 @override@JsonKey() final  double confidence;
-@override@JsonKey() final  OCRSemanticType type;
+@override@JsonKey() final  OcrSemanticType type;
 
-/// Create a copy of OCRLine
+/// Create a copy of OcrLine
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$OCRLineCopyWith<_OCRLine> get copyWith => __$OCRLineCopyWithImpl<_OCRLine>(this, _$identity);
+_$OcrLineCopyWith<_OcrLine> get copyWith => __$OcrLineCopyWithImpl<_OcrLine>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$OCRLineToJson(this, );
+  return _$OcrLineToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OCRLine&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other._elements, _elements)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OcrLine&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other._elements, _elements)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -537,18 +537,18 @@ int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEqu
 
 @override
 String toString() {
-  return 'OCRLine(text: $text, x: $x, y: $y, w: $w, h: $h, elements: $elements, confidence: $confidence, type: $type)';
+  return 'OcrLine(text: $text, x: $x, y: $y, w: $w, h: $h, elements: $elements, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$OCRLineCopyWith<$Res> implements $OCRLineCopyWith<$Res> {
-  factory _$OCRLineCopyWith(_OCRLine value, $Res Function(_OCRLine) _then) = __$OCRLineCopyWithImpl;
+abstract mixin class _$OcrLineCopyWith<$Res> implements $OcrLineCopyWith<$Res> {
+  factory _$OcrLineCopyWith(_OcrLine value, $Res Function(_OcrLine) _then) = __$OcrLineCopyWithImpl;
 @override @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OCRTextElement> elements, double confidence, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OcrElement> elements, double confidence, OcrSemanticType type
 });
 
 
@@ -556,26 +556,26 @@ $Res call({
 
 }
 /// @nodoc
-class __$OCRLineCopyWithImpl<$Res>
-    implements _$OCRLineCopyWith<$Res> {
-  __$OCRLineCopyWithImpl(this._self, this._then);
+class __$OcrLineCopyWithImpl<$Res>
+    implements _$OcrLineCopyWith<$Res> {
+  __$OcrLineCopyWithImpl(this._self, this._then);
 
-  final _OCRLine _self;
-  final $Res Function(_OCRLine) _then;
+  final _OcrLine _self;
+  final $Res Function(_OcrLine) _then;
 
-/// Create a copy of OCRLine
+/// Create a copy of OcrLine
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? elements = null,Object? confidence = null,Object? type = null,}) {
-  return _then(_OCRLine(
+  return _then(_OcrLine(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
 as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
 as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,elements: null == elements ? _self._elements : elements // ignore: cast_nullable_to_non_nullable
-as List<OCRTextElement>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as List<OcrElement>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as OcrSemanticType,
   ));
 }
 
@@ -584,42 +584,42 @@ as OCRSemanticType,
 
 
 /// @nodoc
-mixin _$OCRBlock {
+mixin _$OcrBlock {
 
- String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; List<OCRLine> get lines; OCRSemanticType get type;
-/// Create a copy of OCRBlock
+ String get text;@JsonKey(readValue: _readX) double get x;@JsonKey(readValue: _readY) double get y;@JsonKey(readValue: _readW) double get w;@JsonKey(readValue: _readH) double get h; List<OcrLine> get lines; double get confidence; OcrSemanticType get type;
+/// Create a copy of OcrBlock
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$OCRBlockCopyWith<OCRBlock> get copyWith => _$OCRBlockCopyWithImpl<OCRBlock>(this as OCRBlock, _$identity);
+$OcrBlockCopyWith<OcrBlock> get copyWith => _$OcrBlockCopyWithImpl<OcrBlock>(this as OcrBlock, _$identity);
 
-  /// Serializes this OCRBlock to a JSON map.
+  /// Serializes this OcrBlock to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OCRBlock&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other.lines, lines)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OcrBlock&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other.lines, lines)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEquality().hash(lines),type);
+int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEquality().hash(lines),confidence,type);
 
 @override
 String toString() {
-  return 'OCRBlock(text: $text, x: $x, y: $y, w: $w, h: $h, lines: $lines, type: $type)';
+  return 'OcrBlock(text: $text, x: $x, y: $y, w: $w, h: $h, lines: $lines, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $OCRBlockCopyWith<$Res>  {
-  factory $OCRBlockCopyWith(OCRBlock value, $Res Function(OCRBlock) _then) = _$OCRBlockCopyWithImpl;
+abstract mixin class $OcrBlockCopyWith<$Res>  {
+  factory $OcrBlockCopyWith(OcrBlock value, $Res Function(OcrBlock) _then) = _$OcrBlockCopyWithImpl;
 @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OCRLine> lines, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OcrLine> lines, double confidence, OcrSemanticType type
 });
 
 
@@ -627,16 +627,16 @@ $Res call({
 
 }
 /// @nodoc
-class _$OCRBlockCopyWithImpl<$Res>
-    implements $OCRBlockCopyWith<$Res> {
-  _$OCRBlockCopyWithImpl(this._self, this._then);
+class _$OcrBlockCopyWithImpl<$Res>
+    implements $OcrBlockCopyWith<$Res> {
+  _$OcrBlockCopyWithImpl(this._self, this._then);
 
-  final OCRBlock _self;
-  final $Res Function(OCRBlock) _then;
+  final OcrBlock _self;
+  final $Res Function(OcrBlock) _then;
 
-/// Create a copy of OCRBlock
+/// Create a copy of OcrBlock
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? lines = null,Object? type = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? lines = null,Object? confidence = null,Object? type = null,}) {
   return _then(_self.copyWith(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
@@ -644,16 +644,17 @@ as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
 as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,lines: null == lines ? _self.lines : lines // ignore: cast_nullable_to_non_nullable
-as List<OCRLine>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as List<OcrLine>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as OcrSemanticType,
   ));
 }
 
 }
 
 
-/// Adds pattern-matching-related methods to [OCRBlock].
-extension OCRBlockPatterns on OCRBlock {
+/// Adds pattern-matching-related methods to [OcrBlock].
+extension OcrBlockPatterns on OcrBlock {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -666,10 +667,10 @@ extension OCRBlockPatterns on OCRBlock {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OCRBlock value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OcrBlock value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _OCRBlock() when $default != null:
+case _OcrBlock() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -688,10 +689,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OCRBlock value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OcrBlock value)  $default,){
 final _that = this;
 switch (_that) {
-case _OCRBlock():
+case _OcrBlock():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -709,10 +710,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OCRBlock value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OcrBlock value)?  $default,){
 final _that = this;
 switch (_that) {
-case _OCRBlock() when $default != null:
+case _OcrBlock() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -730,10 +731,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRLine> lines,  OCRSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrLine> lines,  double confidence,  OcrSemanticType type)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _OCRBlock() when $default != null:
-return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.type);case _:
+case _OcrBlock() when $default != null:
+return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.confidence,_that.type);case _:
   return orElse();
 
 }
@@ -751,10 +752,10 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.typ
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRLine> lines,  OCRSemanticType type)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrLine> lines,  double confidence,  OcrSemanticType type)  $default,) {final _that = this;
 switch (_that) {
-case _OCRBlock():
-return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.type);case _:
+case _OcrBlock():
+return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.confidence,_that.type);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -771,10 +772,10 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.typ
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OCRLine> lines,  OCRSemanticType type)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readX)  double x, @JsonKey(readValue: _readY)  double y, @JsonKey(readValue: _readW)  double w, @JsonKey(readValue: _readH)  double h,  List<OcrLine> lines,  double confidence,  OcrSemanticType type)?  $default,) {final _that = this;
 switch (_that) {
-case _OCRBlock() when $default != null:
-return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.type);case _:
+case _OcrBlock() when $default != null:
+return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.confidence,_that.type);case _:
   return null;
 
 }
@@ -785,58 +786,59 @@ return $default(_that.text,_that.x,_that.y,_that.w,_that.h,_that.lines,_that.typ
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _OCRBlock implements OCRBlock {
-  const _OCRBlock({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, final  List<OCRLine> lines = const [], this.type = OCRSemanticType.normal}): _lines = lines;
-  factory _OCRBlock.fromJson(Map<String, dynamic> json) => _$OCRBlockFromJson(json);
+class _OcrBlock implements OcrBlock {
+  const _OcrBlock({required this.text, @JsonKey(readValue: _readX) required this.x, @JsonKey(readValue: _readY) required this.y, @JsonKey(readValue: _readW) required this.w, @JsonKey(readValue: _readH) required this.h, final  List<OcrLine> lines = const [], this.confidence = 0.0, this.type = OcrSemanticType.normal}): _lines = lines;
+  factory _OcrBlock.fromJson(Map<String, dynamic> json) => _$OcrBlockFromJson(json);
 
 @override final  String text;
 @override@JsonKey(readValue: _readX) final  double x;
 @override@JsonKey(readValue: _readY) final  double y;
 @override@JsonKey(readValue: _readW) final  double w;
 @override@JsonKey(readValue: _readH) final  double h;
- final  List<OCRLine> _lines;
-@override@JsonKey() List<OCRLine> get lines {
+ final  List<OcrLine> _lines;
+@override@JsonKey() List<OcrLine> get lines {
   if (_lines is EqualUnmodifiableListView) return _lines;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_lines);
 }
 
-@override@JsonKey() final  OCRSemanticType type;
+@override@JsonKey() final  double confidence;
+@override@JsonKey() final  OcrSemanticType type;
 
-/// Create a copy of OCRBlock
+/// Create a copy of OcrBlock
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$OCRBlockCopyWith<_OCRBlock> get copyWith => __$OCRBlockCopyWithImpl<_OCRBlock>(this, _$identity);
+_$OcrBlockCopyWith<_OcrBlock> get copyWith => __$OcrBlockCopyWithImpl<_OcrBlock>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$OCRBlockToJson(this, );
+  return _$OcrBlockToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OCRBlock&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other._lines, _lines)&&(identical(other.type, type) || other.type == type));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OcrBlock&&(identical(other.text, text) || other.text == text)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.w, w) || other.w == w)&&(identical(other.h, h) || other.h == h)&&const DeepCollectionEquality().equals(other._lines, _lines)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.type, type) || other.type == type));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEquality().hash(_lines),type);
+int get hashCode => Object.hash(runtimeType,text,x,y,w,h,const DeepCollectionEquality().hash(_lines),confidence,type);
 
 @override
 String toString() {
-  return 'OCRBlock(text: $text, x: $x, y: $y, w: $w, h: $h, lines: $lines, type: $type)';
+  return 'OcrBlock(text: $text, x: $x, y: $y, w: $w, h: $h, lines: $lines, confidence: $confidence, type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$OCRBlockCopyWith<$Res> implements $OCRBlockCopyWith<$Res> {
-  factory _$OCRBlockCopyWith(_OCRBlock value, $Res Function(_OCRBlock) _then) = __$OCRBlockCopyWithImpl;
+abstract mixin class _$OcrBlockCopyWith<$Res> implements $OcrBlockCopyWith<$Res> {
+  factory _$OcrBlockCopyWith(_OcrBlock value, $Res Function(_OcrBlock) _then) = __$OcrBlockCopyWithImpl;
 @override @useResult
 $Res call({
- String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OCRLine> lines, OCRSemanticType type
+ String text,@JsonKey(readValue: _readX) double x,@JsonKey(readValue: _readY) double y,@JsonKey(readValue: _readW) double w,@JsonKey(readValue: _readH) double h, List<OcrLine> lines, double confidence, OcrSemanticType type
 });
 
 
@@ -844,25 +846,26 @@ $Res call({
 
 }
 /// @nodoc
-class __$OCRBlockCopyWithImpl<$Res>
-    implements _$OCRBlockCopyWith<$Res> {
-  __$OCRBlockCopyWithImpl(this._self, this._then);
+class __$OcrBlockCopyWithImpl<$Res>
+    implements _$OcrBlockCopyWith<$Res> {
+  __$OcrBlockCopyWithImpl(this._self, this._then);
 
-  final _OCRBlock _self;
-  final $Res Function(_OCRBlock) _then;
+  final _OcrBlock _self;
+  final $Res Function(_OcrBlock) _then;
 
-/// Create a copy of OCRBlock
+/// Create a copy of OcrBlock
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? lines = null,Object? type = null,}) {
-  return _then(_OCRBlock(
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? x = null,Object? y = null,Object? w = null,Object? h = null,Object? lines = null,Object? confidence = null,Object? type = null,}) {
+  return _then(_OcrBlock(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
 as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
 as double,w: null == w ? _self.w : w // ignore: cast_nullable_to_non_nullable
 as double,h: null == h ? _self.h : h // ignore: cast_nullable_to_non_nullable
 as double,lines: null == lines ? _self._lines : lines // ignore: cast_nullable_to_non_nullable
-as List<OCRLine>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as OCRSemanticType,
+as List<OcrLine>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as OcrSemanticType,
   ));
 }
 
@@ -871,44 +874,42 @@ as OCRSemanticType,
 
 
 /// @nodoc
-mixin _$OCRResult {
+mixin _$OcrPage {
 
- String get text; List<OCRBlock> get blocks; double get confidence;// Metadata (V2)
- String get source;// e.g., 'ios_vision', 'google_mlkit'
- String get language; DateTime? get timestamp; int get version;
-/// Create a copy of OCRResult
+ int get pageNumber; List<OcrBlock> get blocks; double get confidence; double get width; double get height;
+/// Create a copy of OcrPage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$OCRResultCopyWith<OCRResult> get copyWith => _$OCRResultCopyWithImpl<OCRResult>(this as OCRResult, _$identity);
+$OcrPageCopyWith<OcrPage> get copyWith => _$OcrPageCopyWithImpl<OcrPage>(this as OcrPage, _$identity);
 
-  /// Serializes this OCRResult to a JSON map.
+  /// Serializes this OcrPage to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OCRResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other.blocks, blocks)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.source, source) || other.source == source)&&(identical(other.language, language) || other.language == language)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.version, version) || other.version == version));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OcrPage&&(identical(other.pageNumber, pageNumber) || other.pageNumber == pageNumber)&&const DeepCollectionEquality().equals(other.blocks, blocks)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(blocks),confidence,source,language,timestamp,version);
+int get hashCode => Object.hash(runtimeType,pageNumber,const DeepCollectionEquality().hash(blocks),confidence,width,height);
 
 @override
 String toString() {
-  return 'OCRResult(text: $text, blocks: $blocks, confidence: $confidence, source: $source, language: $language, timestamp: $timestamp, version: $version)';
+  return 'OcrPage(pageNumber: $pageNumber, blocks: $blocks, confidence: $confidence, width: $width, height: $height)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $OCRResultCopyWith<$Res>  {
-  factory $OCRResultCopyWith(OCRResult value, $Res Function(OCRResult) _then) = _$OCRResultCopyWithImpl;
+abstract mixin class $OcrPageCopyWith<$Res>  {
+  factory $OcrPageCopyWith(OcrPage value, $Res Function(OcrPage) _then) = _$OcrPageCopyWithImpl;
 @useResult
 $Res call({
- String text, List<OCRBlock> blocks, double confidence, String source, String language, DateTime? timestamp, int version
+ int pageNumber, List<OcrBlock> blocks, double confidence, double width, double height
 });
 
 
@@ -916,20 +917,303 @@ $Res call({
 
 }
 /// @nodoc
-class _$OCRResultCopyWithImpl<$Res>
-    implements $OCRResultCopyWith<$Res> {
-  _$OCRResultCopyWithImpl(this._self, this._then);
+class _$OcrPageCopyWithImpl<$Res>
+    implements $OcrPageCopyWith<$Res> {
+  _$OcrPageCopyWithImpl(this._self, this._then);
 
-  final OCRResult _self;
-  final $Res Function(OCRResult) _then;
+  final OcrPage _self;
+  final $Res Function(OcrPage) _then;
 
-/// Create a copy of OCRResult
+/// Create a copy of OcrPage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? blocks = null,Object? confidence = null,Object? source = null,Object? language = null,Object? timestamp = freezed,Object? version = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? pageNumber = null,Object? blocks = null,Object? confidence = null,Object? width = null,Object? height = null,}) {
+  return _then(_self.copyWith(
+pageNumber: null == pageNumber ? _self.pageNumber : pageNumber // ignore: cast_nullable_to_non_nullable
+as int,blocks: null == blocks ? _self.blocks : blocks // ignore: cast_nullable_to_non_nullable
+as List<OcrBlock>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as double,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [OcrPage].
+extension OcrPagePatterns on OcrPage {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OcrPage value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _OcrPage() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OcrPage value)  $default,){
+final _that = this;
+switch (_that) {
+case _OcrPage():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OcrPage value)?  $default,){
+final _that = this;
+switch (_that) {
+case _OcrPage() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int pageNumber,  List<OcrBlock> blocks,  double confidence,  double width,  double height)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _OcrPage() when $default != null:
+return $default(_that.pageNumber,_that.blocks,_that.confidence,_that.width,_that.height);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int pageNumber,  List<OcrBlock> blocks,  double confidence,  double width,  double height)  $default,) {final _that = this;
+switch (_that) {
+case _OcrPage():
+return $default(_that.pageNumber,_that.blocks,_that.confidence,_that.width,_that.height);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int pageNumber,  List<OcrBlock> blocks,  double confidence,  double width,  double height)?  $default,) {final _that = this;
+switch (_that) {
+case _OcrPage() when $default != null:
+return $default(_that.pageNumber,_that.blocks,_that.confidence,_that.width,_that.height);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+@JsonSerializable(explicitToJson: true)
+class _OcrPage implements OcrPage {
+  const _OcrPage({this.pageNumber = 0, final  List<OcrBlock> blocks = const [], this.confidence = 0.0, this.width = 0.0, this.height = 0.0}): _blocks = blocks;
+  factory _OcrPage.fromJson(Map<String, dynamic> json) => _$OcrPageFromJson(json);
+
+@override@JsonKey() final  int pageNumber;
+ final  List<OcrBlock> _blocks;
+@override@JsonKey() List<OcrBlock> get blocks {
+  if (_blocks is EqualUnmodifiableListView) return _blocks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_blocks);
+}
+
+@override@JsonKey() final  double confidence;
+@override@JsonKey() final  double width;
+@override@JsonKey() final  double height;
+
+/// Create a copy of OcrPage
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OcrPageCopyWith<_OcrPage> get copyWith => __$OcrPageCopyWithImpl<_OcrPage>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$OcrPageToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OcrPage&&(identical(other.pageNumber, pageNumber) || other.pageNumber == pageNumber)&&const DeepCollectionEquality().equals(other._blocks, _blocks)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,pageNumber,const DeepCollectionEquality().hash(_blocks),confidence,width,height);
+
+@override
+String toString() {
+  return 'OcrPage(pageNumber: $pageNumber, blocks: $blocks, confidence: $confidence, width: $width, height: $height)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OcrPageCopyWith<$Res> implements $OcrPageCopyWith<$Res> {
+  factory _$OcrPageCopyWith(_OcrPage value, $Res Function(_OcrPage) _then) = __$OcrPageCopyWithImpl;
+@override @useResult
+$Res call({
+ int pageNumber, List<OcrBlock> blocks, double confidence, double width, double height
+});
+
+
+
+
+}
+/// @nodoc
+class __$OcrPageCopyWithImpl<$Res>
+    implements _$OcrPageCopyWith<$Res> {
+  __$OcrPageCopyWithImpl(this._self, this._then);
+
+  final _OcrPage _self;
+  final $Res Function(_OcrPage) _then;
+
+/// Create a copy of OcrPage
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? pageNumber = null,Object? blocks = null,Object? confidence = null,Object? width = null,Object? height = null,}) {
+  return _then(_OcrPage(
+pageNumber: null == pageNumber ? _self.pageNumber : pageNumber // ignore: cast_nullable_to_non_nullable
+as int,blocks: null == blocks ? _self._blocks : blocks // ignore: cast_nullable_to_non_nullable
+as List<OcrBlock>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as double,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as double,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$OcrResult {
+
+ String get text;@JsonKey(readValue: _readPages) List<OcrPage> get pages; double get confidence;// Metadata (V2)
+ String get source;// e.g., 'ios_vision', 'google_mlkit'
+ String get language; DateTime? get timestamp; int get version;
+/// Create a copy of OcrResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OcrResultCopyWith<OcrResult> get copyWith => _$OcrResultCopyWithImpl<OcrResult>(this as OcrResult, _$identity);
+
+  /// Serializes this OcrResult to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OcrResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other.pages, pages)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.source, source) || other.source == source)&&(identical(other.language, language) || other.language == language)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.version, version) || other.version == version));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(pages),confidence,source,language,timestamp,version);
+
+@override
+String toString() {
+  return 'OcrResult(text: $text, pages: $pages, confidence: $confidence, source: $source, language: $language, timestamp: $timestamp, version: $version)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OcrResultCopyWith<$Res>  {
+  factory $OcrResultCopyWith(OcrResult value, $Res Function(OcrResult) _then) = _$OcrResultCopyWithImpl;
+@useResult
+$Res call({
+ String text,@JsonKey(readValue: _readPages) List<OcrPage> pages, double confidence, String source, String language, DateTime? timestamp, int version
+});
+
+
+
+
+}
+/// @nodoc
+class _$OcrResultCopyWithImpl<$Res>
+    implements $OcrResultCopyWith<$Res> {
+  _$OcrResultCopyWithImpl(this._self, this._then);
+
+  final OcrResult _self;
+  final $Res Function(OcrResult) _then;
+
+/// Create a copy of OcrResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? pages = null,Object? confidence = null,Object? source = null,Object? language = null,Object? timestamp = freezed,Object? version = null,}) {
   return _then(_self.copyWith(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
-as String,blocks: null == blocks ? _self.blocks : blocks // ignore: cast_nullable_to_non_nullable
-as List<OCRBlock>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,pages: null == pages ? _self.pages : pages // ignore: cast_nullable_to_non_nullable
+as List<OcrPage>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,timestamp: freezed == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
@@ -941,8 +1225,8 @@ as int,
 }
 
 
-/// Adds pattern-matching-related methods to [OCRResult].
-extension OCRResultPatterns on OCRResult {
+/// Adds pattern-matching-related methods to [OcrResult].
+extension OcrResultPatterns on OcrResult {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -955,10 +1239,10 @@ extension OCRResultPatterns on OCRResult {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OCRResult value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OcrResult value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _OCRResult() when $default != null:
+case _OcrResult() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -977,10 +1261,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OCRResult value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OcrResult value)  $default,){
 final _that = this;
 switch (_that) {
-case _OCRResult():
+case _OcrResult():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -998,10 +1282,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OCRResult value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OcrResult value)?  $default,){
 final _that = this;
 switch (_that) {
-case _OCRResult() when $default != null:
+case _OcrResult() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -1019,10 +1303,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text,  List<OCRBlock> blocks,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readPages)  List<OcrPage> pages,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _OCRResult() when $default != null:
-return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
+case _OcrResult() when $default != null:
+return $default(_that.text,_that.pages,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
   return orElse();
 
 }
@@ -1040,10 +1324,10 @@ return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.lang
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text,  List<OCRBlock> blocks,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String text, @JsonKey(readValue: _readPages)  List<OcrPage> pages,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)  $default,) {final _that = this;
 switch (_that) {
-case _OCRResult():
-return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
+case _OcrResult():
+return $default(_that.text,_that.pages,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1060,10 +1344,10 @@ return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.lang
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text,  List<OCRBlock> blocks,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String text, @JsonKey(readValue: _readPages)  List<OcrPage> pages,  double confidence,  String source,  String language,  DateTime? timestamp,  int version)?  $default,) {final _that = this;
 switch (_that) {
-case _OCRResult() when $default != null:
-return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
+case _OcrResult() when $default != null:
+return $default(_that.text,_that.pages,_that.confidence,_that.source,_that.language,_that.timestamp,_that.version);case _:
   return null;
 
 }
@@ -1074,16 +1358,16 @@ return $default(_that.text,_that.blocks,_that.confidence,_that.source,_that.lang
 /// @nodoc
 
 @JsonSerializable(explicitToJson: true)
-class _OCRResult implements OCRResult {
-  const _OCRResult({required this.text, final  List<OCRBlock> blocks = const [], this.confidence = 0.0, this.source = 'unknown', this.language = 'auto', this.timestamp, this.version = 1}): _blocks = blocks;
-  factory _OCRResult.fromJson(Map<String, dynamic> json) => _$OCRResultFromJson(json);
+class _OcrResult extends OcrResult {
+  const _OcrResult({required this.text, @JsonKey(readValue: _readPages) final  List<OcrPage> pages = const [], this.confidence = 0.0, this.source = 'unknown', this.language = 'auto', this.timestamp, this.version = 2}): _pages = pages,super._();
+  factory _OcrResult.fromJson(Map<String, dynamic> json) => _$OcrResultFromJson(json);
 
 @override final  String text;
- final  List<OCRBlock> _blocks;
-@override@JsonKey() List<OCRBlock> get blocks {
-  if (_blocks is EqualUnmodifiableListView) return _blocks;
+ final  List<OcrPage> _pages;
+@override@JsonKey(readValue: _readPages) List<OcrPage> get pages {
+  if (_pages is EqualUnmodifiableListView) return _pages;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_blocks);
+  return EqualUnmodifiableListView(_pages);
 }
 
 @override@JsonKey() final  double confidence;
@@ -1094,40 +1378,40 @@ class _OCRResult implements OCRResult {
 @override final  DateTime? timestamp;
 @override@JsonKey() final  int version;
 
-/// Create a copy of OCRResult
+/// Create a copy of OcrResult
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$OCRResultCopyWith<_OCRResult> get copyWith => __$OCRResultCopyWithImpl<_OCRResult>(this, _$identity);
+_$OcrResultCopyWith<_OcrResult> get copyWith => __$OcrResultCopyWithImpl<_OcrResult>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$OCRResultToJson(this, );
+  return _$OcrResultToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OCRResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other._blocks, _blocks)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.source, source) || other.source == source)&&(identical(other.language, language) || other.language == language)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.version, version) || other.version == version));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OcrResult&&(identical(other.text, text) || other.text == text)&&const DeepCollectionEquality().equals(other._pages, _pages)&&(identical(other.confidence, confidence) || other.confidence == confidence)&&(identical(other.source, source) || other.source == source)&&(identical(other.language, language) || other.language == language)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.version, version) || other.version == version));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(_blocks),confidence,source,language,timestamp,version);
+int get hashCode => Object.hash(runtimeType,text,const DeepCollectionEquality().hash(_pages),confidence,source,language,timestamp,version);
 
 @override
 String toString() {
-  return 'OCRResult(text: $text, blocks: $blocks, confidence: $confidence, source: $source, language: $language, timestamp: $timestamp, version: $version)';
+  return 'OcrResult(text: $text, pages: $pages, confidence: $confidence, source: $source, language: $language, timestamp: $timestamp, version: $version)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$OCRResultCopyWith<$Res> implements $OCRResultCopyWith<$Res> {
-  factory _$OCRResultCopyWith(_OCRResult value, $Res Function(_OCRResult) _then) = __$OCRResultCopyWithImpl;
+abstract mixin class _$OcrResultCopyWith<$Res> implements $OcrResultCopyWith<$Res> {
+  factory _$OcrResultCopyWith(_OcrResult value, $Res Function(_OcrResult) _then) = __$OcrResultCopyWithImpl;
 @override @useResult
 $Res call({
- String text, List<OCRBlock> blocks, double confidence, String source, String language, DateTime? timestamp, int version
+ String text,@JsonKey(readValue: _readPages) List<OcrPage> pages, double confidence, String source, String language, DateTime? timestamp, int version
 });
 
 
@@ -1135,20 +1419,20 @@ $Res call({
 
 }
 /// @nodoc
-class __$OCRResultCopyWithImpl<$Res>
-    implements _$OCRResultCopyWith<$Res> {
-  __$OCRResultCopyWithImpl(this._self, this._then);
+class __$OcrResultCopyWithImpl<$Res>
+    implements _$OcrResultCopyWith<$Res> {
+  __$OcrResultCopyWithImpl(this._self, this._then);
 
-  final _OCRResult _self;
-  final $Res Function(_OCRResult) _then;
+  final _OcrResult _self;
+  final $Res Function(_OcrResult) _then;
 
-/// Create a copy of OCRResult
+/// Create a copy of OcrResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? blocks = null,Object? confidence = null,Object? source = null,Object? language = null,Object? timestamp = freezed,Object? version = null,}) {
-  return _then(_OCRResult(
+@override @pragma('vm:prefer-inline') $Res call({Object? text = null,Object? pages = null,Object? confidence = null,Object? source = null,Object? language = null,Object? timestamp = freezed,Object? version = null,}) {
+  return _then(_OcrResult(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
-as String,blocks: null == blocks ? _self._blocks : blocks // ignore: cast_nullable_to_non_nullable
-as List<OCRBlock>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,pages: null == pages ? _self._pages : pages // ignore: cast_nullable_to_non_nullable
+as List<OcrPage>,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
 as double,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
 as String,language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String,timestamp: freezed == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable

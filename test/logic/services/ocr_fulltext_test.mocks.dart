@@ -50,8 +50,8 @@ class _FakeDatabase_2 extends _i1.SmartFake implements _i4.Database {
     : super(parent, parentInvocation);
 }
 
-class _FakeOCRResult_3 extends _i1.SmartFake implements _i5.OCRResult {
-  _FakeOCRResult_3(Object parent, Invocation parentInvocation)
+class _FakeOcrResult_3 extends _i1.SmartFake implements _i5.OcrResult {
+  _FakeOcrResult_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -138,7 +138,7 @@ class MockSQLCipherDatabaseService extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockIOCRService extends _i1.Mock implements _i10.IOCRService {
   @override
-  _i9.Future<_i5.OCRResult> recognizeText(
+  _i9.Future<_i5.OcrResult> recognizeText(
     _i11.Uint8List? imageBytes, {
     String? mimeType,
     String? language = 'zh',
@@ -149,8 +149,8 @@ class MockIOCRService extends _i1.Mock implements _i10.IOCRService {
               [imageBytes],
               {#mimeType: mimeType, #language: language},
             ),
-            returnValue: _i9.Future<_i5.OCRResult>.value(
-              _FakeOCRResult_3(
+            returnValue: _i9.Future<_i5.OcrResult>.value(
+              _FakeOcrResult_3(
                 this,
                 Invocation.method(
                   #recognizeText,
@@ -159,8 +159,8 @@ class MockIOCRService extends _i1.Mock implements _i10.IOCRService {
                 ),
               ),
             ),
-            returnValueForMissingStub: _i9.Future<_i5.OCRResult>.value(
-              _FakeOCRResult_3(
+            returnValueForMissingStub: _i9.Future<_i5.OcrResult>.value(
+              _FakeOcrResult_3(
                 this,
                 Invocation.method(
                   #recognizeText,
@@ -170,7 +170,7 @@ class MockIOCRService extends _i1.Mock implements _i10.IOCRService {
               ),
             ),
           )
-          as _i9.Future<_i5.OCRResult>);
+          as _i9.Future<_i5.OcrResult>);
 
   @override
   _i9.Future<void> dispose() =>

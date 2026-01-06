@@ -7,19 +7,16 @@
 /// - **Secure Wipe**: 识别过程中生成的临时文件，必须在 `finally` 块中立即强制删除。
 /// - **Native Vision**: 利用 iOS 内置 AI 能力，无需额外模型文件，隐私性好。
 ///
-/// ## Implementation Details
-/// - 通道名称: `com.example.phf/ocr`
-/// - 方法: `recognizeText`
-/// - 参数: `imagePath` (String)
-/// - 返回: JSON String (为了跨平台序列化一致性，Native端返回 JSON 字符串比 Map 更有序可控)
+/// ## Repair Logs
+/// [2026-01-06] 修复：集成 Talker 日志系统，升级至 OcrResult V2 模型，确保跨平台命名一致性。
 library;
 
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../utils/secure_wipe_helper.dart';
@@ -28,18 +25,20 @@ import 'interfaces/ocr_service.dart';
 
 class IOSOCRService implements IOCRService {
   static const MethodChannel _channel = MethodChannel('com.example.phf/ocr');
+  final Talker? _talker;
+
+  IOSOCRService({Talker? talker}) : _talker = talker;
 
   @override
-  Future<OCRResult> recognizeText(
+  Future<OcrResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
     String language = 'zh-Hans',
   }) async {
     File? tempFile;
     try {
-      log(
-        'Starting iOS OCR ($language) for image size: ${imageBytes.length} bytes',
-        name: 'IOSOCRService',
+      _talker?.info(
+        '[IOSOCRService] Starting iOS OCR ($language) for ${imageBytes.length} bytes',
       );
 
       // 1. Create secure temp file
@@ -59,29 +58,20 @@ class IOSOCRService implements IOCRService {
       final dynamic decoded = jsonDecode(jsonResult);
       final Map<String, dynamic> resultMap = decoded as Map<String, dynamic>;
 
-      final ocrResult = OCRResult.fromJson(resultMap);
-      log(
-        'iOS OCR completed. Found ${ocrResult.blocks.length} blocks.',
-        name: 'IOSOCRService',
+      final ocrResult = OcrResult.fromJson(resultMap);
+      _talker?.info(
+        '[IOSOCRService] completed. Found ${ocrResult.pages.length} pages, ${ocrResult.blocks.length} blocks.',
       );
 
       return ocrResult;
     } catch (e, stack) {
-      log(
-        'iOS OCR Failed: $e',
-        name: 'IOSOCRService',
-        error: e,
-        stackTrace: stack,
-      );
+      _talker?.handle(e, stack, '[IOSOCRService] OCR Failed');
       throw Exception('iOS OCR Logic Error: $e');
     } finally {
       // 4. Secure Wipe (Crucial)
       if (tempFile != null) {
         await SecureWipeHelper.wipe(tempFile);
-        log(
-          'Secure wipe of temp iOS OCR file completed.',
-          name: 'IOSOCRService',
-        );
+        _talker?.debug('[IOSOCRService] Secure wipe of temp file completed.');
       }
     }
   }

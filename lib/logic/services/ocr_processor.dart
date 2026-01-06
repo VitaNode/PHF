@@ -109,7 +109,7 @@ class OCRProcessor {
       );
 
       // 3.1 语义增强 (Heuristic Enhancement)
-      ocrResult = OCREnhancer.enhance(ocrResult);
+      ocrResult = OcrEnhancer.enhance(ocrResult);
 
       // 立即释放原始解密数据
       decryptedBytes = null;
