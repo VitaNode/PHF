@@ -107,6 +107,7 @@ Phase 3 (Governance & Store Readiness) has started.
 - [x] **T3.8.2**: OCR - Platform Adapter Refactoring (Issue #82).
     - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision) with 0.0-1.0 normalization.
     - Integrated `talker` logging system into `AndroidOCRService` and `IOSOCRService`.
+    - **Fix (2026-01-06)**: Added `text-recognition` (Latin) dependency to `build.gradle.kts` to resolve Android build errors when using `TextRecognizerOptions`.
     - Standardized all OCR-related classes to **PascalCase** (`OcrResult`, `OcrBlock`, etc.) across the codebase.
     - Registered `ocrServiceProvider` in `core_providers.dart` with platform-specific instantiation.
     - Verified cross-platform consistency of Schema V2 (Pages) outputs.
