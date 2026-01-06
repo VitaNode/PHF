@@ -138,11 +138,7 @@ void main() {
 
     test('OCRResult supports integer (milliseconds) timestamp', () {
       final nowMs = DateTime.now().millisecondsSinceEpoch;
-      final json = {
-        'text': 'Test',
-        'pages': [],
-        'timestamp': nowMs,
-      };
+      final json = {'text': 'Test', 'pages': [], 'timestamp': nowMs};
 
       final result = OcrResult.fromJson(json);
       expect(result.timestamp?.millisecondsSinceEpoch, nowMs);

@@ -51,7 +51,8 @@ double _readH(Map<dynamic, dynamic> json, String key) =>
 Object? _readTimestamp(Map json, String key) {
   final val = json[key];
   if (val == null) return null;
-  if (val is int) return DateTime.fromMillisecondsSinceEpoch(val).toIso8601String();
+  if (val is int)
+    return DateTime.fromMillisecondsSinceEpoch(val).toIso8601String();
   return val;
 }
 
