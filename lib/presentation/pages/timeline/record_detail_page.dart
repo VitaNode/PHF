@@ -598,13 +598,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     if (img.ocrRawJson != null) {
       try {
         final json = jsonDecode(img.ocrRawJson!);
-        final result = OCRResult.fromJson(json as Map<String, dynamic>);
+        final result = OcrResult.fromJson(json as Map<String, dynamic>);
         // Reconstruct full text from blocks if fullText is empty or for better formatting
         // But usually fullText is sufficient. Let's use the blocks to reconstruct lines if needed,
         // or just use the raw text if available.
-        // OCRResult likely has a text field or we derive it.
-        // Looking at OCRResult definition (from memory/previous view), it usually has blocks.
-        // Let's assume we construct it from blocks for now if there's no top-level text field in OCRResult
+        // OcrResult likely has a text field or we derive it.
+        // Looking at OcrResult definition (from memory/previous view), it usually has blocks.
+        // Let's assume we construct it from blocks for now if there's no top-level text field in OcrResult
         // (Wait, MedicalImage has `ocrText`).
 
         // Priority: MedicalImage.ocrText > Reconstructed from JSON

@@ -104,11 +104,12 @@ Phase 3 (Governance & Store Readiness) has started.
     - Created placeholder source assets and asset generation guide.
     - **Review & Reinforcement (2026-01-05)**: Fixed `pubspec.yaml` font path configurations to eliminate test warnings. Executed and verified full asset generation pipeline for Android and iOS.
 - [x] **T3.8.1**: OCR - Schema V2 (Issue #81).
-    - Defined multi-level `OCRResult` structure (Block -> Line -> Element).
+    - Defined multi-level `OcrResult` structure (`Page` -> `Block` -> `Line` -> `Element`).
+    - Standardized naming to **PascalCase** (`OcrResult`, `OcrPage`, etc.) per Constitution.
     - Implemented coordinate normalization (0.0 - 1.0) across Android and iOS.
-    - Added V1/V2 compatibility logic in `OCRHighlightPainter`.
+    - Added V1/V2 compatibility logic for `pages`/`blocks` in JSON deserialization.
     - Integrated metadata (source, language, timestamp) into models.
-    - Updated native code in `AppDelegate.swift` and `MainActivity.kt` to support V2.
+    - Reinforced `OcrResult` with compatibility getters for legacy `blocks` access.
 - [x] **T3.8.2**: OCR - Platform Adapter Refactoring (Issue #82).
     - Refactored `IOCRService` to support explicit `language` parameters.
     - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision).

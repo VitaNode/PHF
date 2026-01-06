@@ -30,7 +30,7 @@ class IOSOCRService implements IOCRService {
   static const MethodChannel _channel = MethodChannel('com.example.phf/ocr');
 
   @override
-  Future<OCRResult> recognizeText(
+  Future<OcrResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
     String language = 'zh-Hans',
@@ -59,7 +59,7 @@ class IOSOCRService implements IOCRService {
       final dynamic decoded = jsonDecode(jsonResult);
       final Map<String, dynamic> resultMap = decoded as Map<String, dynamic>;
 
-      final ocrResult = OCRResult.fromJson(resultMap);
+      final ocrResult = OcrResult.fromJson(resultMap);
       log(
         'iOS OCR completed. Found ${ocrResult.blocks.length} blocks.',
         name: 'IOSOCRService',

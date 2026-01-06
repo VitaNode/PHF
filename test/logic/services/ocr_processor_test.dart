@@ -94,7 +94,7 @@ void main() {
         status: RecordStatus.processing,
       );
       final decryptedBytes = Uint8List(10);
-      const ocrResult = OCRResult(
+      const ocrResult = OcrResult(
         text: '2023-10-10\nHospital A',
         confidence: 0.95,
       );
@@ -177,7 +177,7 @@ void main() {
         updatedAt: DateTime.now(),
         status: RecordStatus.processing,
       );
-      const ocrResult = OCRResult(text: 'No Clear Data', confidence: 0.5);
+      const ocrResult = OcrResult(text: 'No Clear Data', confidence: 0.5);
 
       when(mockQueueRepo.dequeue()).thenAnswer((_) async => item);
       when(mockImageRepo.getImageById('img1')).thenAnswer((_) async => image);
