@@ -129,6 +129,12 @@ Phase 3 (Governance & Store Readiness) has started.
     - Implemented section title identification using geometric and keyword-based heuristics.
     - Updated `OCRResult` model to support `OCRSemanticType` (label, value, section_title).
     - Integrated enhancement layer into `OCRProcessor` pipeline.
+- [x] **T3.8.4**: UI - Enhanced OCR Structured View (Issue #84).
+    - Implemented `EnhancedOcrView` for semantically highlighted text rendering.
+    - Upgraded `CollapsibleOcrCard` with "Original" vs "Enhanced" mode toggle.
+    - Integrated structured rendering into `RecordDetailPage` info view and OCR bottom sheet.
+    - Supported automatic fallback to plain text for legacy OCR data.
+    - Verified with comprehensive widget tests.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.

@@ -28,6 +28,7 @@ import '../../widgets/secure_image.dart';
 import '../../widgets/tag_selector.dart';
 import '../../widgets/full_image_viewer.dart';
 import 'widgets/collapsible_ocr_card.dart';
+import 'widgets/enhanced_ocr_view.dart';
 
 class RecordDetailPage extends ConsumerStatefulWidget {
   final String recordId;
@@ -358,7 +359,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       ),
       body: Column(
         children: [
-          // ... (existing Image Pager code remains the same)
           Expanded(
             flex: 4,
             child: Stack(
@@ -544,7 +544,22 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 .toList(),
           ),
         const SizedBox(height: 24),
-        CollapsibleOcrCard(text: img.ocrText ?? ''),
+        Builder(
+          builder: (context) {
+            OcrResult? ocrResult;
+            if (img.ocrRawJson != null) {
+              try {
+                ocrResult = OcrResult.fromJson(
+                  jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+                );
+              } catch (_) {}
+            }
+            return CollapsibleOcrCard(
+              text: img.ocrText ?? '',
+              ocrResult: ocrResult,
+            );
+          },
+        ),
         const SizedBox(height: 40),
         const Divider(),
         const SizedBox(height: 16),
@@ -586,105 +601,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         ),
         const SizedBox(height: 24),
       ],
-    );
-  }
-
-  void _showOCRText() {
-    if (_images.isEmpty) return;
-    final img = _images[_currentIndex];
-
-    String displayText = '暂无识别内容';
-
-    if (img.ocrRawJson != null) {
-      try {
-        final json = jsonDecode(img.ocrRawJson!);
-        final result = OcrResult.fromJson(json as Map<String, dynamic>);
-        // Reconstruct full text from blocks if fullText is empty or for better formatting
-        // But usually fullText is sufficient. Let's use the blocks to reconstruct lines if needed,
-        // or just use the raw text if available.
-        // OcrResult likely has a text field or we derive it.
-        // Looking at OcrResult definition (from memory/previous view), it usually has blocks.
-        // Let's assume we construct it from blocks for now if there's no top-level text field in OcrResult
-        // (Wait, MedicalImage has `ocrText`).
-
-        // Priority: MedicalImage.ocrText > Reconstructed from JSON
-        if (img.ocrText != null && img.ocrText!.isNotEmpty) {
-          displayText = img.ocrText!;
-        } else {
-          // Fallback reconstruct
-          displayText = result.blocks.map((b) => b.text).join('\n');
-        }
-      } catch (e) {
-        displayText = 'OCR 数据解析失败: $e';
-      }
-    } else if (img.ocrText != null) {
-      displayText = img.ocrText!;
-    }
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'OCR 识别结果',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const Divider(),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: SelectableText(
-                    displayText,
-                    style: AppTheme.monoStyle.copyWith(
-                      fontSize: 16,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Clipboard copy
-                    // Clipboard is in services.dart
-                    // Just use SelectableText for now, or add Clipboard support if requested.
-                    // The requirement says "support clicking button to view", doesn't explicitly force copy button but it's good UX.
-                    // I'll skip explicit clipboard button to keep it simple and safe (no clipboard import yet),
-                    // SelectableText allows copying.
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.check),
-                  label: const Text('完成'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -784,7 +700,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               }
             }
           },
-          onCreate: _handleCreateTag, // Add this
+          onCreate: _handleCreateTag,
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -804,6 +720,125 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  void _showOCRText() {
+    if (_images.isEmpty) return;
+    final img = _images[_currentIndex];
+
+    OcrResult? ocrResult;
+    if (img.ocrRawJson != null) {
+      try {
+        ocrResult = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
+      } catch (_) {}
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => _OcrResultSheet(
+          text: img.ocrText ?? '',
+          result: ocrResult,
+          scrollController: scrollController,
+        ),
+      ),
+    );
+  }
+}
+
+class _OcrResultSheet extends StatefulWidget {
+  final String text;
+  final OcrResult? result;
+  final ScrollController scrollController;
+
+  const _OcrResultSheet({
+    required this.text,
+    this.result,
+    required this.scrollController,
+  });
+
+  @override
+  State<_OcrResultSheet> createState() => _OcrResultSheetState();
+}
+
+class _OcrResultSheetState extends State<_OcrResultSheet> {
+  bool _isEnhanced = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'OCR 识别结果',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: [
+                  if (widget.result != null)
+                    TextButton.icon(
+                      onPressed: () =>
+                          setState(() => _isEnhanced = !_isEnhanced),
+                      icon: Icon(
+                        _isEnhanced ? Icons.text_fields : Icons.auto_awesome,
+                        size: 18,
+                      ),
+                      label: Text(_isEnhanced ? '查看原文' : '智能增强'),
+                    ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Divider(),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: widget.scrollController,
+              child: widget.result != null
+                  ? EnhancedOcrView(
+                      result: widget.result!,
+                      isEnhancedMode: _isEnhanced,
+                    )
+                  : SelectableText(
+                      widget.text,
+                      style: AppTheme.monoStyle.copyWith(
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.check),
+              label: const Text('完成'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
