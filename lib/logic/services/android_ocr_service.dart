@@ -66,7 +66,9 @@ class AndroidOCRService implements IOCRService {
       // 4. Secure Wipe (Crucial)
       if (tempFile != null) {
         await SecureWipeHelper.wipe(tempFile);
-        _talker?.debug('[AndroidOCRService] Secure wipe of temp file completed.');
+        _talker?.debug(
+          '[AndroidOCRService] Secure wipe of temp file completed.',
+        );
       }
     }
   }

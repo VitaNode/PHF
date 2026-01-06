@@ -119,10 +119,7 @@ Object? _readPages(Map<dynamic, dynamic> json, String key) {
   if (json['pages'] != null) return json['pages'];
   if (json['blocks'] != null) {
     return [
-      {
-        'pageNumber': 0,
-        'blocks': json['blocks'],
-      }
+      {'pageNumber': 0, 'blocks': json['blocks']},
     ];
   }
   return null;

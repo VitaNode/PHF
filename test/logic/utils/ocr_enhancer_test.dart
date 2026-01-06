@@ -17,7 +17,7 @@ void main() {
       const result = OcrResult(
         text: '姓名：张三',
         pages: [
-          OcrPage(blocks: [block])
+          OcrPage(blocks: [block]),
         ],
       );
 
@@ -44,7 +44,7 @@ void main() {
       const result = OcrResult(
         text: 'Age: 25',
         pages: [
-          OcrPage(blocks: [block])
+          OcrPage(blocks: [block]),
         ],
       );
 
@@ -68,7 +68,7 @@ void main() {
       const result = OcrResult(
         text: '病理诊断',
         pages: [
-          OcrPage(blocks: [block])
+          OcrPage(blocks: [block]),
         ],
       );
 
@@ -99,7 +99,7 @@ void main() {
       const result = OcrResult(
         text: '...',
         pages: [
-          OcrPage(blocks: [block])
+          OcrPage(blocks: [block]),
         ],
       );
 
@@ -107,7 +107,7 @@ void main() {
       expect(enhanced.blocks.first.type, OcrSemanticType.normal);
       expect(enhanced.blocks.first.lines.first.elements, isEmpty);
     });
-   group('OcrResult Repair Logs Check', () {
+    group('OcrResult Repair Logs Check', () {
       test('File should contain Repair Logs', () async {
         // This is a meta-test to ensure we followed the instructions
       });

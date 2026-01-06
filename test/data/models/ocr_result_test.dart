@@ -89,9 +89,7 @@ void main() {
         timestamp: now,
         version: 2,
         pages: [
-          const OcrPage(
-            blocks: [OcrBlock(text: 'B1', x: 0, y: 0, w: 1, h: 1)],
-          )
+          const OcrPage(blocks: [OcrBlock(text: 'B1', x: 0, y: 0, w: 1, h: 1)]),
         ],
       );
 
