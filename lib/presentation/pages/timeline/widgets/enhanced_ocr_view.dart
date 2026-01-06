@@ -82,17 +82,7 @@ class EnhancedOcrView extends StatelessWidget {
       }
     }
 
-    // 如果没有传入 scrollController 且不需要 shrinkWrap，默认使用 Column
-    // 这种模式适合在 SingleChildScrollView 内部或者作为折叠卡片的一部分
-    if (scrollController == null && shrinkWrap) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: items,
-      );
-    }
-
-    // 性能优化模式：使用 ListView
+    // 使用 ListView 以便在有限空间内（如折叠卡片）自动处理裁剪而不报 Overflow
     return ListView.builder(
       controller: scrollController,
       shrinkWrap: shrinkWrap,

@@ -122,6 +122,7 @@ Phase 3 (Governance & Store Readiness) has started.
     - Developed `EnhancedOcrView` with dual-mode (Original vs Enhanced) support.
     - Implemented **Semantic Highlighting** for section titles (bold teal) and key-value pairs.
     - Optimized performance for long documents using `ListView` and `ScrollController` pass-through.
+    - **Fix (2026-01-06)**: Resolved `RenderFlex` overflow in `CollapsibleOcrCard` by ensuring `EnhancedOcrView` always uses `ListView` (allowing automatic clipping in collapsed state).
     - Integrated into `RecordDetailPage` sheet and `CollapsibleOcrCard`.
     - Added automatic fallback to plain text for legacy or malformed data.
     - Enforced Monospace font and theme-consistent styling.
