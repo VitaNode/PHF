@@ -12,6 +12,7 @@
 /// 修正了 MedicalImage 构造函数参数（pageIndex, thumbnailEncryptionKey）；
 /// 解决了 BaseRepository 缺失 db getter 的调用问题；
 /// 优化了 FTS5 查询语法，直接引用表名以确保 MATCH 语义在不同 SQLite 版本下的稳定性。
+/// [2026-01-06] 加固：在 FTS5 索引中引入 `person_id` 物理列，实现更深层的数据隔离与搜索安全。
 library;
 
 import 'dart:convert';
@@ -33,12 +34,14 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final database = await dbService.database;
 
     try {
-      // 使用更兼容的 FTS5 MATCH 语法
+      // 强化隔离：在 FTS 表中直接过滤 person_id
+      // snippet 列索引更新为 6 (content)
       final sql = '''
-        SELECT r.*, snippet(ocr_search_index, 5, '<b>', '</b>', '...', 16) as snippet
+        SELECT r.*, snippet(ocr_search_index, 6, '<b>', '</b>', '...', 16) as snippet
         FROM records r
         INNER JOIN ocr_search_index ON r.id = ocr_search_index.record_id
-        WHERE r.person_id = ? 
+        WHERE ocr_search_index.person_id = ? 
+          AND r.person_id = ?
           AND r.status != 'deleted' 
           AND ocr_search_index MATCH ?
         ORDER BY r.visit_date_ms DESC
@@ -46,6 +49,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       ''';
 
       final List<Map<String, dynamic>> maps = await database.rawQuery(sql, [
+        personId,
         personId,
         sanitizedQuery,
       ]);
@@ -157,7 +161,18 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<void> updateIndex(String recordId, String content) async {
+    // Deprecated: Needs full context for person_id.
+    // Better to use syncRecordIndex.
     final database = await dbService.database;
+    final List<Map<String, dynamic>> records = await database.query(
+      'records',
+      columns: ['person_id'],
+      where: 'id = ?',
+      whereArgs: [recordId],
+    );
+    if (records.isEmpty) return;
+    final personId = records.first['person_id'] as String;
+
     await database.transaction((txn) async {
       await txn.delete(
         'ocr_search_index',
@@ -166,6 +181,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       );
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
+        'person_id': personId,
         'content': content,
       });
     });
@@ -178,7 +194,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     // 1. Fetch Record Info
     final List<Map<String, dynamic>> recordRows = await database.query(
       'records',
-      columns: ['hospital_name', 'notes'],
+      columns: ['hospital_name', 'notes', 'person_id'],
       where: 'id = ?',
       whereArgs: [recordId],
     );
@@ -189,6 +205,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final recordRow = recordRows.first;
     final hospitalName = recordRow['hospital_name'] as String? ?? '';
     final notes = recordRow['notes'] as String? ?? '';
+    final personId = recordRow['person_id'] as String;
 
     // 2. Fetch Images Info (OCR Text & Tags)
     final List<Map<String, dynamic>> imageRows = await database.query(
@@ -248,6 +265,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       );
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
+        'person_id': personId,
         'hospital_name': hospitalName,
         'tags': tagNames,
         'ocr_text': ocrText,
