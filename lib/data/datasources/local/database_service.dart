@@ -41,7 +41,7 @@ import 'seeds/database_seeder.dart';
 
 class SQLCipherDatabaseService {
   static const String _dbName = 'phf_encrypted.db';
-  static const int _dbVersion = 7;
+  static const int _dbVersion = 8;
 
   final MasterKeyManager keyManager;
   final PathProviderService pathService;
@@ -252,6 +252,7 @@ class SQLCipherDatabaseService {
     batch.execute('''
       CREATE VIRTUAL TABLE IF NOT EXISTS ocr_search_index USING fts5(
         record_id UNINDEXED, 
+        person_id UNINDEXED,
         hospital_name,
         tags,
         ocr_text,
@@ -449,9 +450,24 @@ class SQLCipherDatabaseService {
       ''');
 
       // Note: Data will be re-populated by the background processor or on next sync.
-      // In a real app, we might want to migrate data from the old FTS5 or the main tables.
       // Given the 'content' was the only thing there, and it likely came from ocr_text,
       // we can trigger a full re-index if needed, but for now we'll just recreate the structure.
+    }
+
+    if (oldVersion < 8) {
+      // Upgrade to v8: Add person_id to FTS5 Search Index
+      batch.execute('DROP TABLE IF EXISTS ocr_search_index');
+      batch.execute('''
+        CREATE VIRTUAL TABLE ocr_search_index USING fts5(
+          record_id UNINDEXED, 
+          person_id UNINDEXED,
+          hospital_name,
+          tags,
+          ocr_text,
+          notes,
+          content
+        )
+      ''');
     }
 
     await batch.commit();
