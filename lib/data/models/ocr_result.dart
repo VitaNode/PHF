@@ -39,20 +39,21 @@ enum OcrSemanticType {
 
 /// 坐标辅助读取函数，支持 Schema V1 (left, top, width, height) 和 V2 (x, y, w, h)
 double _readX(Map<dynamic, dynamic> json, String key) =>
-    (json['x'] ?? json['left'] ?? 0.0).toDouble();
+    ((json['x'] ?? json['left'] ?? 0.0) as num).toDouble();
 double _readY(Map<dynamic, dynamic> json, String key) =>
-    (json['y'] ?? json['top'] ?? 0.0).toDouble();
+    ((json['y'] ?? json['top'] ?? 0.0) as num).toDouble();
 double _readW(Map<dynamic, dynamic> json, String key) =>
-    (json['w'] ?? json['width'] ?? 0.0).toDouble();
+    ((json['w'] ?? json['width'] ?? 0.0) as num).toDouble();
 double _readH(Map<dynamic, dynamic> json, String key) =>
-    (json['h'] ?? json['height'] ?? 0.0).toDouble();
+    ((json['h'] ?? json['height'] ?? 0.0) as num).toDouble();
 
 /// 时间戳辅助读取函数，确保兼容毫秒整数和 ISO 字符串格式
-Object? _readTimestamp(Map json, String key) {
+Object? _readTimestamp(Map<dynamic, dynamic> json, String key) {
   final val = json[key];
   if (val == null) return null;
-  if (val is int)
+  if (val is int) {
     return DateTime.fromMillisecondsSinceEpoch(val).toIso8601String();
+  }
   return val;
 }
 
