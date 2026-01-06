@@ -7,13 +7,11 @@
 /// - 基于 SQLCipher 加密环境。
 /// - FTS5 索引存储在加密数据库内部。
 ///
-/// ## Updates
-/// - **2026-01-04**:
-///   - 升级 `syncRecordIndex` 以填充多字段 (`hospital_name`, `tags`, `ocr_text`, `notes`) 到 FTS5 索引。
-///   - 升级 `search` 使用 FTS5 MATCH 语法查询多字段。
-/// - **2025-12-31**:
-///   - 实现 `syncRecordIndex` 以支持同 Record 下多图 OCR 文本的聚合检索。
-///   - 修复 `search` 结果映射中 `MedicalImage` 缺失及 `notedAt` null 转换问题。
+/// ## Repair Logs
+/// [2026-01-06] 修复：重构了 `search` 方法，修复了严重的括号嵌套错误、逻辑断层及变量作用域问题；
+/// 修正了 MedicalImage 构造函数参数（pageIndex, thumbnailEncryptionKey）；
+/// 解决了 BaseRepository 缺失 db getter 的调用问题；
+/// 优化了 FTS5 查询语法，直接引用表名以确保 MATCH 语义在不同 SQLite 版本下的稳定性。
 library;
 
 import 'dart:convert';
@@ -28,43 +26,29 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<List<SearchResult>> search(String query, String personId) async {
-    if (query.trim().isEmpty) return [];
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) return [];
 
-    // FTS5 MATCH query syntax:
-    // Simple: "query" (matches any column)
-    // Targeted: "ocr_text:query"
-    // To match ANY column, we can just pass the query.
-    // The query should be sanitized to avoid FTS syntax errors if user types special chars.
-    // For now, we assume simple text search.
-    // "Return keywords in highlight results" -> snippet.
+    final sanitizedQuery = _sanitizeFts5Query(trimmedQuery);
+    final database = await dbService.database;
 
-    // Using `ocr_search_index MATCH ?` matches against all columns in the virtual table.
-    // We request snippet for 'content' or other columns?
-    // Usually snippet is taken from the column that matched.
-    // But snippet() function takes column index.
-    // Columns: record_id(0), hospital_name(1), tags(2), ocr_text(3), notes(4), content(5).
-    // Let's try to get snippet from 'content' as it aggregates everything,
-    // OR we can rely on FTS finding the best match.
-    // However, snippet() only works on one column.
-    // The requirement says "Return keywords in highlight results".
-    // Let's snippet the 'content' column (index 5) as it contains everything.
+    try {
+      // 使用更兼容的 FTS5 MATCH 语法
+      final sql = '''
+        SELECT r.*, snippet(ocr_search_index, 5, '<b>', '</b>', '...', 16) as snippet
+        FROM records r
+        INNER JOIN ocr_search_index ON r.id = ocr_search_index.record_id
+        WHERE r.person_id = ? 
+          AND r.status != 'deleted' 
+          AND ocr_search_index MATCH ?
+        ORDER BY r.visit_date_ms DESC
+        LIMIT 100
+      ''';
 
-    final sql = '''
-      SELECT r.*, snippet(ocr_search_index, 5, '<b>', '</b>', '...', 16) as snippet
-      FROM records r
-      JOIN ocr_search_index fts ON r.id = fts.record_id
-      WHERE r.person_id = ? AND r.status != 'deleted' AND ocr_search_index MATCH ?
-      ORDER BY r.visit_date_ms DESC
-      LIMIT 100
-    ''';
-
-    // Quote the query for FTS safety if needed, or rely on parameter binding.
-    // Note: Parameter binding works for MATCH ? but strict FTS syntax rules apply to the string.
-    // If user types "foo OR bar", it works. If "foo*", it works.
-    final List<Map<String, dynamic>> maps = await db.rawQuery(sql, [
-      personId,
-      query,
-    ]);
+      final List<Map<String, dynamic>> maps = await database.rawQuery(sql, [
+        personId,
+        sanitizedQuery,
+      ]);
 
       if (maps.isEmpty) return [];
 
@@ -72,7 +56,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
       // Fetch Associated Images for N+1 optimization
       final String placeholders = List.filled(recordIds.length, '?').join(',');
-      final List<Map<String, dynamic>> imageMaps = await db.query(
+      final List<Map<String, dynamic>> imageMaps = await database.query(
         'images',
         where: 'record_id IN ($placeholders)',
         whereArgs: recordIds,
@@ -85,12 +69,43 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
         final rid = imgRow['record_id'] as String;
         imagesByRecord.putIfAbsent(rid, () => []);
 
-      final List<String> tagIds = [];
-      if (imgRow['tags'] != null) {
-        try {
-          final decoded = jsonDecode(imgRow['tags'] as String);
-          if (decoded is List) tagIds.addAll(List<String>.from(decoded));
-        } catch (_) {}
+        final List<String> tagIds = [];
+        if (imgRow['tags'] != null) {
+          try {
+            final decoded = jsonDecode(imgRow['tags'] as String);
+            if (decoded is List) {
+              tagIds.addAll(decoded.map((e) => e.toString()));
+            }
+          } catch (_) {}
+        }
+
+        final image = MedicalImage(
+          id: imgRow['id'] as String,
+          recordId: rid,
+          filePath: imgRow['file_path'] as String,
+          thumbnailPath: imgRow['thumbnail_path'] as String,
+          encryptionKey: imgRow['encryption_key'] as String,
+          thumbnailEncryptionKey: imgRow['thumbnail_encryption_key'] as String? ?? '',
+          width: imgRow['width'] as int?,
+          height: imgRow['height'] as int?,
+          mimeType: imgRow['mime_type'] as String? ?? 'image/webp',
+          fileSize: imgRow['file_size'] as int? ?? 0,
+          displayOrder: imgRow['page_index'] as int? ?? 0,
+          tagIds: tagIds,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(
+            imgRow['created_at_ms'] as int,
+          ),
+          ocrText: imgRow['ocr_text'] as String?,
+          ocrRawJson: imgRow['ocr_raw_json'] as String?,
+          ocrConfidence: (imgRow['ocr_confidence'] ?? imgRow['confidence']) as double?,
+          hospitalName: imgRow['hospital_name'] as String?,
+          visitDate: imgRow['visit_date_ms'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  imgRow['visit_date_ms'] as int,
+                )
+              : null,
+        );
+        imagesByRecord[rid]!.add(image);
       }
 
       return maps.map((m) {
@@ -115,7 +130,10 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
           updatedAt: DateTime.fromMillisecondsSinceEpoch(
             m['updated_at_ms'] as int,
           ),
-          status: RecordStatus.values.firstWhere((e) => e.name == m['status']),
+          status: RecordStatus.values.firstWhere(
+            (e) => e.name == m['status'],
+            orElse: () => RecordStatus.archived,
+          ),
           tagsCache: m['tags_cache'] as String?,
           images: imagesByRecord[rid] ?? [],
         );
@@ -126,15 +144,11 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
         );
       }).toList();
     } catch (e) {
-      // Log error and return empty list to avoid crashing UI
       return [];
     }
   }
 
   /// 针对 FTS5 查询对输入进行脱敏
-  ///
-  /// 将输入按空格分词，并为每个词加上双引号并转义现有的双引号，
-  /// 确保不会触发 FTS5 的语法错误（如 *、NEAR、AND 等特殊语义）。
   String _sanitizeFts5Query(String query) {
     final tokens = query.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
     if (tokens.isEmpty) return '';
@@ -143,17 +157,8 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<void> updateIndex(String recordId, String content) async {
-    // Deprecated direct usage, but kept for interface compatibility if needed.
-    // Ideally we should use syncRecordIndex for full updates.
-    // If called directly, we assume content maps to 'content' column only,
-    // or we might lose other columns.
-    // For now, let's redirect to syncRecordIndex logic if possible,
-    // but updateIndex signature is simple.
-    // We will just update 'content' and leave others null/empty?
-    // Or better, let's just implement it as "Update content column only".
-
-    final db = await dbService.database;
-    await db.transaction((txn) async {
+    final database = await dbService.database;
+    await database.transaction((txn) async {
       await txn.delete(
         'ocr_search_index',
         where: 'record_id = ?',
@@ -168,10 +173,10 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<void> syncRecordIndex(String recordId) async {
-    final db = await dbService.database;
+    final database = await dbService.database;
 
     // 1. Fetch Record Info
-    final List<Map<String, dynamic>> recordRows = await db.query(
+    final List<Map<String, dynamic>> recordRows = await database.query(
       'records',
       columns: ['hospital_name', 'notes'],
       where: 'id = ?',
@@ -186,7 +191,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final notes = recordRow['notes'] as String? ?? '';
 
     // 2. Fetch Images Info (OCR Text & Tags)
-    final List<Map<String, dynamic>> imageRows = await db.query(
+    final List<Map<String, dynamic>> imageRows = await database.query(
       'images',
       columns: ['ocr_text', 'tags'],
       where: 'record_id = ?',
@@ -206,7 +211,9 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       if (row['tags'] != null) {
         try {
           final decoded = jsonDecode(row['tags'] as String);
-          if (decoded is List) tagIds.addAll(List<String>.from(decoded));
+          if (decoded is List) {
+            tagIds.addAll(decoded.map((e) => e.toString()));
+          }
         } catch (_) {}
       }
     }
@@ -215,7 +222,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final StringBuffer tagNamesBuffer = StringBuffer();
     if (tagIds.isNotEmpty) {
       final placeholder = List.filled(tagIds.length, '?').join(',');
-      final List<Map<String, dynamic>> tagRows = await db.query(
+      final List<Map<String, dynamic>> tagRows = await database.query(
         'tags',
         columns: ['name'],
         where: 'id IN ($placeholder)',
@@ -233,7 +240,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final content = [hospitalName, tagNames, notes, ocrText].join('\n');
 
     // 5. Update FTS Index
-    await db.transaction((txn) async {
+    await database.transaction((txn) async {
       await txn.delete(
         'ocr_search_index',
         where: 'record_id = ?',
@@ -252,8 +259,8 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<void> deleteIndex(String recordId) async {
-    final db = await dbService.database;
-    await db.delete(
+    final database = await dbService.database;
+    await database.delete(
       'ocr_search_index',
       where: 'record_id = ?',
       whereArgs: [recordId],
