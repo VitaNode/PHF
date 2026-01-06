@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../data/models/person.dart';
 import '../../../data/models/search_result.dart';
 import '../../../logic/providers/search_provider.dart';
 import '../../../logic/providers/person_provider.dart';
@@ -59,123 +60,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgGrey,
-      appBar: AppBar(
-        titleSpacing: 0,
-        title: Container(
-          height: 40,
-          margin: const EdgeInsets.only(right: 16),
-          decoration: BoxDecoration(
-            color: AppTheme.bgGrey,
-            borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-          ),
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: '搜索 OCR 内容、医院或备注...',
-              hintStyle: const TextStyle(
-                color: AppTheme.textHint,
-                fontSize: 14,
-              ),
-              prefixIcon: const Icon(
-                Icons.search,
-                size: 20,
-                color: AppTheme.textGrey,
-              ),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(
-                        Icons.cancel,
-                        size: 20,
-                        color: AppTheme.textGrey,
-                      ),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {});
-                        _onSearchChanged('');
-                      },
-                    )
-                  : null,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10),
-            ),
-            style: const TextStyle(fontSize: 16),
-            onChanged: (val) {
-              setState(() {});
-              _onSearchChanged(val);
-            },
-            textInputAction: TextInputAction.search,
-            onSubmitted: (val) =>
-                ref.read(searchControllerProvider.notifier).search(val),
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(30),
-          child: Container(
-            padding: const EdgeInsets.only(left: 16, bottom: 8),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.person_outline,
-                  size: 14,
-                  color: AppTheme.textHint,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '正在搜索: ${currentPerson?.nickname ?? "加载中..."}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textHint,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(currentPerson),
       body: searchAsync.when(
-        data: (results) {
-          if (results.isEmpty && _searchController.text.isNotEmpty) {
-            return _buildEmptyState();
-          }
-          if (results.isEmpty) {
-            return _buildInitialState();
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  '找到 ${results.length} 条结果',
-                  style: AppTheme.monoStyle.copyWith(
-                    fontSize: 12,
-                    color: AppTheme.textHint,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _SearchResultCard(result: results[index]),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+        data: (results) => _buildSearchResults(results),
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryTeal),
         ),
@@ -186,6 +73,121 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
           ),
         ),
       ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(Person? currentPerson) {
+    return AppBar(
+      titleSpacing: 0,
+      title: _buildSearchField(),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(30),
+        child: Container(
+          padding: const EdgeInsets.only(left: 16, bottom: 8),
+          alignment: Alignment.centerLeft,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.person_outline,
+                size: 14,
+                color: AppTheme.textHint,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '正在搜索: ${currentPerson?.nickname ?? "加载中..."}',
+                style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Container(
+      height: 40,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.bgGrey,
+        borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+      ),
+      child: TextField(
+        controller: _searchController,
+        autofocus: true,
+        decoration: InputDecoration(
+          hintText: '搜索 OCR 内容、医院或备注...',
+          hintStyle: const TextStyle(color: AppTheme.textHint, fontSize: 14),
+          prefixIcon: const Icon(
+            Icons.search,
+            size: 20,
+            color: AppTheme.textGrey,
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.cancel,
+                    size: 20,
+                    color: AppTheme.textGrey,
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                    _onSearchChanged('');
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        ),
+        style: const TextStyle(fontSize: 16),
+        onChanged: (val) {
+          setState(() {});
+          _onSearchChanged(val);
+        },
+        textInputAction: TextInputAction.search,
+        onSubmitted: (val) =>
+            ref.read(searchControllerProvider.notifier).search(val),
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(List<SearchResult> results) {
+    if (results.isEmpty && _searchController.text.isNotEmpty) {
+      return _buildEmptyState();
+    }
+    if (results.isEmpty) {
+      return _buildInitialState();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            '找到 ${results.length} 条结果',
+            style: AppTheme.monoStyle.copyWith(
+              fontSize: 12,
+              color: AppTheme.textHint,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _SearchResultCard(result: results[index]),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -274,96 +276,93 @@ class _SearchResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.local_hospital,
-                  size: 16,
-                  color: AppTheme.primaryTeal,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    result.record.hospitalName ?? '未填写医院',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  DateFormat('yyyy-MM-dd').format(result.record.notedAt),
-                  style: AppTheme.monoStyle.copyWith(
-                    fontSize: 12,
-                    color: AppTheme.textHint,
-                  ),
-                ),
-              ],
+          _buildHeader(),
+          const Divider(height: 1, color: AppTheme.bgGrey),
+          if (result.snippet.isNotEmpty) _buildSnippet(),
+          _buildTags(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.local_hospital,
+            size: 16,
+            color: AppTheme.primaryTeal,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              result.record.hospitalName ?? '未填写医院',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Divider(height: 1, color: AppTheme.bgGrey),
-          // Snippet Content
-          if (result.snippet.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 2),
-                    child: Icon(
-                      Icons.notes,
-                      size: 14,
-                      color: AppTheme.textHint,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: RichText(
-                      text: _parseSnippet(result.snippet),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(width: 8),
+          Text(
+            DateFormat('yyyy-MM-dd').format(result.record.notedAt),
+            style: AppTheme.monoStyle.copyWith(
+              fontSize: 12,
+              color: AppTheme.textHint,
             ),
-          // Tags hint if cached
-          if (result.record.tagsCache != null &&
-              result.record.tagsCache!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Wrap(
-                spacing: 4,
-                children: result.record.tagsCache!.split(',').take(3).map((
-                  tag,
-                ) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.bgGrey,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSnippet() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(Icons.notes, size: 14, color: AppTheme.textHint),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: _parseSnippet(result.snippet),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTags() {
+    if (result.record.tagsCache == null || result.record.tagsCache!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Wrap(
+        spacing: 4,
+        children: result.record.tagsCache!.split(',').take(3).map((tag) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.bgGrey,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '#$tag',
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

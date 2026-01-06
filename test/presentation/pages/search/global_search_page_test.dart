@@ -6,12 +6,16 @@ import 'package:mockito/mockito.dart';
 import 'package:phf/data/models/record.dart';
 import 'package:phf/data/models/search_result.dart';
 import 'package:phf/data/models/person.dart';
+import 'package:phf/data/repositories/app_meta_repository.dart';
 import 'package:phf/data/repositories/interfaces/search_repository.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/pages/search/global_search_page.dart';
 
-@GenerateNiceMocks([MockSpec<ISearchRepository>()])
+@GenerateNiceMocks([
+  MockSpec<ISearchRepository>(),
+  MockSpec<AppMetaRepository>(),
+])
 import 'global_search_page_test.mocks.dart';
 
 class MockCurrentPersonIdController extends CurrentPersonIdController {
@@ -23,15 +27,21 @@ class MockCurrentPersonIdController extends CurrentPersonIdController {
 
 void main() {
   late MockISearchRepository mockSearchRepo;
+  late MockAppMetaRepository mockMetaRepo;
 
   setUp(() {
     mockSearchRepo = MockISearchRepository();
+    mockMetaRepo = MockAppMetaRepository();
+
+    // Default mock behavior for reindexing check
+    when(mockMetaRepo.get(any)).thenAnswer((_) async => 'true');
   });
 
   Widget createSubject() {
     return ProviderScope(
       overrides: [
         searchRepositoryProvider.overrideWithValue(mockSearchRepo),
+        appMetaRepositoryProvider.overrideWithValue(mockMetaRepo),
         currentPersonIdControllerProvider.overrideWith(
           () => MockCurrentPersonIdController('p1'),
         ),

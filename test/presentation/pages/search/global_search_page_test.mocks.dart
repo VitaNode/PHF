@@ -7,6 +7,7 @@ import 'dart:async' as _i3;
 
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:phf/data/models/search_result.dart' as _i4;
+import 'package:phf/data/repositories/app_meta_repository.dart' as _i5;
 import 'package:phf/data/repositories/interfaces/search_repository.dart' as _i2;
 
 // ignore_for_file: type=lint
@@ -72,6 +73,83 @@ class MockISearchRepository extends _i1.Mock implements _i2.ISearchRepository {
   _i3.Future<void> reindexAll() =>
       (super.noSuchMethod(
             Invocation.method(#reindexAll, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+}
+
+/// A class which mocks [AppMetaRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
+  @override
+  _i3.Future<String?> get(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#get, [key]),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> put(String? key, String? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#put, [key, value]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> hasLock() =>
+      (super.noSuchMethod(
+            Invocation.method(#hasLock, []),
+            returnValue: _i3.Future<bool>.value(false),
+            returnValueForMissingStub: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setHasLock(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#setHasLock, [enabled]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<String?> getCurrentPersonId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getCurrentPersonId, []),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> setCurrentPersonId(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#setCurrentPersonId, [id]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isDisclaimerAccepted() =>
+      (super.noSuchMethod(
+            Invocation.method(#isDisclaimerAccepted, []),
+            returnValue: _i3.Future<bool>.value(false),
+            returnValueForMissingStub: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setDisclaimerAccepted(bool? accepted) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDisclaimerAccepted, [accepted]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )

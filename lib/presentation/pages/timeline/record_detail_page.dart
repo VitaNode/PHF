@@ -308,21 +308,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 监听 OCR 任务，如果识别进度有更新，自动刷新数据
-    ref.listen(ocrPendingCountProvider, (previous, next) {
-      if (next.hasValue) {
-        final prevCount = previous?.value ?? 0;
-        final nextCount = next.value!;
-
-        // 只要任务在减少（哪怕没归零，也可能当前看的那张图好了）
-        if (nextCount < prevCount || (prevCount > 0 && nextCount == 0)) {
-          ref
-              .read(talkerProvider)
-              .info('[RecordDetailPage] OCR update detected. Reloading data.');
-          _loadData();
-        }
-      }
-    });
+    _setupOcrListener();
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -335,157 +321,11 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
-      appBar: AppBar(
-        title: Text(_isEditing ? '编辑详情' : '病历详情'),
-        backgroundColor: AppTheme.bgWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-        actions: [
-          if (_isEditing)
-            TextButton(
-              onPressed: _saveChanges,
-              child: const Text(
-                '保存',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          IconButton(
-            icon: const Icon(Icons.description_outlined),
-            tooltip: '查看识别文本',
-            onPressed: () => _showOCRText(),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          Expanded(
-            flex: 4,
-            child: Stack(
-              children: [
-                PageView.builder(
-                  controller: _pageController,
-                  itemCount: _images.length,
-                  onPageChanged: _onPageChanged,
-                  itemBuilder: (context, index) {
-                    final img = _images[index];
-                    return Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push<int>(
-                            context,
-                            MaterialPageRoute<int>(
-                              builder: (context) => FullImageViewer(
-                                images: _images,
-                                initialIndex: _currentIndex,
-                              ),
-                            ),
-                          ).then((newIndex) {
-                            if (newIndex is int && mounted) {
-                              _pageController.jumpToPage(newIndex);
-                            }
-                          });
-                        },
-                        child: SecureImage(
-                          imagePath: img.filePath,
-                          encryptionKey: img.encryptionKey,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                if (_images.length > 1) ...[
-                  if (_currentIndex > 0)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.chevron_left,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            onPressed: () {
-                              _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (_currentIndex < _images.length - 1)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.chevron_right,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-                Positioned(
-                  bottom: 16,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        '${_currentIndex + 1} / ${_images.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          Expanded(flex: 4, child: _buildImageSection()),
           const Divider(height: 1),
-
-          // 2. Bottom Section - Details
           Expanded(
             flex: 6,
             child: SingleChildScrollView(
@@ -500,6 +340,148 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     );
   }
 
+  void _setupOcrListener() {
+    ref.listen(ocrPendingCountProvider, (previous, next) {
+      if (next.hasValue) {
+        final prevCount = previous?.value ?? 0;
+        final nextCount = next.value!;
+        if (nextCount < prevCount || (prevCount > 0 && nextCount == 0)) {
+          ref
+              .read(talkerProvider)
+              .info('[RecordDetailPage] OCR update detected. Reloading data.');
+          _loadData();
+        }
+      }
+    });
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(_isEditing ? '编辑详情' : '病历详情'),
+      backgroundColor: AppTheme.bgWhite,
+      foregroundColor: AppTheme.textPrimary,
+      elevation: 0,
+      actions: [
+        if (_isEditing)
+          TextButton(
+            onPressed: _saveChanges,
+            child: const Text(
+              '保存',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        IconButton(
+          icon: const Icon(Icons.description_outlined),
+          tooltip: '查看识别文本',
+          onPressed: () => _showOCRText(),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  Widget _buildImageSection() {
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          itemCount: _images.length,
+          onPageChanged: _onPageChanged,
+          itemBuilder: (context, index) {
+            final img = _images[index];
+            return Center(
+              child: GestureDetector(
+                onTap: () => _showFullImage(index),
+                child: SecureImage(
+                  imagePath: img.filePath,
+                  encryptionKey: img.encryptionKey,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            );
+          },
+        ),
+        if (_images.length > 1) ...[
+          if (_currentIndex > 0) _buildNavButton(isLeft: true),
+          if (_currentIndex < _images.length - 1)
+            _buildNavButton(isLeft: false),
+        ],
+        _buildPageIndicator(),
+      ],
+    );
+  }
+
+  void _showFullImage(int index) {
+    Navigator.push<int>(
+      context,
+      MaterialPageRoute<int>(
+        builder: (context) =>
+            FullImageViewer(images: _images, initialIndex: _currentIndex),
+      ),
+    ).then((newIndex) {
+      if (newIndex is int && mounted) {
+        _pageController.jumpToPage(newIndex);
+      }
+    });
+  }
+
+  Widget _buildNavButton({required bool isLeft}) {
+    return Align(
+      alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+      child: Padding(
+        padding: EdgeInsets.only(left: isLeft ? 12 : 0, right: isLeft ? 0 : 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          ),
+          child: IconButton(
+            icon: Icon(
+              isLeft ? Icons.chevron_left : Icons.chevron_right,
+              color: Colors.white,
+              size: 28,
+            ),
+            onPressed: () {
+              if (isLeft) {
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              } else {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageIndicator() {
+    return Positioned(
+      bottom: 16,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.black54,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            '${_currentIndex + 1} / ${_images.length}',
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoView(MedicalImage img) {
     final hospital = img.hospitalName ?? _record?.hospitalName ?? '未填写';
     final date = img.visitDate ?? _record?.notedAt;
@@ -510,59 +492,91 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '医院',
-          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
-        ),
-        Text(
-          hospital,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        _buildInfoItem('医院', hospital, isTitle: true),
         const SizedBox(height: 16),
-        const Text(
-          '就诊日期',
-          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
-        ),
-        Text(dateStr, style: AppTheme.monoStyle.copyWith(fontSize: 16)),
+        _buildInfoItem('就诊日期', dateStr, isMono: true),
         const SizedBox(height: 24),
         const Text(
           '标签',
           style: TextStyle(fontSize: 12, color: AppTheme.textHint),
         ),
         const SizedBox(height: 8),
-        if (img.tagIds.isEmpty)
-          const Text(
-            '无标签',
-            style: TextStyle(color: AppTheme.textHint, fontSize: 14),
-          )
-        else
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: img.tagIds
-                .map<Widget>((tid) => _TagNameChip(tagId: tid))
-                .toList(),
-          ),
+        _buildTagList(img),
         const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            OcrResult? ocrResult;
-            if (img.ocrRawJson != null) {
-              try {
-                ocrResult = OcrResult.fromJson(
-                  jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
-                );
-              } catch (_) {}
-            }
-            return CollapsibleOcrCard(
-              text: img.ocrText ?? '',
-              ocrResult: ocrResult,
-            );
-          },
-        ),
+        _buildOcrCard(img),
         const SizedBox(height: 40),
         const Divider(),
         const SizedBox(height: 16),
+        _buildActionButtons(),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildInfoItem(
+    String label,
+    String value, {
+    bool isTitle = false,
+    bool isMono = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
+        ),
+        Text(
+          value,
+          style: isMono
+              ? AppTheme.monoStyle.copyWith(fontSize: 16)
+              : TextStyle(
+                  fontSize: 18,
+                  fontWeight: isTitle ? FontWeight.bold : null,
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTagList(MedicalImage img) {
+    if (img.tagIds.isEmpty) {
+      return const Text(
+        '无标签',
+        style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: img.tagIds
+          .map<Widget>((tid) => _TagNameChip(tagId: tid))
+          .toList(),
+    );
+  }
+
+  Widget _buildOcrCard(MedicalImage img) {
+    return Builder(
+      builder: (context) {
+        OcrResult? ocrResult;
+        if (img.ocrRawJson != null) {
+          try {
+            ocrResult = OcrResult.fromJson(
+              jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+            );
+          } catch (_) {}
+        }
+        return CollapsibleOcrCard(
+          text: img.ocrText ?? '',
+          ocrResult: ocrResult,
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
         Row(
           children: [
             Expanded(
@@ -599,7 +613,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
       ],
     );
   }
@@ -613,113 +626,120 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           decoration: const InputDecoration(labelText: '医院名称'),
         ),
         const SizedBox(height: 16),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('就诊日期'),
-          subtitle: Text(
-            _visitDate != null
-                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
-                : '选择日期',
-          ),
-          trailing: const Icon(Icons.calendar_today),
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: _visitDate ?? DateTime.now(),
-              firstDate: DateTime(2000),
-              lastDate: DateTime.now(),
-            );
-            if (picked != null) setState(() => _visitDate = picked);
-          },
-        ),
+        _buildDatePicker(),
         const SizedBox(height: 24),
         const Text('管理标签', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        TagSelector(
-          selectedTagIds: _images[_currentIndex].tagIds,
-          onToggle: (tid) async {
-            final currentIds = [..._images[_currentIndex].tagIds];
-            if (currentIds.contains(tid)) {
-              currentIds.remove(tid);
-            } else {
-              currentIds.add(tid);
-            }
-            final oldIds = _images[_currentIndex].tagIds;
-            setState(() {
-              _images[_currentIndex] = _images[_currentIndex].copyWith(
-                tagIds: currentIds,
-              );
-            });
-            try {
-              await ref
-                  .read(imageRepositoryProvider)
-                  .updateImageTags(_images[_currentIndex].id, currentIds);
-              // Notify Timeline (async)
-              await ref.read(timelineControllerProvider.notifier).refresh();
-            } catch (e) {
-              setState(() {
-                _images[_currentIndex] = _images[_currentIndex].copyWith(
-                  tagIds: oldIds,
-                );
-              });
-              if (mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('更新标签失败: $e')));
-              }
-            }
-          },
-          onReorder: (oldIdx, newIdx) async {
-            final originalIds = [..._images[_currentIndex].tagIds];
-            final currentIds = [...originalIds];
-            if (oldIdx < newIdx) newIdx -= 1;
-            final item = currentIds.removeAt(oldIdx);
-            currentIds.insert(newIdx, item);
-
-            setState(() {
-              _images[_currentIndex] = _images[_currentIndex].copyWith(
-                tagIds: currentIds,
-              );
-            });
-            try {
-              await ref
-                  .read(imageRepositoryProvider)
-                  .updateImageTags(_images[_currentIndex].id, currentIds);
-              // Notify Timeline (async)
-              await ref.read(timelineControllerProvider.notifier).refresh();
-            } catch (e) {
-              setState(() {
-                _images[_currentIndex] = _images[_currentIndex].copyWith(
-                  tagIds: originalIds,
-                );
-              });
-              if (mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('重排标签失败: $e')));
-              }
-            }
-          },
-          onCreate: _handleCreateTag,
-        ),
+        _buildTagSelector(),
         const SizedBox(height: 32),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () {
-              setState(() {
-                _isEditing = false;
-                _updateControllersForIndex(_currentIndex);
-              });
-            },
-            child: const Text(
-              '取消编辑',
-              style: TextStyle(color: AppTheme.textGrey),
-            ),
-          ),
-        ),
+        _buildCancelEditButton(),
         const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildDatePicker() {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: const Text('就诊日期'),
+      subtitle: Text(
+        _visitDate != null
+            ? DateFormat('yyyy-MM-dd').format(_visitDate!)
+            : '选择日期',
+      ),
+      trailing: const Icon(Icons.calendar_today),
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: _visitDate ?? DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime.now(),
+        );
+        if (picked != null) setState(() => _visitDate = picked);
+      },
+    );
+  }
+
+  Widget _buildTagSelector() {
+    return TagSelector(
+      selectedTagIds: _images[_currentIndex].tagIds,
+      onToggle: (tid) async {
+        final currentIds = [..._images[_currentIndex].tagIds];
+        if (currentIds.contains(tid)) {
+          currentIds.remove(tid);
+        } else {
+          currentIds.add(tid);
+        }
+        final oldIds = _images[_currentIndex].tagIds;
+        setState(() {
+          _images[_currentIndex] = _images[_currentIndex].copyWith(
+            tagIds: currentIds,
+          );
+        });
+        try {
+          await ref
+              .read(imageRepositoryProvider)
+              .updateImageTags(_images[_currentIndex].id, currentIds);
+          await ref.read(timelineControllerProvider.notifier).refresh();
+        } catch (e) {
+          setState(() {
+            _images[_currentIndex] = _images[_currentIndex].copyWith(
+              tagIds: oldIds,
+            );
+          });
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('更新标签失败: $e')));
+          }
+        }
+      },
+      onReorder: (oldIdx, newIdx) async {
+        final originalIds = [..._images[_currentIndex].tagIds];
+        final currentIds = [...originalIds];
+        if (oldIdx < newIdx) newIdx -= 1;
+        final item = currentIds.removeAt(oldIdx);
+        currentIds.insert(newIdx, item);
+
+        setState(() {
+          _images[_currentIndex] = _images[_currentIndex].copyWith(
+            tagIds: currentIds,
+          );
+        });
+        try {
+          await ref
+              .read(imageRepositoryProvider)
+              .updateImageTags(_images[_currentIndex].id, currentIds);
+          await ref.read(timelineControllerProvider.notifier).refresh();
+        } catch (e) {
+          setState(() {
+            _images[_currentIndex] = _images[_currentIndex].copyWith(
+              tagIds: originalIds,
+            );
+          });
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('重排标签失败: $e')));
+          }
+        }
+      },
+      onCreate: _handleCreateTag,
+    );
+  }
+
+  Widget _buildCancelEditButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () {
+          setState(() {
+            _isEditing = false;
+            _updateControllersForIndex(_currentIndex);
+          });
+        },
+        child: const Text('取消编辑', style: TextStyle(color: AppTheme.textGrey)),
+      ),
     );
   }
 

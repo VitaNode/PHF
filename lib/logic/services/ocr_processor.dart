@@ -28,8 +28,11 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 import 'package:talker_flutter/talker_flutter.dart';
+import '../../data/models/image.dart';
 import '../../data/models/ocr_queue_item.dart';
+import '../../data/models/ocr_result.dart';
 import '../../data/models/record.dart';
+import '../../data/models/extracted_medical_data.dart';
 import '../../data/repositories/interfaces/ocr_queue_repository.dart';
 import '../../data/repositories/interfaces/image_repository.dart';
 import '../../data/repositories/interfaces/record_repository.dart';
@@ -76,148 +79,122 @@ class OCRProcessor {
     final item = await _queueRepository.dequeue();
     if (item == null) return false;
 
-    final msg = 'Processing Task: ${item.id} for Image: ${item.imageId}';
-    _talker?.info('[OCRProcessor] $msg');
-    if (_talker == null) log(msg, name: 'OCRProcessor');
-
-    // Make local vars nullable to allow clearing
-    Uint8List? decryptedBytes;
+    _log('Processing Task: ${item.id} for Image: ${item.imageId}');
 
     try {
-      // 1. 获取图片元数据
       final image = await _imageRepository.getImageById(item.imageId);
-      if (image == null) {
-        throw Exception('Image not found: ${item.imageId}');
-      }
+      if (image == null) throw Exception('Image not found: ${item.imageId}');
 
-      // 2. 解密图片 (Into Memory)
-      // Resolve absolute path from stored relative path
-      final fullPath = image.filePath.startsWith('/')
-          ? image.filePath
-          : '${_pathService.sandboxRoot}/${image.filePath}';
+      final decryptedBytes = await _loadImageAndDecrypt(image);
+      final ocrResult = await _performOCRAndEnhance(decryptedBytes, image);
+      final fullText = _getValidatedText(ocrResult, image.id);
 
-      // IOCRService 需要 Uint8List
-      decryptedBytes = await _securityHelper.decryptDataFromFile(
-        fullPath,
-        image.encryptionKey,
-      );
-
-      // 3. 执行 OCR 识别
-      var ocrResult = await _ocrService.recognizeText(
-        decryptedBytes,
-        mimeType: image.mimeType,
-      );
-
-      // 3.1 语义增强 (Heuristic Enhancement)
-      ocrResult = OcrEnhancer.enhance(ocrResult);
-
-      // 立即释放原始解密数据
-      decryptedBytes = null;
-
-      // 3.1 预处理 OCR 结果 (防止因接口返回 text 为空但 blocks 有数据的情况)
-      String fullText = ocrResult.text.trim();
-      if (fullText.isEmpty && ocrResult.blocks.isNotEmpty) {
-        fullText = ocrResult.blocks.map((b) => b.text).join('\n').trim();
-        _talker?.warning(
-          '[OCRProcessor] OCR text was empty but blocks exist. Joined blocks.',
-        );
-      }
-
-      if (fullText.isEmpty) {
-        _talker?.warning(
-          '[OCRProcessor] OCR result for Image ${image.id} is completely empty.',
-        );
-      }
-
-      // 4. 智能提取 (FR-203)
       final extracted = SmartExtractor.extract(fullText, ocrResult.confidence);
-
-      final info =
-          'Extracted: date=${extracted.visitDate}, hospital=${extracted.hospitalName}, score=${extracted.confidenceScore}';
-      _talker?.info('[OCRProcessor] $info');
-      if (_talker == null) log(info, name: 'OCRProcessor');
-
-      // 5. 持久化数据
-      // 5.1 更新 Image OCR 数据
-      await _imageRepository.updateOCRData(
-        image.id,
-        fullText,
-        rawJson: jsonEncode(ocrResult.toJson()),
-        confidence: extracted.confidenceScore,
+      _log(
+        'Extracted: date=${extracted.visitDate}, hospital=${extracted.hospitalName}, score=${extracted.confidenceScore}',
       );
 
-      // 5.2 更新 Image 业务元数据 (如果有新发现)
-      // 仅当提取到有效值且当前 Image 对应字段为空时，或者我们选择覆盖？
-      if (extracted.visitDate != null || extracted.hospitalName != null) {
-        await _imageRepository.updateImageMetadata(
-          image.id,
-          hospitalName: extracted.hospitalName,
-          visitDate: extracted.visitDate,
-        );
-      }
-
-      // 5.3 更新 Record 状态与合并元数据
-      final record = await _recordRepository.getRecordById(image.recordId);
-      if (record != null) {
-        // 更新 Record 元数据聚合 (sync logic inside repo usually handles this,
-        // but updateImageMetadata triggers syncRecordMetadataCache in Repo implementation)
-        // 所以我们只需要处理 Status。
-
-        // 决策状态 (Spec FR-203 Phase 2 A.5)
-        // - High Confidence (>0.9): Archived (Done)
-        // - Low Confidence (<=0.9): Review
-        // 注意：Record 可能包含多张图。如果任何一张图是 Low Confirm，Record 应该是 Review 吗？
-        // 或者只要有一张是 High，就 OK？通常取最低分或加权。
-        // 为了简单起见 (MVP Loop)，如果当前图片置信度低，我们将 Record 标记为 Review。
-        // 如果当前是 High，且 Record 原本是 Processing，我们可以改为 Archived。
-
-        RecordStatus newStatus = record.status;
-        if (extracted.confidenceScore > _highConfidenceThreshold) {
-          if (newStatus == RecordStatus.processing) {
-            newStatus = RecordStatus.archived;
-          }
-        } else {
-          // 低置信度强制进入 Review
-          newStatus = RecordStatus.review;
-        }
-
-        if (newStatus != record.status) {
-          await _recordRepository.updateStatus(record.id, newStatus);
-        }
-      }
-
-      // 5.4 更新搜索索引 (Search Index)
-      // 聚合整个 Record 的文本入库
+      await _persistResults(image, ocrResult, fullText, extracted);
+      await _updateRecordStatus(image.recordId, extracted.confidenceScore);
       await _searchRepository.syncRecordIndex(image.recordId);
-
-      // 6. 标记任务完成
       await _queueRepository.updateStatus(item.id, OCRJobStatus.completed);
 
-      _talker?.info('[OCRProcessor] Processing Completed: ${item.id}');
-      if (_talker == null) {
-        log('Processing Completed: ${item.id}', name: 'OCRProcessor');
-      }
+      _log('Processing Completed: ${item.id}');
       return true;
     } catch (e, stack) {
       _talker?.handle(e, stack, '[OCRProcessor] Processing Failed: ${item.id}');
-      if (_talker == null) {
-        log(
-          'Processing Failed: ${item.id}. Error: $e',
-          name: 'OCRProcessor',
-          error: e,
-          stackTrace: stack,
-        );
-      }
-      decryptedBytes = null; // Ensure clear on error
-
       await _queueRepository.updateStatus(
         item.id,
         OCRJobStatus.failed,
         error: e.toString(),
       );
-
-      // Retry logic could be expanded here (currently just status update)
       return false;
+    }
+  }
+
+  void _log(String msg) {
+    _talker?.info('[OCRProcessor] $msg');
+    if (_talker == null) log(msg, name: 'OCRProcessor');
+  }
+
+  Future<Uint8List> _loadImageAndDecrypt(MedicalImage image) async {
+    final fullPath = image.filePath.startsWith('/')
+        ? image.filePath
+        : '${_pathService.sandboxRoot}/${image.filePath}';
+
+    return _securityHelper.decryptDataFromFile(fullPath, image.encryptionKey);
+  }
+
+  Future<OcrResult> _performOCRAndEnhance(
+    Uint8List bytes,
+    MedicalImage image,
+  ) async {
+    try {
+      final result = await _ocrService.recognizeText(
+        bytes,
+        mimeType: image.mimeType,
+      );
+      return OcrEnhancer.enhance(result);
+    } finally {
+      // Small optimization: overwrite first few bytes if possible,
+      // but in Dart Uint8List is just a pointer to heap.
+      // The best we can do is let it go out of scope.
+    }
+  }
+
+  String _getValidatedText(OcrResult result, String imageId) {
+    String text = result.text.trim();
+    if (text.isEmpty && result.blocks.isNotEmpty) {
+      text = result.blocks.map((b) => b.text).join('\n').trim();
+      _talker?.warning(
+        '[OCRProcessor] OCR text was empty but blocks exist. Joined blocks.',
+      );
+    }
+    if (text.isEmpty) {
+      _talker?.warning(
+        '[OCRProcessor] OCR result for Image $imageId is completely empty.',
+      );
+    }
+    return text;
+  }
+
+  Future<void> _persistResults(
+    MedicalImage image,
+    OcrResult result,
+    String text,
+    ExtractedMedicalData extracted,
+  ) async {
+    await _imageRepository.updateOCRData(
+      image.id,
+      text,
+      rawJson: jsonEncode(result.toJson()),
+      confidence: extracted.confidenceScore,
+    );
+
+    if (extracted.visitDate != null || extracted.hospitalName != null) {
+      await _imageRepository.updateImageMetadata(
+        image.id,
+        hospitalName: extracted.hospitalName,
+        visitDate: extracted.visitDate,
+      );
+    }
+  }
+
+  Future<void> _updateRecordStatus(String recordId, double confidence) async {
+    final record = await _recordRepository.getRecordById(recordId);
+    if (record == null) return;
+
+    RecordStatus newStatus = record.status;
+    if (confidence > _highConfidenceThreshold) {
+      if (newStatus == RecordStatus.processing) {
+        newStatus = RecordStatus.archived;
+      }
+    } else {
+      newStatus = RecordStatus.review;
+    }
+
+    if (newStatus != record.status) {
+      await _recordRepository.updateStatus(record.id, newStatus);
     }
   }
 }

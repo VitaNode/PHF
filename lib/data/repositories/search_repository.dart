@@ -17,6 +17,7 @@
 library;
 
 import 'dart:convert';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/image.dart';
 import '../models/record.dart';
 import 'base_repository.dart';
@@ -31,24 +32,47 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return [];
 
+    final sanitizedQuery = _sanitizeQuery(trimmedQuery);
+    final database = await dbService.database;
+
+    try {
+      final maps = await _executeSearchQuery(
+        database,
+        personId,
+        sanitizedQuery,
+      );
+      if (maps.isEmpty) return [];
+
+      final recordIds = maps.map((m) => m['id'] as String).toList();
+      final imagesByRecord = await _fetchImagesForRecords(database, recordIds);
+
+      return maps.map((m) => _mapToSearchResult(m, imagesByRecord)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  String _sanitizeQuery(String query) {
     // 先按空格分词，对每个原始词内部进行 CJK 分段并包裹引号，确保 CJK 连续词作为 Phrase 匹配
-    final tokens = trimmedQuery
+    return query
         .split(RegExp(r'\s+'))
-        .where((t) => t.isNotEmpty);
-    final sanitizedQuery = tokens
+        .where((t) => t.isNotEmpty)
         .map((t) {
           final segmented = _segmentCJK(t);
           final escaped = segmented.replaceAll('"', '""');
           return '"$escaped"';
         })
         .join(' ');
+  }
 
-    final database = await dbService.database;
-
-    try {
-      // 强化隔离：在 FTS 表中直接过滤 person_id
-      // snippet 列索引更新为 6 (content)
-      final sql = '''
+  Future<List<Map<String, dynamic>>> _executeSearchQuery(
+    Database database,
+    String personId,
+    String sanitizedQuery,
+  ) async {
+    // 强化隔离：在 FTS 表中直接过滤 person_id
+    // snippet 列索引更新为 6 (content)
+    const sql = '''
         SELECT r.*, snippet(ocr_search_index, 6, '<b>', '</b>', '...', 16) as snippet
         FROM records r
         INNER JOIN ocr_search_index ON r.id = ocr_search_index.record_id
@@ -60,110 +84,104 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
         LIMIT 100
       ''';
 
-      final List<Map<String, dynamic>> maps = await database.rawQuery(sql, [
-        personId,
-        personId,
-        sanitizedQuery,
-      ]);
+    return database.rawQuery(sql, [personId, personId, sanitizedQuery]);
+  }
 
-      if (maps.isEmpty) return [];
+  Future<Map<String, List<MedicalImage>>> _fetchImagesForRecords(
+    Database database,
+    List<String> recordIds,
+  ) async {
+    final String placeholders = List.filled(recordIds.length, '?').join(',');
+    final List<Map<String, dynamic>> imageMaps = await database.query(
+      'images',
+      where: 'record_id IN ($placeholders)',
+      whereArgs: recordIds,
+      orderBy: 'page_index ASC',
+    );
 
-      final recordIds = maps.map((m) => m['id'] as String).toList();
+    final Map<String, List<MedicalImage>> imagesByRecord = {};
+    for (var imgRow in imageMaps) {
+      final rid = imgRow['record_id'] as String;
+      imagesByRecord.putIfAbsent(rid, () => []);
 
-      // Fetch Associated Images for N+1 optimization
-      final String placeholders = List.filled(recordIds.length, '?').join(',');
-      final List<Map<String, dynamic>> imageMaps = await database.query(
-        'images',
-        where: 'record_id IN ($placeholders)',
-        whereArgs: recordIds,
-        orderBy: 'page_index ASC',
-      );
-
-      // Group images by record_id
-      final Map<String, List<MedicalImage>> imagesByRecord = {};
-      for (var imgRow in imageMaps) {
-        final rid = imgRow['record_id'] as String;
-        imagesByRecord.putIfAbsent(rid, () => []);
-
-        final List<String> tagIds = [];
-        if (imgRow['tags'] != null) {
-          try {
-            final decoded = jsonDecode(imgRow['tags'] as String);
-            if (decoded is List) {
-              tagIds.addAll(decoded.map((e) => e.toString()));
-            }
-          } catch (_) {}
-        }
-
-        final image = MedicalImage(
-          id: imgRow['id'] as String,
-          recordId: rid,
-          filePath: imgRow['file_path'] as String,
-          thumbnailPath: imgRow['thumbnail_path'] as String,
-          encryptionKey: imgRow['encryption_key'] as String,
-          thumbnailEncryptionKey:
-              imgRow['thumbnail_encryption_key'] as String? ?? '',
-          width: imgRow['width'] as int?,
-          height: imgRow['height'] as int?,
-          mimeType: imgRow['mime_type'] as String? ?? 'image/webp',
-          fileSize: imgRow['file_size'] as int? ?? 0,
-          displayOrder: imgRow['page_index'] as int? ?? 0,
-          tagIds: tagIds,
-          createdAt: DateTime.fromMillisecondsSinceEpoch(
-            imgRow['created_at_ms'] as int,
-          ),
-          ocrText: imgRow['ocr_text'] as String?,
-          ocrRawJson: imgRow['ocr_raw_json'] as String?,
-          ocrConfidence:
-              (imgRow['ocr_confidence'] ?? imgRow['confidence']) as double?,
-          hospitalName: imgRow['hospital_name'] as String?,
-          visitDate: imgRow['visit_date_ms'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(
-                  imgRow['visit_date_ms'] as int,
-                )
-              : null,
-        );
-        imagesByRecord[rid]!.add(image);
-      }
-
-      return maps.map((m) {
-        final rid = m['id'] as String;
-        final createdAtMs = m['created_at_ms'] as int;
-        final visitDateMs = m['visit_date_ms'] as int?;
-
-        final record = MedicalRecord(
-          id: rid,
-          personId: m['person_id'] as String,
-          hospitalName: m['hospital_name'] as String?,
-          notes: m['notes'] as String?,
-          notedAt: visitDateMs != null
-              ? DateTime.fromMillisecondsSinceEpoch(visitDateMs)
-              : DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-          visitEndDate: m['visit_end_date_ms'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(
-                  m['visit_end_date_ms'] as int,
-                )
-              : null,
-          createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-          updatedAt: DateTime.fromMillisecondsSinceEpoch(
-            m['updated_at_ms'] as int,
-          ),
-          status: RecordStatus.values.firstWhere(
-            (e) => e.name == m['status'],
-            orElse: () => RecordStatus.archived,
-          ),
-          tagsCache: m['tags_cache'] as String?,
-          images: imagesByRecord[rid] ?? [],
-        );
-
-        return SearchResult(
-          record: record,
-          snippet: _desegmentCJK(m['snippet'] as String? ?? ''),
-        );
-      }).toList();
-    } catch (e) {
-      return [];
+      final image = _mapToMedicalImage(imgRow);
+      imagesByRecord[rid]!.add(image);
     }
+    return imagesByRecord;
+  }
+
+  MedicalImage _mapToMedicalImage(Map<String, dynamic> imgRow) {
+    final List<String> tagIds = [];
+    if (imgRow['tags'] != null) {
+      try {
+        final decoded = jsonDecode(imgRow['tags'] as String);
+        if (decoded is List) {
+          tagIds.addAll(decoded.map((e) => e.toString()));
+        }
+      } catch (_) {}
+    }
+
+    return MedicalImage(
+      id: imgRow['id'] as String,
+      recordId: imgRow['record_id'] as String,
+      filePath: imgRow['file_path'] as String,
+      thumbnailPath: imgRow['thumbnail_path'] as String,
+      encryptionKey: imgRow['encryption_key'] as String,
+      thumbnailEncryptionKey:
+          imgRow['thumbnail_encryption_key'] as String? ?? '',
+      width: imgRow['width'] as int?,
+      height: imgRow['height'] as int?,
+      mimeType: imgRow['mime_type'] as String? ?? 'image/webp',
+      fileSize: imgRow['file_size'] as int? ?? 0,
+      displayOrder: imgRow['page_index'] as int? ?? 0,
+      tagIds: tagIds,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        imgRow['created_at_ms'] as int,
+      ),
+      ocrText: imgRow['ocr_text'] as String?,
+      ocrRawJson: imgRow['ocr_raw_json'] as String?,
+      ocrConfidence:
+          (imgRow['ocr_confidence'] ?? imgRow['confidence']) as double?,
+      hospitalName: imgRow['hospital_name'] as String?,
+      visitDate: imgRow['visit_date_ms'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(imgRow['visit_date_ms'] as int)
+          : null,
+    );
+  }
+
+  SearchResult _mapToSearchResult(
+    Map<String, dynamic> m,
+    Map<String, List<MedicalImage>> imagesByRecord,
+  ) {
+    final rid = m['id'] as String;
+    final createdAtMs = m['created_at_ms'] as int;
+    final visitDateMs = m['visit_date_ms'] as int?;
+
+    final record = MedicalRecord(
+      id: rid,
+      personId: m['person_id'] as String,
+      hospitalName: m['hospital_name'] as String?,
+      notes: m['notes'] as String?,
+      notedAt: visitDateMs != null
+          ? DateTime.fromMillisecondsSinceEpoch(visitDateMs)
+          : DateTime.fromMillisecondsSinceEpoch(createdAtMs),
+      visitEndDate: m['visit_end_date_ms'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(m['visit_end_date_ms'] as int)
+          : null,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updated_at_ms'] as int),
+      status: RecordStatus.values.firstWhere(
+        (e) => e.name == m['status'],
+        orElse: () => RecordStatus.archived,
+      ),
+      tagsCache: m['tags_cache'] as String?,
+      images: imagesByRecord[rid] ?? [],
+    );
+
+    return SearchResult(
+      record: record,
+      snippet: _desegmentCJK(m['snippet'] as String? ?? ''),
+    );
   }
 
   /// 移除为了 FTS5 分词而人工插入的 CJK 空格

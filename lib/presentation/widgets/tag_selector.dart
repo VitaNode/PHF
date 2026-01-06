@@ -75,208 +75,221 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
   }
 
   Widget _buildContent(BuildContext context, List<Tag> allTags) {
-    // 1. Filter tags based on search query
-    final filteredTags = allTags.where((tag) {
-      if (_searchQuery.isEmpty) return true;
-      return tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
-
-    // 2. Check for exact match to decide if "Create" option should be shown
-    final bool hasExactMatch = allTags.any(
-      (t) => t.name.toLowerCase() == _searchQuery.toLowerCase().trim(),
-    );
+    final filteredTags = _filterTags(allTags);
+    final bool hasExactMatch = _checkExactMatch(allTags);
     final bool showCreateOption =
         _searchQuery.isNotEmpty && !hasExactMatch && widget.onCreate != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Bar
-        TextField(
-          controller: _searchCtrl,
-          decoration: InputDecoration(
-            hintText: '搜索或创建标签...',
-            prefixIcon: const Icon(Icons.search, size: 20),
-            suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, size: 18),
-                    onPressed: () {
-                      _searchCtrl.clear();
-                      setState(() => _searchQuery = '');
-                    },
-                  )
-                : null,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.bgGrey),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppTheme.bgGrey),
-            ),
-          ),
-          onChanged: (val) {
-            setState(() => _searchQuery = val);
-          },
-        ),
+        _buildSearchField(),
         const SizedBox(height: 12),
-
-        // Create Option
-        if (showCreateOption)
-          InkWell(
-            onTap: () async {
-              final newName = _searchQuery.trim();
-              if (newName.isNotEmpty) {
-                try {
-                  await widget.onCreate?.call(newName);
-                  _searchCtrl.clear();
-                  setState(() => _searchQuery = '');
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('创建标签失败: $e'),
-                        backgroundColor: AppTheme.errorRed,
-                      ),
-                    );
-                  }
-                }
-              }
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryTeal.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppTheme.primaryTeal.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.add_circle_outline,
-                    color: AppTheme.primaryTeal,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '创建新标签 "$_searchQuery"',
-                    style: const TextStyle(
-                      color: AppTheme.primaryTeal,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        // Tags Library (Filtered)
+        if (showCreateOption) _buildCreateOption(context),
         if (filteredTags.isNotEmpty) ...[
-          Wrap(
-            spacing: 8,
-            runSpacing: 10,
-            children: filteredTags.map((tag) {
-              final isSelected = widget.selectedTagIds.contains(tag.id);
-              return FilterChip(
-                label: Text(tag.name),
-                selected: isSelected,
-                onSelected: (_) => widget.onToggle(tag.id),
-                showCheckmark: true,
-                selectedColor: AppTheme.primaryTeal,
-                checkmarkColor: Colors.white,
-                labelStyle: TextStyle(
-                  fontSize: 13,
-                  color: isSelected ? Colors.white : AppTheme.textPrimary,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
-                    color: isSelected ? AppTheme.primaryTeal : AppTheme.bgGrey,
-                    width: 1,
-                  ),
-                ),
-                backgroundColor: AppTheme.bgGrey,
-                elevation: isSelected ? 2 : 0,
-                pressElevation: 4,
-              );
-            }).toList(),
-          ),
+          _buildTagsWrap(filteredTags),
           const SizedBox(height: 24),
         ],
-
-        // Selected Tags Reorder List
         if (widget.selectedTagIds.isNotEmpty) ...[
           const Divider(),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.swap_vert, size: 16, color: AppTheme.textHint),
-              const SizedBox(width: 4),
-              const Text(
-                '已选标签 (拖拽排序)',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textHint,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${widget.selectedTagIds.length} 个',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.primaryTeal,
-                ),
-              ),
-            ],
-          ),
+          _buildReorderHeader(),
           const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.bgGrey.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.bgGrey),
-            ),
-            child: ReorderableListView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              onReorder: widget.onReorder,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              proxyDecorator: (child, index, animation) {
-                return Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: child,
-                  ),
-                );
-              },
-              children: [
-                for (int i = 0; i < widget.selectedTagIds.length; i++)
-                  _buildReorderItem(allTags, widget.selectedTagIds[i], i),
-              ],
-            ),
-          ),
+          _buildReorderList(allTags),
         ],
       ],
+    );
+  }
+
+  List<Tag> _filterTags(List<Tag> allTags) {
+    return allTags.where((tag) {
+      if (_searchQuery.isEmpty) return true;
+      return tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+  }
+
+  bool _checkExactMatch(List<Tag> allTags) {
+    return allTags.any(
+      (t) => t.name.toLowerCase() == _searchQuery.toLowerCase().trim(),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchCtrl,
+      decoration: InputDecoration(
+        hintText: '搜索或创建标签...',
+        prefixIcon: const Icon(Icons.search, size: 20),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: 18),
+                onPressed: () {
+                  _searchCtrl.clear();
+                  setState(() => _searchQuery = '');
+                },
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.bgGrey),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppTheme.bgGrey),
+        ),
+      ),
+      onChanged: (val) {
+        setState(() => _searchQuery = val);
+      },
+    );
+  }
+
+  Widget _buildCreateOption(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final newName = _searchQuery.trim();
+        if (newName.isEmpty) return;
+        try {
+          await widget.onCreate?.call(newName);
+          _searchCtrl.clear();
+          setState(() => _searchQuery = '');
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('创建标签失败: $e'),
+                backgroundColor: AppTheme.errorRed,
+              ),
+            );
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppTheme.primaryTeal.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.add_circle_outline,
+              color: AppTheme.primaryTeal,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '创建新标签 "$_searchQuery"',
+              style: const TextStyle(
+                color: AppTheme.primaryTeal,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTagsWrap(List<Tag> filteredTags) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 10,
+      children: filteredTags.map((tag) {
+        final isSelected = widget.selectedTagIds.contains(tag.id);
+        return FilterChip(
+          label: Text(tag.name),
+          selected: isSelected,
+          onSelected: (_) => widget.onToggle(tag.id),
+          showCheckmark: true,
+          selectedColor: AppTheme.primaryTeal,
+          checkmarkColor: Colors.white,
+          labelStyle: TextStyle(
+            fontSize: 13,
+            color: isSelected ? Colors.white : AppTheme.textPrimary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: isSelected ? AppTheme.primaryTeal : AppTheme.bgGrey,
+              width: 1,
+            ),
+          ),
+          backgroundColor: AppTheme.bgGrey,
+          elevation: isSelected ? 2 : 0,
+          pressElevation: 4,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildReorderHeader() {
+    return Row(
+      children: [
+        const Icon(Icons.swap_vert, size: 16, color: AppTheme.textHint),
+        const SizedBox(width: 4),
+        const Text(
+          '已选标签 (拖拽排序)',
+          style: TextStyle(
+            fontSize: 12,
+            color: AppTheme.textHint,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          '${widget.selectedTagIds.length} 个',
+          style: const TextStyle(fontSize: 11, color: AppTheme.primaryTeal),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReorderList(List<Tag> allTags) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.bgGrey.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.bgGrey),
+      ),
+      child: ReorderableListView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        onReorder: widget.onReorder,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        proxyDecorator: (child, index, animation) {
+          return Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: child,
+            ),
+          );
+        },
+        children: [
+          for (int i = 0; i < widget.selectedTagIds.length; i++)
+            _buildReorderItem(allTags, widget.selectedTagIds[i], i),
+        ],
+      ),
     );
   }
 
