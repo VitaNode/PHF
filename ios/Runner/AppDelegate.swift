@@ -68,12 +68,25 @@ import workmanager_apple
               fullText += topCandidate.string + "\n"
 
               let boundingBox = observation.boundingBox
+              
+              // V2 structure: each observation is treated as a block containing one line
+              let line: [String: Any] = [
+                  "text": topCandidate.string,
+                  "x": boundingBox.origin.x,
+                  "y": 1 - boundingBox.origin.y - boundingBox.height,
+                  "w": boundingBox.width,
+                  "h": boundingBox.height,
+                  "confidence": topCandidate.confidence,
+                  "elements": []
+              ]
+
               let block: [String: Any] = [
                   "text": topCandidate.string,
-                  "left": boundingBox.origin.x,
-                  "top": 1 - boundingBox.origin.y - boundingBox.height,
-                  "width": boundingBox.width,
-                  "height": boundingBox.height
+                  "x": boundingBox.origin.x,
+                  "y": 1 - boundingBox.origin.y - boundingBox.height,
+                  "w": boundingBox.width,
+                  "h": boundingBox.height,
+                  "lines": [line]
               ]
               blocks.append(block)
           }
@@ -81,7 +94,11 @@ import workmanager_apple
           let responseData: [String: Any] = [
               "text": fullText,
               "blocks": blocks,
-              "confidence": 1.0
+              "confidence": 1.0,
+              "source": "ios_vision",
+              "language": "auto",
+              "version": 2,
+              "timestamp": Int64(Date().timeIntervalSince1970 * 1000)
           ]
 
           if let jsonData = try? JSONSerialization.data(withJSONObject: responseData, options: []),

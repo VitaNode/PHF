@@ -8,8 +8,10 @@ import 'dart:async' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:phf/data/models/image.dart' as _i6;
 import 'package:phf/data/models/record.dart' as _i4;
+import 'package:phf/data/models/tag.dart' as _i8;
 import 'package:phf/data/repositories/interfaces/image_repository.dart' as _i5;
 import 'package:phf/data/repositories/interfaces/record_repository.dart' as _i2;
+import 'package:phf/data/repositories/interfaces/tag_repository.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -248,4 +250,67 @@ class MockIImageRepository extends _i1.Mock implements _i5.IImageRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
+}
+
+/// A class which mocks [ITagRepository].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockITagRepository extends _i1.Mock implements _i7.ITagRepository {
+  @override
+  _i3.Future<List<_i8.Tag>> getAllTags({String? personId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#getAllTags, [], {#personId: personId}),
+            returnValue: _i3.Future<List<_i8.Tag>>.value(<_i8.Tag>[]),
+            returnValueForMissingStub: _i3.Future<List<_i8.Tag>>.value(
+              <_i8.Tag>[],
+            ),
+          )
+          as _i3.Future<List<_i8.Tag>>);
+
+  @override
+  _i3.Future<void> createTag(_i8.Tag? tag) =>
+      (super.noSuchMethod(
+            Invocation.method(#createTag, [tag]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> updateTag(_i8.Tag? tag) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateTag, [tag]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> deleteTag(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteTag, [id]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> updateOrder(List<_i8.Tag>? tags) =>
+      (super.noSuchMethod(
+            Invocation.method(#updateOrder, [tags]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<List<_i8.Tag>> suggestTags(String? text, {String? personId}) =>
+      (super.noSuchMethod(
+            Invocation.method(#suggestTags, [text], {#personId: personId}),
+            returnValue: _i3.Future<List<_i8.Tag>>.value(<_i8.Tag>[]),
+            returnValueForMissingStub: _i3.Future<List<_i8.Tag>>.value(
+              <_i8.Tag>[],
+            ),
+          )
+          as _i3.Future<List<_i8.Tag>>);
 }

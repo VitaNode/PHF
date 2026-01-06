@@ -103,6 +103,12 @@ Phase 3 (Governance & Store Readiness) has started.
     - Set up native splash screen logic with brand colors (#008080).
     - Created placeholder source assets and asset generation guide.
     - **Review & Reinforcement (2026-01-05)**: Fixed `pubspec.yaml` font path configurations to eliminate test warnings. Executed and verified full asset generation pipeline for Android and iOS.
+- [x] **T3.8.1**: OCR - Schema V2 (Issue #81).
+    - Defined multi-level `OCRResult` structure (Block -> Line -> Element).
+    - Implemented coordinate normalization (0.0 - 1.0) across Android and iOS.
+    - Added V1/V2 compatibility logic in `OCRHighlightPainter`.
+    - Integrated metadata (source, language, timestamp) into models.
+    - Updated native code in `AppDelegate.swift` and `MainActivity.kt` to support V2.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.
