@@ -1,7 +1,12 @@
 import Flutter
 import UIKit
 import Vision
+
+#if canImport(workmanager_apple)
 import workmanager_apple
+#elseif canImport(workmanager)
+import workmanager
+#endif
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
