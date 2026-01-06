@@ -5,6 +5,8 @@
 
 ## Approved Features (Highlights)
 - [x] **T20.4**: 全局搜索 (FTS5 + Highlight).
+    - **Fix (2026-01-06)**: Enabled Chinese search support in FTS5 by implementing manual CJK character segmentation during indexing and query parsing (Issue #95).
+    - **Fix (2026-01-06)**: Upgraded FTS5 index to version 9 with `unicode61` tokenizer fallback.
 - [x] **T21.2**: 级联删除逻辑 (当图片全删时自动清理 Record 及其 OCR 任务).
 - [x] **T21.3**: OCR 质量补强与“重新识别”功能.
 - [x] **T21.4**: 详情页与校对页编辑闭环 (确保同步更新 Timeline).

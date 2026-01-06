@@ -24,6 +24,8 @@
 /// - `ocr_queue`: OCR 任务队列
 ///
 /// ## Fix Record
+/// - **2026-01-06**:
+///   1. 执行 v9 版本迁移：为 FTS5 搜索索引启用 `unicode61` 分词器，以支持中文搜索。
 /// - **2026-01-04**:
 ///   1. 执行 v7 版本迁移：扩展 `persons` 表支持排序与颜色，优化 FTS5 搜索索引。
 /// - **2025-12-31**:
@@ -41,7 +43,7 @@ import 'seeds/database_seeder.dart';
 
 class SQLCipherDatabaseService {
   static const String _dbName = 'phf_encrypted.db';
-  static const int _dbVersion = 8;
+  static const int _dbVersion = 9;
 
   final MasterKeyManager keyManager;
   final PathProviderService pathService;
@@ -249,6 +251,7 @@ class SQLCipherDatabaseService {
 
     // 9. FTS5 Search Index (OCR 全文检索)
     // UNINDEXED: record_id 不参与分词，但可以被取回
+    // tokenize = "unicode61": 支持多语言（包括中文）分词
     batch.execute('''
       CREATE VIRTUAL TABLE IF NOT EXISTS ocr_search_index USING fts5(
         record_id UNINDEXED, 
@@ -257,7 +260,8 @@ class SQLCipherDatabaseService {
         tags,
         ocr_text,
         notes,
-        content
+        content,
+        tokenize = "unicode61"
       )
     ''');
 
@@ -466,6 +470,23 @@ class SQLCipherDatabaseService {
           ocr_text,
           notes,
           content
+        )
+      ''');
+    }
+
+    if (oldVersion < 9) {
+      // Upgrade to v9: Enable unicode61 tokenizer for Chinese support
+      batch.execute('DROP TABLE IF EXISTS ocr_search_index');
+      batch.execute('''
+        CREATE VIRTUAL TABLE ocr_search_index USING fts5(
+          record_id UNINDEXED, 
+          person_id UNINDEXED,
+          hospital_name,
+          tags,
+          ocr_text,
+          notes,
+          content,
+          tokenize = "unicode61"
         )
       ''');
     }

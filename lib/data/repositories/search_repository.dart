@@ -30,7 +30,8 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return [];
 
-    final sanitizedQuery = _sanitizeFts5Query(trimmedQuery);
+    final segmentedQuery = _segmentCJK(trimmedQuery);
+    final sanitizedQuery = _sanitizeFts5Query(segmentedQuery);
     final database = await dbService.database;
 
     try {
@@ -146,7 +147,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
         return SearchResult(
           record: record,
-          snippet: m['snippet'] as String? ?? '',
+          snippet: _desegmentCJK(m['snippet'] as String? ?? ''),
         );
       }).toList();
     } catch (e) {
@@ -154,11 +155,28 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     }
   }
 
+  /// 移除为了 FTS5 分词而人工插入的 CJK 空格
+  String _desegmentCJK(String text) {
+    return text
+        .replaceAllMapped(RegExp(r'([\u4e00-\u9fa5])\s+'), (m) => m.group(1)!)
+        .replaceAllMapped(RegExp(r'\s+([\u4e00-\u9fa5])'), (m) => m.group(1)!)
+        .trim();
+  }
+
   /// 针对 FTS5 查询对输入进行脱敏
   String _sanitizeFts5Query(String query) {
-    final tokens = query.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
-    if (tokens.isEmpty) return '';
-    return tokens.map((t) => '"${t.replaceAll('"', '""')}"').join(' ');
+    // 简单替换双引号以防止语法注入
+    final escaped = query.replaceAll('"', '""');
+    if (escaped.isEmpty) return '';
+    // 包装在双引号中以支持分词后的短语匹配
+    return '"$escaped"';
+  }
+
+  /// 为 CJK 字符插入空格以支持 FTS5 分词
+  String _segmentCJK(String text) {
+    // 匹配 CJK 字符区间
+    final regExp = RegExp(r'([\u4e00-\u9fa5])');
+    return text.replaceAllMapped(regExp, (match) => ' ${match.group(0)} ');
   }
 
   @override
@@ -258,7 +276,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     // 4. Construct Content (Aggregate for fallback)
     final content = [hospitalName, tagNames, notes, ocrText].join('\n');
 
-    // 5. Update FTS Index
+    // 5. Update FTS Index with CJK segmentation
     await database.transaction((txn) async {
       await txn.delete(
         'ocr_search_index',
@@ -268,11 +286,11 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
         'person_id': personId,
-        'hospital_name': hospitalName,
-        'tags': tagNames,
-        'ocr_text': ocrText,
-        'notes': notes,
-        'content': content,
+        'hospital_name': _segmentCJK(hospitalName),
+        'tags': _segmentCJK(tagNames),
+        'ocr_text': _segmentCJK(ocrText),
+        'notes': _segmentCJK(notes),
+        'content': _segmentCJK(content),
       });
     });
   }
