@@ -812,21 +812,22 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
           ),
           const Divider(),
           Expanded(
-            child: SingleChildScrollView(
-              controller: widget.scrollController,
-              child: widget.result != null
-                  ? EnhancedOcrView(
-                      result: widget.result!,
-                      isEnhancedMode: _isEnhanced,
-                    )
-                  : SelectableText(
+            child: widget.result != null
+                ? EnhancedOcrView(
+                    result: widget.result!,
+                    isEnhancedMode: _isEnhanced,
+                    scrollController: widget.scrollController,
+                  )
+                : SingleChildScrollView(
+                    controller: widget.scrollController,
+                    child: SelectableText(
                       widget.text,
                       style: AppTheme.monoStyle.copyWith(
                         fontSize: 16,
                         height: 1.5,
                       ),
                     ),
-            ),
+                  ),
           ),
           const SizedBox(height: 16),
           SizedBox(

@@ -126,8 +126,10 @@ class _CollapsibleOcrCardState extends State<CollapsibleOcrCard> {
                   ? EnhancedOcrView(
                       result: widget.ocrResult!,
                       isEnhancedMode: _isEnhanced,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                     )
-                  : Text(
+                  : SelectableText(
                       widget.text,
                       style: AppTheme.monoStyle.copyWith(
                         fontSize: 14,
