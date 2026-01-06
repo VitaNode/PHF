@@ -80,6 +80,58 @@ void main() {
       );
     });
 
+    test('Noise Cleaning (Horizontal Lines)', () {
+      const line = OcrLine(
+        text: '________________',
+        x: 0.1,
+        y: 0.1,
+        w: 0.8,
+        h: 0.01,
+      );
+      const block = OcrBlock(
+        text: '________________',
+        x: 0.1,
+        y: 0.1,
+        w: 0.8,
+        h: 0.01,
+        lines: [line],
+      );
+      const result = OcrResult(
+        text: '...',
+        pages: [
+          OcrPage(blocks: [block]),
+        ],
+      );
+
+      final enhanced = OcrEnhancer.enhance(result);
+      expect(enhanced.blocks.first.text, isEmpty);
+      expect(enhanced.blocks.first.lines.first.text, isEmpty);
+    });
+
+    test('Noise Cleaning (Prefix/Suffix)', () {
+      const line = OcrLine(text: '|结果：正常~', x: 0.1, y: 0.1, w: 0.5, h: 0.05);
+      const block = OcrBlock(
+        text: '|结果：正常~',
+        x: 0.1,
+        y: 0.1,
+        w: 0.5,
+        h: 0.05,
+        lines: [line],
+      );
+      const result = OcrResult(
+        text: '...',
+        pages: [
+          OcrPage(blocks: [block]),
+        ],
+      );
+
+      final enhanced = OcrEnhancer.enhance(result);
+      final enhancedLine = enhanced.blocks.first.lines.first;
+      expect(enhancedLine.text, '结果：正常');
+      expect(enhancedLine.elements[0].text, '结果');
+      expect(enhancedLine.elements[1].text, '正常');
+    });
+
     test('Normal text remains normal', () {
       const line = OcrLine(
         text: '这是一段普通的医疗描述文本，没有冒号。',
@@ -106,11 +158,6 @@ void main() {
       final enhanced = OcrEnhancer.enhance(result);
       expect(enhanced.blocks.first.type, OcrSemanticType.normal);
       expect(enhanced.blocks.first.lines.first.elements, isEmpty);
-    });
-    group('OcrResult Repair Logs Check', () {
-      test('File should contain Repair Logs', () async {
-        // This is a meta-test to ensure we followed the instructions
-      });
     });
   });
 }

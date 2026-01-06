@@ -116,6 +116,13 @@ Phase 3 (Governance & Store Readiness) has started.
     - Registered `ocrServiceProvider` in `core_providers.dart` with platform-specific instantiation.
     - Verified cross-platform consistency of Schema V2 (Pages) outputs.
     - Refactored `OcrEnhancer` to support multi-page structures.
+- [x] **T3.8.3**: OCR - Heuristic Enhancement Layer (Issue #83).
+    - Implemented `OcrEnhancer` with multi-page support.
+    - Added **Key-Value Splitting** for both Chinese and English colons.
+    - Implemented **Section Title Identification** based on geometric and keyword features.
+    - Added **Fragment Cleaning** to remove OCR noise (e.g., table lines, stray characters).
+    - Verified semantic tagging (`label`, `value`, `sectionTitle`) via unit tests.
+    - Integrated with `OCRProcessor` for automatic enhancement after recognition.
 - [x] **T3.8.3**: OCR - Heuristic Semantic Enhancement (Issue #83).
     - Implemented `OCREnhancer` for post-recognition semantic augmentation.
     - Added Key-Value splitting logic for lines containing colons (label/value).
