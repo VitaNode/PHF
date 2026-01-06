@@ -114,6 +114,12 @@ Phase 3 (Governance & Store Readiness) has started.
     - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision).
     - Implemented platform-specific language mapping (e.g., `zh-Hans` for iOS vs `zh` for Android).
     - Verified cross-platform consistency of `OCRResult` outputs.
+- [x] **T3.8.3**: OCR - Heuristic Semantic Enhancement (Issue #83).
+    - Implemented `OCREnhancer` for post-recognition semantic augmentation.
+    - Added Key-Value splitting logic for lines containing colons (label/value).
+    - Implemented section title identification using geometric and keyword-based heuristics.
+    - Updated `OCRResult` model to support `OCRSemanticType` (label, value, section_title).
+    - Integrated enhancement layer into `OCRProcessor` pipeline.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.

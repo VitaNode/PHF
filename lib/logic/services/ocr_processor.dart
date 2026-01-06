@@ -37,6 +37,7 @@ import '../../data/repositories/interfaces/search_repository.dart';
 import '../../core/security/file_security_helper.dart';
 import '../../core/services/path_provider_service.dart';
 import '../utils/smart_extractor.dart';
+import '../utils/ocr_enhancer.dart';
 import 'interfaces/ocr_service.dart';
 
 class OCRProcessor {
@@ -102,10 +103,13 @@ class OCRProcessor {
       );
 
       // 3. 执行 OCR 识别
-      final ocrResult = await _ocrService.recognizeText(
+      var ocrResult = await _ocrService.recognizeText(
         decryptedBytes,
         mimeType: image.mimeType,
       );
+
+      // 3.1 语义增强 (Heuristic Enhancement)
+      ocrResult = OCREnhancer.enhance(ocrResult);
 
       // 立即释放原始解密数据
       decryptedBytes = null;

@@ -14,6 +14,9 @@ _OCRTextElement _$OCRTextElementFromJson(Map<String, dynamic> json) =>
       w: (_readW(json, 'w') as num).toDouble(),
       h: (_readH(json, 'h') as num).toDouble(),
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
+      type:
+          $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
+          OCRSemanticType.normal,
     );
 
 Map<String, dynamic> _$OCRTextElementToJson(_OCRTextElement instance) =>
@@ -24,7 +27,15 @@ Map<String, dynamic> _$OCRTextElementToJson(_OCRTextElement instance) =>
       'w': instance.w,
       'h': instance.h,
       'confidence': instance.confidence,
+      'type': _$OCRSemanticTypeEnumMap[instance.type]!,
     };
+
+const _$OCRSemanticTypeEnumMap = {
+  OCRSemanticType.normal: 'normal',
+  OCRSemanticType.label: 'label',
+  OCRSemanticType.value: 'value',
+  OCRSemanticType.sectionTitle: 'section_title',
+};
 
 _OCRLine _$OCRLineFromJson(Map<String, dynamic> json) => _OCRLine(
   text: json['text'] as String,
@@ -38,6 +49,9 @@ _OCRLine _$OCRLineFromJson(Map<String, dynamic> json) => _OCRLine(
           .toList() ??
       const [],
   confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
+  type:
+      $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
+      OCRSemanticType.normal,
 );
 
 Map<String, dynamic> _$OCRLineToJson(_OCRLine instance) => <String, dynamic>{
@@ -48,6 +62,7 @@ Map<String, dynamic> _$OCRLineToJson(_OCRLine instance) => <String, dynamic>{
   'h': instance.h,
   'elements': instance.elements.map((e) => e.toJson()).toList(),
   'confidence': instance.confidence,
+  'type': _$OCRSemanticTypeEnumMap[instance.type]!,
 };
 
 _OCRBlock _$OCRBlockFromJson(Map<String, dynamic> json) => _OCRBlock(
@@ -61,6 +76,9 @@ _OCRBlock _$OCRBlockFromJson(Map<String, dynamic> json) => _OCRBlock(
           ?.map((e) => OCRLine.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  type:
+      $enumDecodeNullable(_$OCRSemanticTypeEnumMap, json['type']) ??
+      OCRSemanticType.normal,
 );
 
 Map<String, dynamic> _$OCRBlockToJson(_OCRBlock instance) => <String, dynamic>{
@@ -70,6 +88,7 @@ Map<String, dynamic> _$OCRBlockToJson(_OCRBlock instance) => <String, dynamic>{
   'w': instance.w,
   'h': instance.h,
   'lines': instance.lines.map((e) => e.toJson()).toList(),
+  'type': _$OCRSemanticTypeEnumMap[instance.type]!,
 };
 
 _OCRResult _$OCRResultFromJson(Map<String, dynamic> json) => _OCRResult(

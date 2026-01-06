@@ -22,6 +22,18 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'ocr_result.freezed.dart';
 part 'ocr_result.g.dart';
 
+/// 语义类型，用于增强 OCR 结果的语义表达
+enum OCRSemanticType {
+  @JsonValue('normal')
+  normal,
+  @JsonValue('label')
+  label,
+  @JsonValue('value')
+  value,
+  @JsonValue('section_title')
+  sectionTitle,
+}
+
 /// 坐标辅助读取函数，支持 Schema V1 (left, top, width, height) 和 V2 (x, y, w, h)
 double _readX(Map<dynamic, dynamic> json, String key) =>
     (json['x'] ?? json['left'] ?? 0.0) as double;
@@ -41,6 +53,7 @@ abstract class OCRTextElement with _$OCRTextElement {
     @JsonKey(readValue: _readW) required double w,
     @JsonKey(readValue: _readH) required double h,
     @Default(0.0) double confidence,
+    @Default(OCRSemanticType.normal) OCRSemanticType type,
   }) = _OCRTextElement;
 
   factory OCRTextElement.fromJson(Map<String, dynamic> json) =>
@@ -58,6 +71,7 @@ abstract class OCRLine with _$OCRLine {
     @JsonKey(readValue: _readH) required double h,
     @Default([]) List<OCRTextElement> elements,
     @Default(0.0) double confidence,
+    @Default(OCRSemanticType.normal) OCRSemanticType type,
   }) = _OCRLine;
 
   factory OCRLine.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +88,7 @@ abstract class OCRBlock with _$OCRBlock {
     @JsonKey(readValue: _readW) required double w,
     @JsonKey(readValue: _readH) required double h,
     @Default([]) List<OCRLine> lines,
+    @Default(OCRSemanticType.normal) OCRSemanticType type,
   }) = _OCRBlock;
 
   factory OCRBlock.fromJson(Map<String, dynamic> json) =>
