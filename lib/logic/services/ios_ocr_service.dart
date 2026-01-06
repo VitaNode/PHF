@@ -33,11 +33,12 @@ class IOSOCRService implements IOCRService {
   Future<OCRResult> recognizeText(
     Uint8List imageBytes, {
     String? mimeType,
+    String language = 'zh-Hans',
   }) async {
     File? tempFile;
     try {
       log(
-        'Starting iOS OCR for image size: ${imageBytes.length} bytes',
+        'Starting iOS OCR ($language) for image size: ${imageBytes.length} bytes',
         name: 'IOSOCRService',
       );
 
@@ -50,6 +51,7 @@ class IOSOCRService implements IOCRService {
       // 2. Call Native Method
       final dynamic result = await _channel.invokeMethod('recognizeText', {
         'imagePath': tempFile.path,
+        'language': language,
       });
       final String jsonResult = result as String;
 

@@ -23,7 +23,8 @@ import workmanager_apple
               result(FlutterError(code: "INVALID_ARGUMENT", message: "imagePath is missing", details: nil))
               return
           }
-          self.performOCR(imagePath: imagePath, result: result)
+          let language = args["language"] as? String ?? "zh-Hans"
+          self.performOCR(imagePath: imagePath, language: language, result: result)
       } else {
         result(FlutterMethodNotImplemented)
       }
@@ -39,7 +40,7 @@ import workmanager_apple
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  private func performOCR(imagePath: String, result: @escaping FlutterResult) {
+  private func performOCR(imagePath: String, language: String, result: @escaping FlutterResult) {
       let imageUrl = URL(fileURLWithPath: imagePath)
       guard let imageData = try? Data(contentsOf: imageUrl),
             let image = UIImage(data: imageData),
@@ -96,7 +97,7 @@ import workmanager_apple
               "blocks": blocks,
               "confidence": 1.0,
               "source": "ios_vision",
-              "language": "auto",
+              "language": language,
               "version": 2,
               "timestamp": Int64(Date().timeIntervalSince1970 * 1000)
           ]
@@ -109,7 +110,7 @@ import workmanager_apple
           }
       }
 
-      request.recognitionLanguages = ["zh-Hans", "en-US"]
+      request.recognitionLanguages = [language, "en-US"]
       request.usesLanguageCorrection = true
 
       DispatchQueue.global(qos: .userInitiated).async {

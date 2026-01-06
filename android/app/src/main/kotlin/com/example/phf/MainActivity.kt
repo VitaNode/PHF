@@ -9,6 +9,7 @@ import io.flutter.plugin.common.MethodChannel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -21,8 +22,9 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "recognizeText") {
                 val imagePath = call.argument<String>("imagePath")
+                val language = call.argument<String>("language") ?: "zh"
                 if (imagePath != null) {
-                    recognizeText(imagePath, result)
+                    recognizeText(imagePath, language, result)
                 } else {
                     result.error("INVALID_ARGUMENT", "Image path is null", null)
                 }
@@ -32,13 +34,19 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-    private fun recognizeText(imagePath: String, result: MethodChannel.Result) {
+    private fun recognizeText(imagePath: String, language: String, result: MethodChannel.Result) {
         try {
             val file = File(imagePath)
             val image = InputImage.fromFilePath(this, Uri.fromFile(file))
             val imageWidth = image.width.toDouble()
             val imageHeight = image.height.toDouble()
-            val recognizer = TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build())
+            
+            val options = if (language.startsWith("zh")) {
+                ChineseTextRecognizerOptions.Builder().build()
+            } else {
+                TextRecognizerOptions.Builder().build()
+            }
+            val recognizer = TextRecognition.getClient(options)
 
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
@@ -95,7 +103,7 @@ class MainActivity: FlutterActivity() {
                     jsonResult.put("blocks", blocksArray)
                     jsonResult.put("confidence", 1.0)
                     jsonResult.put("source", "google_mlkit")
-                    jsonResult.put("language", "zh")
+                    jsonResult.put("language", language)
                     jsonResult.put("version", 2)
                     jsonResult.put("timestamp", System.currentTimeMillis())
 

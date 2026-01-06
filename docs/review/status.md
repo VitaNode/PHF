@@ -109,6 +109,11 @@ Phase 3 (Governance & Store Readiness) has started.
     - Added V1/V2 compatibility logic in `OCRHighlightPainter`.
     - Integrated metadata (source, language, timestamp) into models.
     - Updated native code in `AppDelegate.swift` and `MainActivity.kt` to support V2.
+- [x] **T3.8.2**: OCR - Platform Adapter Refactoring (Issue #82).
+    - Refactored `IOCRService` to support explicit `language` parameters.
+    - Standardized native coordinate systems across Android (ML Kit) and iOS (Vision).
+    - Implemented platform-specific language mapping (e.g., `zh-Hans` for iOS vs `zh` for Android).
+    - Verified cross-platform consistency of `OCRResult` outputs.
 - [x] **T3.3.2 & T3.3.3**: Secure Backup Engine.
     - Implemented `BackupService` with AES-256-GCM encryption and ZIP streaming.
     - Integrated with `share_plus` for encrypted backup distribution.
