@@ -21,6 +21,7 @@ out/
 
 # Flutter/Dart/Pub
 .dart_tool/
+.flutter-plugins-dependencies
 .packages
 build/
 ios/Flutter/Generated.xcconfig

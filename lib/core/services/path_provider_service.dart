@@ -20,16 +20,15 @@ import 'package:path_provider/path_provider.dart';
 import '../../logic/utils/secure_wipe_helper.dart';
 
 class PathProviderService {
-  static final PathProviderService _instance = PathProviderService._internal();
-  factory PathProviderService() => _instance;
-  PathProviderService._internal();
-
   Directory? _appDocDir;
   Directory? _dbDir;
   Directory? _imagesDir;
   Directory? _tempDir;
-
   bool _isInitialized = false;
+
+  static final PathProviderService _instance = PathProviderService._internal();
+  factory PathProviderService() => _instance;
+  PathProviderService._internal();
 
   /// 初始化目录结构
   ///

@@ -70,60 +70,16 @@ void callbackDispatcher() {
 }
 
 class BackgroundWorkerService {
+  Talker? _talker;
+  bool _isProcessing = false;
+
   static final BackgroundWorkerService _instance =
       BackgroundWorkerService._internal();
   factory BackgroundWorkerService() => _instance;
   BackgroundWorkerService._internal();
 
-  Talker? _talker;
-  bool _isProcessing = false;
-
   void setTalker(Talker talker) {
     _talker = talker;
-  }
-
-  /// 内部依赖构建逻辑 (Isolate 安全)
-  Future<OCRProcessor> _buildProcessor({Talker? talker}) async {
-    final pathService = PathProviderService();
-
-    talker?.info('[BackgroundWorkerService] Initializing dependencies...');
-    // CRITICAL: Ensure path service is initialized
-    await pathService.initialize();
-    talker?.info('[BackgroundWorkerService] PathProvider initialized.');
-
-    final keyManager = MasterKeyManager();
-    final dbService = SQLCipherDatabaseService(
-      keyManager: keyManager,
-      pathService: pathService,
-    );
-
-    final cryptoService = CryptoService();
-    final fileSecurityHelper = FileSecurityHelper(cryptoService: cryptoService);
-
-    final ocrQueueRepo = OCRQueueRepository(dbService);
-    final imageRepo = ImageRepository(dbService);
-    final recordRepo = RecordRepository(dbService);
-    final searchRepo = SearchRepository(dbService);
-
-    IOCRService ocrService;
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      ocrService = AndroidOCRService(talker: talker);
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      ocrService = IOSOCRService(talker: talker);
-    } else {
-      throw UnsupportedError('Unsupported platform');
-    }
-
-    return OCRProcessor(
-      queueRepository: ocrQueueRepo,
-      imageRepository: imageRepo,
-      recordRepository: recordRepo,
-      searchRepository: searchRepo,
-      ocrService: ocrService,
-      securityHelper: fileSecurityHelper,
-      pathService: pathService,
-      talker: talker,
-    );
   }
 
   /// 初始化 WorkManager
@@ -196,5 +152,49 @@ class BackgroundWorkerService {
         ),
       );
     }
+  }
+
+  /// 内部依赖构建逻辑 (Isolate 安全)
+  Future<OCRProcessor> _buildProcessor({Talker? talker}) async {
+    final pathService = PathProviderService();
+
+    talker?.info('[BackgroundWorkerService] Initializing dependencies...');
+    // CRITICAL: Ensure path service is initialized
+    await pathService.initialize();
+    talker?.info('[BackgroundWorkerService] PathProvider initialized.');
+
+    final keyManager = MasterKeyManager();
+    final dbService = SQLCipherDatabaseService(
+      keyManager: keyManager,
+      pathService: pathService,
+    );
+
+    final cryptoService = CryptoService();
+    final fileSecurityHelper = FileSecurityHelper(cryptoService: cryptoService);
+
+    final ocrQueueRepo = OCRQueueRepository(dbService);
+    final imageRepo = ImageRepository(dbService);
+    final recordRepo = RecordRepository(dbService);
+    final searchRepo = SearchRepository(dbService);
+
+    IOCRService ocrService;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      ocrService = AndroidOCRService(talker: talker);
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      ocrService = IOSOCRService(talker: talker);
+    } else {
+      throw UnsupportedError('Unsupported platform');
+    }
+
+    return OCRProcessor(
+      queueRepository: ocrQueueRepo,
+      imageRepository: imageRepo,
+      recordRepository: recordRepo,
+      searchRepository: searchRepo,
+      ocrService: ocrService,
+      securityHelper: fileSecurityHelper,
+      pathService: pathService,
+      talker: talker,
+    );
   }
 }

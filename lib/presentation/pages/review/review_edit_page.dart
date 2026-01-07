@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/record.dart';
+import '../../../data/models/image.dart';
 import '../../../data/models/ocr_result.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/review_list_provider.dart';
@@ -89,260 +90,264 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final images = widget.record.images;
-    if (images.isEmpty) return const SizedBox(); // Should not happen
-
-    final currentImage = images[_currentImageIndex];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('校对信息', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        actions: [
-          TextButton(
-            onPressed: _approve,
-            child: const Text(
-              '确认归档',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text('校对信息', style: TextStyle(color: Colors.black)),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      iconTheme: const IconThemeData(color: Colors.black),
+      actions: [
+        TextButton(
+          onPressed: _approve,
+          child: const Text(
+            '确认归档',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Top: Image Viewer with OCR Highlights
-          Expanded(
-            flex: 3,
-            child: Container(
-              color: Colors.black87,
-              child: Stack(
-                children: [
-                  PageView.builder(
-                    controller: _pageController,
-                    itemCount: images.length,
-                    onPageChanged: _onImageChanged,
-                    itemBuilder: (context, index) {
-                      final img = images[index];
-                      OcrResult? currentOcr;
-                      if (img.ocrRawJson != null) {
-                        try {
-                          currentOcr = OcrResult.fromJson(
-                            jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageViewer(List<MedicalImage> images) {
+    return Expanded(
+      flex: 3,
+      child: Container(
+        color: Colors.black87,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: images.length,
+              onPageChanged: _onImageChanged,
+              itemBuilder: (context, index) {
+                final img = images[index];
+                OcrResult? currentOcr;
+                if (img.ocrRawJson != null) {
+                  try {
+                    currentOcr = OcrResult.fromJson(
+                      jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+                    );
+                  } catch (_) {}
+                }
+
+                return Center(
+                  child: SecureImage(
+                    imagePath: img.filePath,
+                    encryptionKey: img.encryptionKey,
+                    fit: BoxFit.contain,
+                    builder:
+                        (
+                          BuildContext context,
+                          ImageProvider<Object> imageProvider,
+                        ) {
+                          return OCRHighlightView(
+                            imageProvider: imageProvider,
+                            ocrResult: currentOcr,
+                            actualImageSize:
+                                (img.width != null && img.height != null)
+                                ? Size(
+                                    img.width!.toDouble(),
+                                    img.height!.toDouble(),
+                                  )
+                                : null,
                           );
-                        } catch (_) {}
-                      }
-
-                      return Center(
-                        child: SecureImage(
-                          imagePath: img.filePath,
-                          encryptionKey: img.encryptionKey,
-                          fit: BoxFit.contain,
-                          builder:
-                              (
-                                BuildContext context,
-                                ImageProvider<Object> imageProvider,
-                              ) {
-                                return OCRHighlightView(
-                                  imageProvider: imageProvider,
-                                  ocrResult: currentOcr,
-                                  actualImageSize:
-                                      (img.width != null && img.height != null)
-                                      ? Size(
-                                          img.width!.toDouble(),
-                                          img.height!.toDouble(),
-                                        )
-                                      : null,
-                                );
-                              },
-                        ),
-                      );
-                    },
+                        },
                   ),
-                  // Navigation Arrows
-                  if (images.length > 1) ...[
-                    if (_currentImageIndex > 0)
-                      Positioned(
-                        left: 12,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.chevron_left,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                              onPressed: () => _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_currentImageIndex < images.length - 1)
-                      Positioned(
-                        right: 12,
-                        top: 0,
-                        bottom: 0,
-                        child: Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.chevron_right,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                              onPressed: () => _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                  // Page Indicator
-                  Positioned(
-                    bottom: 16,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Text(
-                          '图片 ${_currentImageIndex + 1} / ${images.length} (请核对每页信息)',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-          ),
-
-          // Bottom: Edit Form
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              color: Colors.white,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '基本信息 (可点击修改)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+            // Navigation Arrows
+            if (images.length > 1) ...[
+              if (_currentImageIndex > 0)
+                Positioned(
+                  left: 12,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _hospitalController,
-                      decoration: const InputDecoration(
-                        labelText: '医院/机构名称',
-                        prefixIcon: Icon(Icons.local_hospital_outlined),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _visitDate ?? DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) setState(() => _visitDate = date);
-                      },
-                      child: AbsorbPointer(
-                        child: TextField(
-                          controller: TextEditingController(
-                            text: _visitDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
-                                : '',
-                          ),
-                          decoration: const InputDecoration(
-                            labelText: '就诊日期',
-                            prefixIcon: Icon(Icons.calendar_today),
-                            border: OutlineInputBorder(),
-                          ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.chevron_left,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () => _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    if (currentImage.ocrConfidence != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryTeal.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppTheme.primaryTeal.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.auto_awesome,
-                              size: 16,
-                              color: AppTheme.primaryTeal,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'OCR 置信度: ${(currentImage.ocrConfidence! * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(
-                                color: AppTheme.primaryTeal,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                  ),
+                ),
+              if (_currentImageIndex < images.length - 1)
+                Positioned(
+                  right: 12,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
-                  ],
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () => _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+            // Page Indicator
+            Positioned(
+              bottom: 16,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    '图片 ${_currentImageIndex + 1} / ${images.length} (请核对每页信息)',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditForm(MedicalImage currentImage) {
+    return Expanded(
+      flex: 2,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        color: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '基本信息 (可点击修改)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _hospitalController,
+                decoration: const InputDecoration(
+                  labelText: '医院/机构名称',
+                  prefixIcon: Icon(Icons.local_hospital_outlined),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _visitDate ?? DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) setState(() => _visitDate = date);
+                },
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: TextEditingController(
+                      text: _visitDate != null
+                          ? DateFormat('yyyy-MM-dd').format(_visitDate!)
+                          : '',
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: '就诊日期',
+                      prefixIcon: Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (currentImage.ocrConfidence != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryTeal.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.primaryTeal.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.auto_awesome,
+                        size: 16,
+                        color: AppTheme.primaryTeal,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'OCR 置信度: ${(currentImage.ocrConfidence! * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          color: AppTheme.primaryTeal,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final images = widget.record.images;
+    if (images.isEmpty) return const SizedBox();
+
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: Column(
+        children: [
+          _buildImageViewer(images),
+          _buildEditForm(images[_currentImageIndex]),
         ],
       ),
     );

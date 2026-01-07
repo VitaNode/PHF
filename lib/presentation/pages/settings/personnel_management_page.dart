@@ -244,119 +244,138 @@ class _PersonnelManagementPageState
   }
 
   Future<void> _showEditDialog({Person? person}) async {
-    final isEditing = person != null;
-    final nameCtrl = TextEditingController(text: person?.nickname ?? '');
-    String selectedColor = person?.profileColor ?? _presetColors[0];
-
     await showDialog<void>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(isEditing ? '编辑档案' : '新建档案'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: nameCtrl,
-                    decoration: const InputDecoration(
-                      labelText: '昵称',
-                      hintText: '请输入姓名或称呼',
-                    ),
-                    autofocus: true,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '标识颜色',
-                    style: TextStyle(fontSize: 12, color: AppTheme.textHint),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _presetColors.map((colorHex) {
-                      final isSelected = selectedColor == colorHex;
-                      return GestureDetector(
-                        onTap: () => setState(() => selectedColor = colorHex),
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Color(
-                              int.parse(colorHex.replaceAll('#', '0xFF')),
-                            ),
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(color: Colors.black54, width: 2)
-                                : null,
-                          ),
-                          child: isSelected
-                              ? const Icon(
-                                  Icons.check,
-                                  size: 16,
-                                  color: Colors.white,
-                                )
-                              : null,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final nickname = nameCtrl.text.trim();
-                  if (nickname.isEmpty) {
-                    return;
-                  }
-                  try {
-                    final personRepo = ref.read(personRepositoryProvider);
-                    if (person != null) {
-                      await personRepo.updatePerson(
-                        person.copyWith(
-                          nickname: nickname,
-                          profileColor: selectedColor,
-                        ),
-                      );
-                    } else {
-                      final allPersons =
-                          ref.read(allPersonsProvider).value ?? [];
-                      final newPerson = Person(
-                        id: const Uuid().v4(),
-                        nickname: nickname,
-                        profileColor: selectedColor,
-                        createdAt: DateTime.now(),
-                        orderIndex: allPersons.length,
-                      );
-                      await personRepo.createPerson(newPerson);
-                    }
-                    ref.invalidate(allPersonsProvider);
-                    if (context.mounted) Navigator.pop(context);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('保存失败: $e'),
-                          backgroundColor: AppTheme.errorRed,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const Text('保存'),
-              ),
-            ],
-          );
-        },
-      ),
+      builder: (context) =>
+          _PersonEditDialog(person: person, presetColors: _presetColors),
     );
+  }
+}
+
+class _PersonEditDialog extends ConsumerStatefulWidget {
+  final Person? person;
+  final List<String> presetColors;
+
+  const _PersonEditDialog({this.person, required this.presetColors});
+
+  @override
+  ConsumerState<_PersonEditDialog> createState() => _PersonEditDialogState();
+}
+
+class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
+  late TextEditingController _nameCtrl;
+  late String _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.person?.nickname ?? '');
+    _selectedColor = widget.person?.profileColor ?? widget.presetColors[0];
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = widget.person != null;
+
+    return AlertDialog(
+      title: Text(isEditing ? '编辑档案' : '新建档案'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
+                labelText: '昵称',
+                hintText: '请输入姓名或称呼',
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              '标识颜色',
+              style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: widget.presetColors.map((colorHex) {
+                final isSelected = _selectedColor == colorHex;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedColor = colorHex),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: Color(int.parse(colorHex.replaceAll('#', '0xFF'))),
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(color: Colors.black54, width: 2)
+                          : null,
+                    ),
+                    child: isSelected
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        ElevatedButton(onPressed: _save, child: const Text('保存')),
+      ],
+    );
+  }
+
+  Future<void> _save() async {
+    final nickname = _nameCtrl.text.trim();
+    if (nickname.isEmpty) return;
+
+    try {
+      final personRepo = ref.read(personRepositoryProvider);
+      if (widget.person != null) {
+        await personRepo.updatePerson(
+          widget.person!.copyWith(
+            nickname: nickname,
+            profileColor: _selectedColor,
+          ),
+        );
+      } else {
+        final allPersons = ref.read(allPersonsProvider).value ?? [];
+        final newPerson = Person(
+          id: const Uuid().v4(),
+          nickname: nickname,
+          profileColor: _selectedColor,
+          createdAt: DateTime.now(),
+          orderIndex: allPersons.length,
+        );
+        await personRepo.createPerson(newPerson);
+      }
+      ref.invalidate(allPersonsProvider);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('保存失败: $e'),
+            backgroundColor: AppTheme.errorRed,
+          ),
+        );
+      }
+    }
   }
 }
