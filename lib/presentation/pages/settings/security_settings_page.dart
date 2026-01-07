@@ -60,6 +60,8 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
               subtitle: '更改用于解锁应用的 6 位数字密码',
               onTap: _handleChangePin,
             ),
+            const Divider(height: 1),
+            _buildLockTimeoutTile(context, state),
             if (state.canCheckBiometrics) ...[
               const Divider(height: 1),
               SwitchListTile(
@@ -110,6 +112,73 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
           letterSpacing: 1.2,
         ),
       ),
+    );
+  }
+
+  Widget _buildLockTimeoutTile(
+    BuildContext context,
+    SecuritySettingsState state,
+  ) {
+    return ListTile(
+      leading: const Icon(Icons.timer_outlined, color: AppTheme.primaryTeal),
+      title: const Text(
+        '自动锁定时间',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        '当前设置: ${_getLockTimeoutText(state.lockTimeout)}',
+        style: const TextStyle(fontSize: 12),
+      ),
+      trailing: const Icon(Icons.chevron_right, size: 20),
+      onTap: () => _showLockTimeoutDialog(context, state.lockTimeout),
+    );
+  }
+
+  String _getLockTimeoutText(int seconds) {
+    if (seconds <= 0) return '立即';
+    if (seconds == 60) return '离开 1 分钟后';
+    if (seconds == 300) return '离开 5 分钟后';
+    return '离开 ${seconds ~/ 60} 分钟后';
+  }
+
+  void _showLockTimeoutDialog(BuildContext context, int currentTimeout) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('选择自动锁定时间'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTimeoutOption(context, '立即', 0, currentTimeout),
+            _buildTimeoutOption(context, '离开 1 分钟后', 60, currentTimeout),
+            _buildTimeoutOption(context, '离开 5 分钟后', 300, currentTimeout),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeoutOption(
+    BuildContext context,
+    String label,
+    int seconds,
+    int currentTimeout,
+  ) {
+    return RadioListTile<int>(
+      title: Text(label),
+      value: seconds,
+      // ignore: deprecated_member_use
+      groupValue: currentTimeout,
+      activeColor: AppTheme.primaryTeal,
+      // ignore: deprecated_member_use
+      onChanged: (val) {
+        if (val != null) {
+          ref
+              .read(securitySettingsControllerProvider.notifier)
+              .updateLockTimeout(val);
+          Navigator.pop(context);
+        }
+      },
     );
   }
 

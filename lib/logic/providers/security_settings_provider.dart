@@ -22,6 +22,7 @@ abstract class SecuritySettingsState with _$SecuritySettingsState {
     @Default(false) bool isBiometricsEnabled,
     @Default(false) bool canCheckBiometrics,
     @Default(false) bool isLoading,
+    @Default(60) int lockTimeout,
   }) = _SecuritySettingsState;
 }
 
@@ -30,12 +31,27 @@ class SecuritySettingsController extends _$SecuritySettingsController {
   @override
   FutureOr<SecuritySettingsState> build() async {
     final service = ref.watch(securityServiceProvider);
+    final repository = ref.watch(appMetaRepositoryProvider);
 
     return SecuritySettingsState(
       hasPin: await service.hasLock(),
       isBiometricsEnabled: await service.isBiometricsEnabled(),
       canCheckBiometrics: await service.canCheckBiometrics(),
+      lockTimeout: await repository.getLockTimeout(),
     );
+  }
+
+  /// 更新锁定超时时间
+  Future<void> updateLockTimeout(int seconds) async {
+    final currentState = state.asData?.value;
+    if (currentState != null) {
+      state = AsyncData(currentState.copyWith(isLoading: true));
+    }
+
+    final repository = ref.read(appMetaRepositoryProvider);
+    await repository.setLockTimeout(seconds);
+
+    ref.invalidateSelf();
   }
 
   /// 修改 PIN 码

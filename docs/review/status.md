@@ -31,6 +31,10 @@
 - **Background (Phase 2)**: `BackgroundWorkerService` (T19.3) and iOS `BGTaskScheduler` (T19.4) implemented and verified.
 - [x] **UI (Phase 2)**: Detail View OCR Viewer (T20.3) implemented and robust.
 - [x] **UI (Phase 2)**: `GlobalSearchPage` (T20.4) implemented with FTS5 highlighting and query sanitization.
+- [x] **T3.3.6 (Issue #111)**: 增强应用锁逻辑与自动锁定设置。
+    - **Logic**: Implemented time-based lock (default 1 min, options: 1 min, 5 min, Immediate).
+    - **Bug Fix**: Resolved FaceID only working on cold start by re-triggering authentication on `resumed` lifecycle state.
+    - **UI**: Added "Auto Lock Time" setting to Privacy & Security page and manual biometric trigger to LockScreen.
 
 ## 🟢 Phase 3 Complete
 Phase 3 (Governance & Store Readiness) is now complete.

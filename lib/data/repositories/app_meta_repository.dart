@@ -24,6 +24,7 @@ class AppMetaRepository {
   static const String _keyHasLock = 'has_lock';
   static const String _keyCurrentPersonId = 'current_person_id';
   static const String _keyDisclaimerAccepted = 'is_disclaimer_accepted';
+  static const String _keyLockTimeout = 'lock_timeout';
 
   /// 通用读取
   Future<String?> get(String key) async {
@@ -80,5 +81,19 @@ class AppMetaRepository {
   /// 设置免责声明接受状态
   Future<void> setDisclaimerAccepted(bool accepted) async {
     await put(_keyDisclaimerAccepted, accepted ? '1' : '0');
+  }
+
+  /// 获取锁屏超时时间（秒）
+  /// 默认 1 分钟 (60s)
+  /// 0 表示立即锁定
+  Future<int> getLockTimeout() async {
+    final val = await get(_keyLockTimeout);
+    if (val == null) return 60;
+    return int.tryParse(val) ?? 60;
+  }
+
+  /// 设置锁屏超时时间（秒）
+  Future<void> setLockTimeout(int seconds) async {
+    await put(_keyLockTimeout, seconds.toString());
   }
 }

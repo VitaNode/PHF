@@ -17,25 +17,55 @@ class LockScreen extends ConsumerStatefulWidget {
   ConsumerState<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends ConsumerState<LockScreen> {
+class _LockScreenState extends ConsumerState<LockScreen>
+    with WidgetsBindingObserver {
   String _pin = '';
   bool _isProcessing = false;
+  bool _canCheckBiometrics = false;
 
   @override
   void initState() {
     super.initState();
-    _checkBiometrics();
+    WidgetsBinding.instance.addObserver(this);
+    _initBiometrics();
   }
 
-  Future<void> _checkBiometrics() async {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _authenticateWithBiometrics();
+    }
+  }
+
+  Future<void> _initBiometrics() async {
     final securityService = ref.read(securityServiceProvider);
+    final canCheck = await securityService.canCheckBiometrics();
     final isEnabled = await securityService.isBiometricsEnabled();
-    if (isEnabled) {
-      final success = await securityService
-          .enableBiometrics(); // Reuse existing method or create authenticateBiometrics
-      if (success) {
-        widget.onAuthenticated();
-      }
+    if (mounted) {
+      setState(() {
+        _canCheckBiometrics = canCheck && isEnabled;
+      });
+    }
+    if (_canCheckBiometrics) {
+      await _authenticateWithBiometrics();
+    }
+  }
+
+  Future<void> _authenticateWithBiometrics() async {
+    if (!_canCheckBiometrics || _isProcessing) return;
+
+    final securityService = ref.read(securityServiceProvider);
+    // 这里的 enableBiometrics 实际上是执行一次认证
+    // 建议将来在 SecurityService 中拆分出 authenticate 方法
+    final success = await securityService.enableBiometrics();
+    if (success && mounted) {
+      widget.onAuthenticated();
     }
   }
 
@@ -116,6 +146,16 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 );
               }),
             ),
+
+            const SizedBox(height: 32),
+
+            // Biometric Trigger
+            if (_canCheckBiometrics && !_isProcessing)
+              IconButton(
+                onPressed: _authenticateWithBiometrics,
+                icon: const Icon(Icons.face, size: 40, color: AppTheme.primary),
+                tooltip: '使用生物识别解锁',
+              ),
 
             const Spacer(),
 

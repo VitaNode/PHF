@@ -170,4 +170,22 @@ class MockAppMetaRepository extends _i1.Mock implements _i5.AppMetaRepository {
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getLockTimeout() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLockTimeout, []),
+            returnValue: _i3.Future<int>.value(0),
+            returnValueForMissingStub: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<void> setLockTimeout(int? seconds) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLockTimeout, [seconds]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }

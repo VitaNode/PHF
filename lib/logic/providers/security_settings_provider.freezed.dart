@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SecuritySettingsState {
 
- bool get hasPin; bool get isBiometricsEnabled; bool get canCheckBiometrics; bool get isLoading;
+ bool get hasPin; bool get isBiometricsEnabled; bool get canCheckBiometrics; bool get isLoading; int get lockTimeout;
 /// Create a copy of SecuritySettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SecuritySettingsStateCopyWith<SecuritySettingsState> get copyWith => _$Security
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SecuritySettingsState&&(identical(other.hasPin, hasPin) || other.hasPin == hasPin)&&(identical(other.isBiometricsEnabled, isBiometricsEnabled) || other.isBiometricsEnabled == isBiometricsEnabled)&&(identical(other.canCheckBiometrics, canCheckBiometrics) || other.canCheckBiometrics == canCheckBiometrics)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SecuritySettingsState&&(identical(other.hasPin, hasPin) || other.hasPin == hasPin)&&(identical(other.isBiometricsEnabled, isBiometricsEnabled) || other.isBiometricsEnabled == isBiometricsEnabled)&&(identical(other.canCheckBiometrics, canCheckBiometrics) || other.canCheckBiometrics == canCheckBiometrics)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lockTimeout, lockTimeout) || other.lockTimeout == lockTimeout));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,hasPin,isBiometricsEnabled,canCheckBiometrics,isLoading);
+int get hashCode => Object.hash(runtimeType,hasPin,isBiometricsEnabled,canCheckBiometrics,isLoading,lockTimeout);
 
 @override
 String toString() {
-  return 'SecuritySettingsState(hasPin: $hasPin, isBiometricsEnabled: $isBiometricsEnabled, canCheckBiometrics: $canCheckBiometrics, isLoading: $isLoading)';
+  return 'SecuritySettingsState(hasPin: $hasPin, isBiometricsEnabled: $isBiometricsEnabled, canCheckBiometrics: $canCheckBiometrics, isLoading: $isLoading, lockTimeout: $lockTimeout)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SecuritySettingsStateCopyWith<$Res>  {
   factory $SecuritySettingsStateCopyWith(SecuritySettingsState value, $Res Function(SecuritySettingsState) _then) = _$SecuritySettingsStateCopyWithImpl;
 @useResult
 $Res call({
- bool hasPin, bool isBiometricsEnabled, bool canCheckBiometrics, bool isLoading
+ bool hasPin, bool isBiometricsEnabled, bool canCheckBiometrics, bool isLoading, int lockTimeout
 });
 
 
@@ -62,13 +62,14 @@ class _$SecuritySettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SecuritySettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? hasPin = null,Object? isBiometricsEnabled = null,Object? canCheckBiometrics = null,Object? isLoading = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? hasPin = null,Object? isBiometricsEnabled = null,Object? canCheckBiometrics = null,Object? isLoading = null,Object? lockTimeout = null,}) {
   return _then(_self.copyWith(
 hasPin: null == hasPin ? _self.hasPin : hasPin // ignore: cast_nullable_to_non_nullable
 as bool,isBiometricsEnabled: null == isBiometricsEnabled ? _self.isBiometricsEnabled : isBiometricsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,canCheckBiometrics: null == canCheckBiometrics ? _self.canCheckBiometrics : canCheckBiometrics // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,lockTimeout: null == lockTimeout ? _self.lockTimeout : lockTimeout // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading,  int lockTimeout)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SecuritySettingsState() when $default != null:
-return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading);case _:
+return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading,_that.lockTimeout);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading,  int lockTimeout)  $default,) {final _that = this;
 switch (_that) {
 case _SecuritySettingsState():
-return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading);case _:
+return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading,_that.lockTimeout);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool hasPin,  bool isBiometricsEnabled,  bool canCheckBiometrics,  bool isLoading,  int lockTimeout)?  $default,) {final _that = this;
 switch (_that) {
 case _SecuritySettingsState() when $default != null:
-return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading);case _:
+return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,_that.isLoading,_that.lockTimeout);case _:
   return null;
 
 }
@@ -209,13 +210,14 @@ return $default(_that.hasPin,_that.isBiometricsEnabled,_that.canCheckBiometrics,
 
 
 class _SecuritySettingsState implements SecuritySettingsState {
-  const _SecuritySettingsState({this.hasPin = false, this.isBiometricsEnabled = false, this.canCheckBiometrics = false, this.isLoading = false});
+  const _SecuritySettingsState({this.hasPin = false, this.isBiometricsEnabled = false, this.canCheckBiometrics = false, this.isLoading = false, this.lockTimeout = 60});
   
 
 @override@JsonKey() final  bool hasPin;
 @override@JsonKey() final  bool isBiometricsEnabled;
 @override@JsonKey() final  bool canCheckBiometrics;
 @override@JsonKey() final  bool isLoading;
+@override@JsonKey() final  int lockTimeout;
 
 /// Create a copy of SecuritySettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ _$SecuritySettingsStateCopyWith<_SecuritySettingsState> get copyWith => __$Secur
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SecuritySettingsState&&(identical(other.hasPin, hasPin) || other.hasPin == hasPin)&&(identical(other.isBiometricsEnabled, isBiometricsEnabled) || other.isBiometricsEnabled == isBiometricsEnabled)&&(identical(other.canCheckBiometrics, canCheckBiometrics) || other.canCheckBiometrics == canCheckBiometrics)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SecuritySettingsState&&(identical(other.hasPin, hasPin) || other.hasPin == hasPin)&&(identical(other.isBiometricsEnabled, isBiometricsEnabled) || other.isBiometricsEnabled == isBiometricsEnabled)&&(identical(other.canCheckBiometrics, canCheckBiometrics) || other.canCheckBiometrics == canCheckBiometrics)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lockTimeout, lockTimeout) || other.lockTimeout == lockTimeout));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,hasPin,isBiometricsEnabled,canCheckBiometrics,isLoading);
+int get hashCode => Object.hash(runtimeType,hasPin,isBiometricsEnabled,canCheckBiometrics,isLoading,lockTimeout);
 
 @override
 String toString() {
-  return 'SecuritySettingsState(hasPin: $hasPin, isBiometricsEnabled: $isBiometricsEnabled, canCheckBiometrics: $canCheckBiometrics, isLoading: $isLoading)';
+  return 'SecuritySettingsState(hasPin: $hasPin, isBiometricsEnabled: $isBiometricsEnabled, canCheckBiometrics: $canCheckBiometrics, isLoading: $isLoading, lockTimeout: $lockTimeout)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$SecuritySettingsStateCopyWith<$Res> implements $SecurityS
   factory _$SecuritySettingsStateCopyWith(_SecuritySettingsState value, $Res Function(_SecuritySettingsState) _then) = __$SecuritySettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool hasPin, bool isBiometricsEnabled, bool canCheckBiometrics, bool isLoading
+ bool hasPin, bool isBiometricsEnabled, bool canCheckBiometrics, bool isLoading, int lockTimeout
 });
 
 
@@ -264,13 +266,14 @@ class __$SecuritySettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SecuritySettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? hasPin = null,Object? isBiometricsEnabled = null,Object? canCheckBiometrics = null,Object? isLoading = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? hasPin = null,Object? isBiometricsEnabled = null,Object? canCheckBiometrics = null,Object? isLoading = null,Object? lockTimeout = null,}) {
   return _then(_SecuritySettingsState(
 hasPin: null == hasPin ? _self.hasPin : hasPin // ignore: cast_nullable_to_non_nullable
 as bool,isBiometricsEnabled: null == isBiometricsEnabled ? _self.isBiometricsEnabled : isBiometricsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,canCheckBiometrics: null == canCheckBiometrics ? _self.canCheckBiometrics : canCheckBiometrics // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,lockTimeout: null == lockTimeout ? _self.lockTimeout : lockTimeout // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

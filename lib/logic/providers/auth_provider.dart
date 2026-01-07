@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,6 +20,8 @@ Future<bool> isDisclaimerAccepted(Ref ref) async {
 @Riverpod(keepAlive: true)
 class AuthStateController extends _$AuthStateController
     with WidgetsBindingObserver {
+  DateTime? _lastPausedTime;
+
   @override
   bool build() {
     // 注册生命周期观察者
@@ -34,6 +37,7 @@ class AuthStateController extends _$AuthStateController
   }
 
   void unlock() {
+    _lastPausedTime = null;
     state = false;
   }
 
@@ -43,8 +47,41 @@ class AuthStateController extends _$AuthStateController
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 当由于进入后台或者被杀掉而重新进入时，触发锁定逻辑
+    // 当进入后台时记录时间
     if (state == AppLifecycleState.paused) {
+      _lastPausedTime = DateTime.now();
+      // 如果设置为立即锁定，则直接锁定
+      unawaited(_handleImmediateLock());
+    }
+
+    // 当从后台切回时，检查是否需要锁定
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_checkLockTimeout());
+    }
+  }
+
+  Future<void> _handleImmediateLock() async {
+    final repository = ref.read(appMetaRepositoryProvider);
+    final timeoutSeconds = await repository.getLockTimeout();
+    if (timeoutSeconds <= 0) {
+      lock();
+    }
+  }
+
+  Future<void> _checkLockTimeout() async {
+    // 如果已经处于锁定状态，不需要再次检查
+    if (state) return;
+
+    final lastPaused = _lastPausedTime;
+    if (lastPaused == null) return;
+
+    final repository = ref.read(appMetaRepositoryProvider);
+    final timeoutSeconds = await repository.getLockTimeout();
+
+    final now = DateTime.now();
+    final difference = now.difference(lastPaused).inSeconds;
+
+    if (difference >= timeoutSeconds) {
       lock();
     }
   }
