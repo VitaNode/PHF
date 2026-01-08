@@ -205,16 +205,16 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     // 文本搜索 (OCR FTS5)
     if (query != null && query.isNotEmpty) {
       // JOIN FTS table
-      // SELECT r.* FROM records r JOIN ocr_search_index fts ON r.id = fts.record_id WHERE ocr_search_index MATCH ?
-      // 注意 FTS MATCH 语法
+      // Reinforce isolation by filtering on both records and fts index
       sql =
           '''
         SELECT r.* 
         FROM records r
         JOIN ocr_search_index fts ON r.id = fts.record_id
-        WHERE $whereClause AND fts.content MATCH ?
+        WHERE $whereClause AND fts.person_id = ? AND fts.content MATCH ?
         ORDER BY r.visit_date_ms DESC
       ''';
+      args.add(personId);
       args.add(query); // Simple match
     } else {
       sql =
