@@ -57,12 +57,7 @@ class LogMaskingService {
 
   // Mask Keywords: Forbidden tokens
   static String _maskKeywords(String text) {
-    final forbiddenKeywords = [
-      'password',
-      'secret',
-      'mnemonic',
-      'master_key',
-    ];
+    final forbiddenKeywords = ['password', 'secret', 'mnemonic', 'master_key'];
     String output = text;
     for (final kw in forbiddenKeywords) {
       final regex = RegExp(kw, caseSensitive: false);
@@ -74,4 +69,3 @@ class LogMaskingService {
 
 /// ## Repair Logs
 /// - [2026-01-08] 修复：增强脱敏逻辑，支持姓名脱敏及敏感关键字过滤（Issue #113 加固）。
-

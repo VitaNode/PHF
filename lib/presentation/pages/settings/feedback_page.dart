@@ -24,46 +24,6 @@ class FeedbackPage extends ConsumerStatefulWidget {
 class _FeedbackPageState extends ConsumerState<FeedbackPage> {
   bool _isLoadingLogs = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.bgWhite,
-      appBar: AppBar(
-        title: const Text('问题反馈'),
-        backgroundColor: AppTheme.bgWhite,
-        foregroundColor: AppTheme.textPrimary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildInfoSection(),
-              const SizedBox(height: 32),
-              _buildContactItem(
-                icon: Icons.email_outlined,
-                title: '发送邮件',
-                subtitle: 'VitaNode@outlook.com',
-                onTap: _sendEmail,
-              ),
-              const SizedBox(height: 16),
-              _buildContactItem(
-                icon: Icons.code,
-                title: 'GitHub Issues',
-                subtitle: '提交 Bug 或建议',
-                onTap: _openGitHub,
-              ),
-              const SizedBox(height: 48),
-              _buildLogSection(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -264,5 +224,45 @@ App Version: ${packageInfo.version} (${packageInfo.buildNumber})
 Device: $deviceModel
 System: $systemVersion
 ''';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.bgWhite,
+      appBar: AppBar(
+        title: const Text('问题反馈'),
+        backgroundColor: AppTheme.bgWhite,
+        foregroundColor: AppTheme.textPrimary,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildInfoSection(),
+              const SizedBox(height: 32),
+              _buildContactItem(
+                icon: Icons.email_outlined,
+                title: '发送邮件',
+                subtitle: 'VitaNode@outlook.com',
+                onTap: _sendEmail,
+              ),
+              const SizedBox(height: 16),
+              _buildContactItem(
+                icon: Icons.code,
+                title: 'GitHub Issues',
+                subtitle: '提交 Bug 或建议',
+                onTap: _openGitHub,
+              ),
+              const SizedBox(height: 48),
+              _buildLogSection(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
