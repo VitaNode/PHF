@@ -64,6 +64,27 @@ class PaperHealthApp extends ConsumerWidget {
         '/onboarding': (context) => const SecurityOnboardingPage(),
         '/disclaimer': (context) => const MedicalDisclaimerPage(),
       },
+      // 全局锁屏拦截器：确保在任何页面下，如果处于锁定状态都显示锁屏
+      builder: (context, child) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final isLocked = ref.watch(authStateControllerProvider);
+            final hasLock = ref.watch(hasLockProvider).value ?? false;
+            final isDisclaimerAccepted =
+                ref.watch(isDisclaimerAcceptedProvider).value ?? false;
+
+            // 只有当：已接受免责声明、已设置密码、且处于锁定状态时，才强制显示锁屏
+            if (isDisclaimerAccepted && hasLock && isLocked) {
+              return LockScreen(
+                onAuthenticated: () {
+                  ref.read(authStateControllerProvider.notifier).unlock();
+                },
+              );
+            }
+            return child!;
+          },
+        );
+      },
     );
   }
 }
@@ -95,17 +116,8 @@ class AppLoader extends ConsumerWidget {
               return const SecurityOnboardingPage();
             }
 
-            // 如果已设置应用锁，检查锁定状态
-            final isLocked = ref.watch(authStateControllerProvider);
-            if (isLocked) {
-              return LockScreen(
-                onAuthenticated: () {
-                  ref.read(authStateControllerProvider.notifier).unlock();
-                },
-              );
-            }
-
-            // 如果已设置应用锁且已验证，进入首页
+            // 如果已设置应用锁，默认进入首页
+            // 注意：此时 MaterialApp.builder 会拦截并显示 LockScreen（如果 isLocked 为 true）
             return const HomePage();
           },
           loading: () =>

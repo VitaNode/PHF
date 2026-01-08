@@ -11,6 +11,10 @@
     - **Schema**: 确保 `ocr_search_index` 虚拟表包含 `person_id` 列 (UNINDEXED)。
     - **Logic**: 在 `RecordRepository.searchRecords` 和 `SearchRepository.search` 中强制执行 `fts.person_id = ?` 过滤。
     - **Testing**: 补全了 `repository_test.dart` 中的 FTS 架构定义，并增加了跨用户搜索隔离的安全性测试。
+- [x] **Issue #121**: 修复“立即锁定”设置在非首页路由下失效的问题。
+    - **Architecture**: 将锁屏拦截逻辑从 `AppLoader` 移动至 `MaterialApp.builder`。
+    - **Logic**: 通过全局 Builder 包装 `Navigator`，确保无论当前处于哪个路由（如：设置页、详情页），只要 `isLocked` 为真，都会强制显示 `LockScreen` 覆盖层。
+    - **Refinement**: 优化了 `AppLoader` 的路由分发逻辑，并确保在安全引导流程完成后自动解锁，避免拦截。
 - [x] **Issue #113**: Feedback System & Encrypted Logging.
     - **Secure Logging**: Implemented `EncryptedLogService` with AES-256-GCM, automatic rotation (daily files), and PII masking (`LogMaskingService`).
     - **Feedback UI**: Added `FeedbackPage` with secure "Copy Logs" functionality (decrypts in memory), Email integration, and GitHub Issues link.
