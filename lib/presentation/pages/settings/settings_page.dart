@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'backup_page.dart';
+import 'feedback_page.dart';
 import 'personnel_management_page.dart';
 import 'privacy_policy_page.dart';
 import 'security_settings_page.dart';
@@ -68,6 +69,18 @@ class SettingsPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const BackupPage()),
+            ),
+          ),
+          const Divider(),
+          _buildSectionTitle('帮助与支持'),
+          _buildListTile(
+            context,
+            icon: Icons.feedback_outlined,
+            title: '问题反馈',
+            subtitle: '报告问题或提交建议',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(builder: (_) => const FeedbackPage()),
             ),
           ),
           const Divider(),
