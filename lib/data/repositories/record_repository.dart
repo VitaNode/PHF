@@ -18,13 +18,18 @@
 library;
 
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import '../../core/utils/fts_helper.dart';
 import '../../data/models/image.dart';
 import '../../data/models/record.dart';
 import 'base_repository.dart';
 import 'interfaces/record_repository.dart';
+import 'interfaces/search_repository.dart';
 
 class RecordRepository extends BaseRepository implements IRecordRepository {
-  RecordRepository(super.dbService);
+  final ISearchRepository? _searchRepository;
+
+  RecordRepository(super.dbService, {ISearchRepository? searchRepository})
+    : _searchRepository = searchRepository;
 
   @override
   Future<void> saveRecord(MedicalRecord record) async {
@@ -53,6 +58,9 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       dbMap,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    // 同步 FTS 索引
+    await _searchRepository?.syncRecordIndex(record.id);
   }
 
   @override
@@ -134,6 +142,8 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    // 状态变更可能影响搜索可见性，建议同步
+    await _searchRepository?.syncRecordIndex(id);
   }
 
   @override
@@ -159,6 +169,8 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    // 元数据变更需同步 FTS
+    await _searchRepository?.syncRecordIndex(id);
   }
 
   @override
@@ -204,18 +216,26 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
 
     // 文本搜索 (OCR FTS5)
     if (query != null && query.isNotEmpty) {
-      // JOIN FTS table
-      // Reinforce isolation by filtering on both records and fts index
-      sql =
-          '''
-        SELECT r.* 
-        FROM records r
-        JOIN ocr_search_index fts ON r.id = fts.record_id
-        WHERE $whereClause AND fts.person_id = ? AND fts.content MATCH ?
-        ORDER BY r.visit_date_ms DESC
-      ''';
-      args.add(personId);
-      args.add(query); // Simple match
+      final sanitizedQuery = FtsHelper.sanitizeQuery(query);
+      if (sanitizedQuery.isNotEmpty) {
+        // JOIN FTS table
+        // SELECT r.* FROM records r JOIN ocr_search_index fts ON r.id = fts.record_id WHERE ocr_search_index MATCH ?
+        // 强化隔离：在 FTS 表中直接过滤 person_id
+        sql = '''
+          SELECT r.* 
+          FROM records r
+          JOIN ocr_search_index fts ON r.id = fts.record_id
+          WHERE $whereClause 
+            AND fts.person_id = ?
+            AND ocr_search_index MATCH ?
+          ORDER BY r.visit_date_ms DESC
+        ''';
+        args.add(personId); // for fts.person_id
+        args.add(sanitizedQuery); // for ocr_search_index MATCH ?
+      } else {
+        sql =
+            'SELECT r.* FROM records r WHERE $whereClause ORDER BY r.visit_date_ms DESC';
+      }
     } else {
       sql =
           'SELECT r.* FROM records r WHERE $whereClause ORDER BY r.visit_date_ms DESC';
