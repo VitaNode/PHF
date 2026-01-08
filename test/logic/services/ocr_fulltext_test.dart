@@ -185,4 +185,45 @@ void main() {
     expect(results.length, 1);
     expect(results.first.record.personId, 'p2');
   });
+
+  test('RecordRepository.searchRecords should also isolate results by person_id',
+      () async {
+    // 1. Manually insert data into FTS index (as if OCR happened)
+    await db.insert('ocr_search_index', {
+      'record_id': 'r1',
+      'person_id': 'p1',
+      'content': 'Secret P1',
+    });
+    await db.insert('ocr_search_index', {
+      'record_id': 'r2',
+      'person_id': 'p2',
+      'content': 'Public P2',
+    });
+
+    // 2. P2 searches for 'Secret' through RecordRepository
+    // This uses FTS JOIN
+    final results = await recordRepo.searchRecords(
+      personId: 'p2',
+      query: 'Secret',
+    );
+
+    expect(results, isEmpty, reason: 'P2 should not find P1 content even if joined with FTS');
+  });
+
+  test('RecordRepository.searchRecords should support CJK search', () async {
+    // 1. Manually insert segmented CJK into FTS index
+    await db.insert('ocr_search_index', {
+      'record_id': 'r1',
+      'person_id': 'p1',
+      'content': ' 结 果 ', // Segmented '结果'
+    });
+
+    // 2. Search for '结果' (unsegmented)
+    final results = await recordRepo.searchRecords(
+      personId: 'p1',
+      query: '结果',
+    );
+
+    expect(results.length, 1, reason: 'Should find segmented CJK content');
+  });
 }

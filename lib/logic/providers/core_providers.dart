@@ -106,7 +106,8 @@ IGalleryService galleryService(Ref ref) {
 @Riverpod(keepAlive: true)
 IRecordRepository recordRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
-  return RecordRepository(db);
+  final search = ref.watch(searchRepositoryProvider);
+  return RecordRepository(db, searchRepository: search);
 }
 
 @Riverpod(keepAlive: true)
@@ -133,7 +134,8 @@ IBackupService backupService(Ref ref) {
 @Riverpod(keepAlive: true)
 IImageRepository imageRepository(Ref ref) {
   final db = ref.watch(databaseServiceProvider);
-  return ImageRepository(db);
+  final search = ref.watch(searchRepositoryProvider);
+  return ImageRepository(db, searchRepository: search);
 }
 
 @Riverpod(keepAlive: true)

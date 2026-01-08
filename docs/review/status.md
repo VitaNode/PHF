@@ -43,6 +43,10 @@
     - **Log Security**: Implemented AES-256-GCM encrypted log storage with PII redaction (LogMasker) and 7-day auto-rotation.
     - **UI**: Added "Problem Feedback" page in Settings with mailto/GitHub links and one-click copy of decrypted/de-identified logs.
     - **Refinement**: Removed debug log entry from homepage AppBar for production readiness.
+- [x] **Issue #98**: 强化 FTS5 搜索索引的多用户数据隔离。
+    - **Security**: Forced `person_id` validation in both `SearchRepository` and `RecordRepository` FTS queries.
+    - **Architecture**: Refactored repositories to automatically sync FTS index on metadata or tag updates.
+    - **Robustness**: Unified CJK segmentation and query sanitization via `FtsHelper`.
 
 ## 🟢 Phase 3 Complete
 Phase 3 (Governance & Store Readiness) is now complete.
@@ -83,8 +87,7 @@ Phase 3 (Governance & Store Readiness) is now complete.
     - **Fix (2026-01-06)**: Resolved `RenderFlex` overflow in `CollapsibleOcrCard`.
 
 ## 🟡 Pending Issues / Technical Debt (New for Phase 4)
-- **Security/Hardening**: `ocr_search_index` (FTS5) lacks explicit `person_id` column for deep isolation.
-- **Robustness**: `SearchRepository.search` requires refactoring due to structural logic issues.
+- None.
 
 ## 🔴 Blockers
 - None.

@@ -14,10 +14,12 @@
 /// 优化了 FTS5 查询语法，直接引用表名以确保 MATCH 语义在不同 SQLite 版本下的稳定性。
 /// [2026-01-06] 加固：在 FTS5 索引中引入 `person_id` 物理列，实现更深层的数据隔离与搜索安全。
 /// [2026-01-06] 优化：改进了 CJK 分段逻辑与查询脱敏，修复了多词搜索回归问题，并确保 Snippet 还原的可读性。
+/// [2026-01-08] 修复：提取 FtsHelper 工具类，统一全站 FTS5 查询脱敏与 CJK 处理逻辑。
 library;
 
 import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import '../../core/utils/fts_helper.dart';
 import '../models/image.dart';
 import '../models/record.dart';
 import 'base_repository.dart';
@@ -29,10 +31,9 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
   @override
   Future<List<SearchResult>> search(String query, String personId) async {
-    final trimmedQuery = query.trim();
-    if (trimmedQuery.isEmpty) return [];
+    final sanitizedQuery = FtsHelper.sanitizeQuery(query);
+    if (sanitizedQuery.isEmpty) return [];
 
-    final sanitizedQuery = _sanitizeQuery(trimmedQuery);
     final database = await dbService.database;
 
     try {
@@ -50,19 +51,6 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     } catch (e) {
       return [];
     }
-  }
-
-  String _sanitizeQuery(String query) {
-    // 先按空格分词，对每个原始词内部进行 CJK 分段并包裹引号，确保 CJK 连续词作为 Phrase 匹配
-    return query
-        .split(RegExp(r'\s+'))
-        .where((t) => t.isNotEmpty)
-        .map((t) {
-          final segmented = _segmentCJK(t);
-          final escaped = segmented.replaceAll('"', '""');
-          return '"$escaped"';
-        })
-        .join(' ');
   }
 
   Future<List<Map<String, dynamic>>> _executeSearchQuery(
@@ -180,29 +168,8 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
 
     return SearchResult(
       record: record,
-      snippet: _desegmentCJK(m['snippet'] as String? ?? ''),
+      snippet: FtsHelper.desegmentCJK(m['snippet'] as String? ?? ''),
     );
-  }
-
-  /// 移除为了 FTS5 分词而人工插入的 CJK 空格
-  String _desegmentCJK(String text) {
-    if (text.isEmpty) return text;
-    // 移除所有与 CJK 字符相邻的空格
-    return text
-        .replaceAll(RegExp(r'\s+(?=[\u4e00-\u9fa5])'), '')
-        .replaceAll(RegExp(r'(?<=[\u4e00-\u9fa5])\s+'), '')
-        .trim();
-  }
-
-  /// 为 CJK 字符插入空格以支持 FTS5 分词
-  String _segmentCJK(String text) {
-    if (text.isEmpty) return text;
-    // 匹配 CJK 字符区间
-    final regExp = RegExp(r'([\u4e00-\u9fa5])');
-    return text
-        .replaceAllMapped(regExp, (match) => ' ${match.group(0)} ')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
   }
 
   @override
@@ -227,7 +194,7 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
         'person_id': personId,
-        'content': _segmentCJK(content),
+        'content': FtsHelper.segmentCJK(content),
       });
     });
   }
@@ -311,11 +278,11 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
         'person_id': personId,
-        'hospital_name': _segmentCJK(hospitalName),
-        'tags': _segmentCJK(tagNames),
-        'ocr_text': _segmentCJK(ocrText),
-        'notes': _segmentCJK(notes),
-        'content': _segmentCJK(content),
+        'hospital_name': FtsHelper.segmentCJK(hospitalName),
+        'tags': FtsHelper.segmentCJK(tagNames),
+        'ocr_text': FtsHelper.segmentCJK(ocrText),
+        'notes': FtsHelper.segmentCJK(notes),
+        'content': FtsHelper.segmentCJK(content),
       });
     });
   }
