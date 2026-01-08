@@ -30,22 +30,22 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
   SearchRepository(super.dbService);
 
   @override
-  Future<List<SearchResult>> search(String query, String personId) async {
+  Future<List<SearchResult>> search(
+    String query,
+    String personId, {
+    DatabaseExecutor? executor,
+  }) async {
     final sanitizedQuery = FtsHelper.sanitizeQuery(query);
     if (sanitizedQuery.isEmpty) return [];
 
-    final database = await dbService.database;
+    final exec = await getExecutor(executor);
 
     try {
-      final maps = await _executeSearchQuery(
-        database,
-        personId,
-        sanitizedQuery,
-      );
+      final maps = await _executeSearchQuery(exec, personId, sanitizedQuery);
       if (maps.isEmpty) return [];
 
       final recordIds = maps.map((m) => m['id'] as String).toList();
-      final imagesByRecord = await _fetchImagesForRecords(database, recordIds);
+      final imagesByRecord = await _fetchImagesForRecords(exec, recordIds);
 
       return maps.map((m) => _mapToSearchResult(m, imagesByRecord)).toList();
     } catch (e) {
