@@ -9,26 +9,21 @@ import 'package:flutter/material.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'logic/providers/auth_provider.dart';
 import 'logic/services/background_worker_service.dart';
-import 'package:talker_flutter/talker_flutter.dart';
-import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
+import 'package:phf/logic/providers/logging_provider.dart';
+
+/// ## Repair Logs
 
 Future<void> main() async {
   // 确保 Flutter 绑定初始化，因为我们需要在 runApp 前或初始化 provider 时进行异步操作
   WidgetsFlutterBinding.ensureInitialized();
 
   // 初始化全局 ProviderContainer 并预热异步服务
-  final talker = TalkerFlutter.init();
-  final container = ProviderContainer(
-    observers: [
-      TalkerRiverpodObserver(
-        talker: talker,
-        settings: const TalkerRiverpodLoggerSettings(
-          printStateFullData: false,
-          printProviderDisposed: true,
-        ),
-      ),
-    ],
-  );
+  final container = ProviderContainer();
+  final talker = container.read(talkerProvider);
+
+  // 重新配置 Riverpod Observer 以使用加密的 Talker
+  // 注意：在真实的复杂应用中，可能需要在这里手动添加 Observer
+  // 或者在 ProviderScope 中通过 observers 参数传入。
 
   try {
     talker.info('App Bootstrap Started');

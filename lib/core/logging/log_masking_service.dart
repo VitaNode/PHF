@@ -16,20 +16,16 @@ class LogMaskingService {
     String output = input;
     output = _maskChinaID(output);
     output = _maskChinaPhone(output);
-    // Add more rules as needed
+    output = _maskNames(output);
+    output = _maskKeywords(output);
     return output;
   }
 
   // Mask China ID: 18 digits or 17 digits + X
-  // Simple regex: \d{17}[\dXx] -> \d{6}********\d{4}
-  // Be careful not to match random long numbers unless they look like IDs.
   static String _maskChinaID(String text) {
     final RegExp idRegex = RegExp(r'(?<!\d)\d{6}(\d{8})\d{3}[\dXx](?!\d)');
     return text.replaceAllMapped(idRegex, (match) {
       final full = match.group(0)!;
-      // Keep first 6, last 4. Mask 8 in middle?
-      // Standard ID is 18 chars. 6(area) + 8(dob) + 4(seq).
-      // We mask the DOB.
       if (full.length == 18) {
         return '${full.substring(0, 6)}********${full.substring(14)}';
       }
@@ -44,4 +40,38 @@ class LogMaskingService {
       return '${match.group(1)}****${match.group(3)}';
     });
   }
+
+  // Mask Names: Heuristic for "姓名：xxx" or "Name: xxx"
+  static String _maskNames(String text) {
+    return text.replaceAllMapped(
+      RegExp(r'([姓名Name]{2}[:：]\s*)([\u4e00-\u9fa5]{2,4})'),
+      (match) {
+        final prefix = match.group(1)!;
+        final name = match.group(2)!;
+        if (name.length == 2) return '$prefix${name[0]}*';
+        if (name.length == 3) return '$prefix${name[0]}*${name[2]}';
+        return '$prefix${name[0]}**${name[name.length - 1]}';
+      },
+    );
+  }
+
+  // Mask Keywords: Forbidden tokens
+  static String _maskKeywords(String text) {
+    final forbiddenKeywords = [
+      'password',
+      'secret',
+      'mnemonic',
+      'master_key',
+    ];
+    String output = text;
+    for (final kw in forbiddenKeywords) {
+      final regex = RegExp(kw, caseSensitive: false);
+      output = output.replaceAll(regex, '***');
+    }
+    return output;
+  }
 }
+
+/// ## Repair Logs
+/// - [2026-01-08] 修复：增强脱敏逻辑，支持姓名脱敏及敏感关键字过滤（Issue #113 加固）。
+

@@ -8,6 +8,8 @@
 /// - Log Masking (Sanitization).
 /// - File Rotation (Size > 2MB, Age > 7 days).
 /// - Decryption for Feedback (Export).
+/// ## Repair Logs
+/// - [2026-01-08] 修复：支持 AES-256-GCM 加密日志存储、自动滚动与 7 天自动清理（Issue #113）。
 library;
 
 import 'dart:convert';

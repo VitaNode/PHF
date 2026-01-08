@@ -10,6 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../logic/providers/logging_provider.dart';
 import '../../theme/app_theme.dart';
 
+/// # FeedbackPage
+///
+/// ## Repair Logs
+/// - [2026-01-08] 修复：初始实现问题反馈页面，支持导出脱敏后的加密日志（Issue #113）。
 class FeedbackPage extends ConsumerStatefulWidget {
   const FeedbackPage({super.key});
 
