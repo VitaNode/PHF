@@ -39,16 +39,23 @@ class TimelineController extends _$TimelineController {
 
     // 监听 OCR 任务状态
     ref.listen(ocrPendingCountProvider, (previous, next) {
-      // 只要 next 有值且与 previous 不同
       if (next.hasValue) {
         final nextCount = next.value!;
         final prevCount = previous?.value ?? -1;
 
+        // 仅当数量减少（任务完成）或状态从无变有（开始任务）时触发刷新
+        // 且为了避免 Assertion Error，确保不在 build 过程中直接修改状态
         if (nextCount != prevCount) {
           talker.info(
-            '[TimelineController] OCR Status update: $prevCount -> $nextCount. Triggering refresh.',
+            '[TimelineController] OCR Status update: $prevCount -> $nextCount. Triggering deferred refresh.',
           );
-          refresh();
+
+          // 使用 Future.microtask 确保在当前 build cycle 之后执行，避免 assertion error
+          Future.microtask(() {
+            // 只有当当前没有在加载时才刷新，或者直接调用 refresh()
+            // refresh() 内部会处理 AsyncValue.loading()
+            refresh();
+          });
         }
       }
     });
@@ -94,7 +101,11 @@ class TimelineController extends _$TimelineController {
   }
 
   /// 刷新列表
+
   Future<void> refresh() async {
+    // 防止并发刷新导致的状态竞争
+    if (state.isLoading && state.value != null) return;
+
     final personId = await ref.read(currentPersonIdControllerProvider.future);
     if (personId == null) return;
 
@@ -103,8 +114,10 @@ class TimelineController extends _$TimelineController {
     final currentStart = state.value?.startDate;
     final currentEnd = state.value?.endDate;
 
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    // 保持旧数据展示的同时进入加载状态 (Data-first loading)
+    // state = const AsyncValue.loading(); // 这样会导致 UI 闪烁/清空，不推荐在此处用
+
+    final newState = await AsyncValue.guard(
       () => _fetchRecords(
         personId,
         query: currentQuery,
@@ -113,6 +126,10 @@ class TimelineController extends _$TimelineController {
         endDate: currentEnd,
       ),
     );
+
+    if (newState.hasValue) {
+      state = newState;
+    }
   }
 
   /// 搜索与过滤

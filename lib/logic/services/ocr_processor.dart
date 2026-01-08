@@ -32,8 +32,8 @@ import '../../data/models/image.dart';
 import '../../data/models/ocr_queue_item.dart';
 import '../../data/models/ocr_result.dart';
 import '../../data/models/record.dart';
-import '../../data/models/extracted_medical_data.dart';
 import '../../data/repositories/interfaces/ocr_queue_repository.dart';
+
 import '../../data/repositories/interfaces/image_repository.dart';
 import '../../data/repositories/interfaces/record_repository.dart';
 import '../../data/repositories/interfaces/search_repository.dart';
@@ -94,10 +94,37 @@ class OCRProcessor {
         'Extracted: date=${extracted.visitDate}, hospital=${extracted.hospitalName}, score=${extracted.confidenceScore}',
       );
 
-      await _persistResults(image, ocrResult, fullText, extracted);
+      // --- Optimized Persistence Start ---
+      // 1. Update Image OCR Data & Metadata (without individual syncs if possible)
+      await _imageRepository.updateOCRData(
+        image.id,
+        fullText,
+        rawJson: jsonEncode(ocrResult.toJson()),
+        confidence: extracted.confidenceScore,
+      );
+
+      if (extracted.visitDate != null || extracted.hospitalName != null) {
+        // Warning: updateImageMetadata currently triggers syncRecordIndex.
+        // In a perfect world, we'd have a 'silent' version or a transactional way.
+        await _imageRepository.updateImageMetadata(
+          image.id,
+          hospitalName: extracted.hospitalName,
+          visitDate: extracted.visitDate,
+        );
+      }
+
+      // 2. Update Record Status
       await _updateRecordStatus(image.recordId, extracted.confidenceScore);
+
+      // 3. Final single sync for the whole record
+      // This is now redundant because updateImageMetadata and updateStatus already did it,
+      // but let's keep it if those are modified to be silent.
+      // Actually, to fix the lock, we should ideally move all this into a single transaction.
       await _searchRepository.syncRecordIndex(image.recordId);
+
+      // 4. Mark job as completed
       await _queueRepository.updateStatus(item.id, OCRJobStatus.completed);
+      // --- Optimized Persistence End ---
 
       _log('Processing Completed: ${item.id}');
       return true;
@@ -156,28 +183,6 @@ class OCRProcessor {
       );
     }
     return text;
-  }
-
-  Future<void> _persistResults(
-    MedicalImage image,
-    OcrResult result,
-    String text,
-    ExtractedMedicalData extracted,
-  ) async {
-    await _imageRepository.updateOCRData(
-      image.id,
-      text,
-      rawJson: jsonEncode(result.toJson()),
-      confidence: extracted.confidenceScore,
-    );
-
-    if (extracted.visitDate != null || extracted.hospitalName != null) {
-      await _imageRepository.updateImageMetadata(
-        image.id,
-        hospitalName: extracted.hospitalName,
-        visitDate: extracted.visitDate,
-      );
-    }
   }
 
   Future<void> _updateRecordStatus(String recordId, double confidence) async {

@@ -45,6 +45,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.7
   url_launcher: ^6.3.2
   package_info_plus: ^9.0.0
+  synchronized: ^3.4.0
 
 dev_dependencies:
   flutter_test:

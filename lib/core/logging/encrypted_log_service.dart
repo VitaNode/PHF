@@ -18,6 +18,7 @@ import 'dart:io';
 import 'package:cryptography/cryptography.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'log_key_manager.dart';
 import 'log_masking_service.dart';
@@ -29,6 +30,7 @@ class EncryptedLogService {
 
   final LogKeyManager _keyManager;
   final Cipher _algorithm = AesGcm.with256bits();
+  final Lock _lock = Lock();
   SecretKey? _cachedKey;
 
   EncryptedLogService({LogKeyManager? keyManager})
@@ -36,42 +38,42 @@ class EncryptedLogService {
 
   /// Writes a log message securely.
   Future<void> log(String message) async {
-    try {
-      final masked = LogMaskingService.mask(message);
-      final timestamp = DateTime.now().toIso8601String();
-      final entry = '[$timestamp] $masked';
+    // Use a lock to ensure sequential writes to the file
+    await _lock.synchronized(() async {
+      try {
+        final masked = LogMaskingService.mask(message);
+        final timestamp = DateTime.now().toIso8601String();
+        final entry = '[$timestamp] $masked';
 
-      final key = await _getSecretKey();
-      final file = await _getCurrentLogFile();
+        final key = await _getSecretKey();
+        final file = await _getCurrentLogFile();
 
-      // Check size
-      if (await file.exists() && await file.length() > _maxFileSize) {
-        // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
-        // Ideally we might roll over, but strict requirement says "clear old or rewrite".
-        await file.delete();
+        // Check size
+        if (await file.exists() && await file.length() > _maxFileSize) {
+          // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
+          await file.delete();
+        }
+
+        // Encrypt
+        final bytes = utf8.encode(entry);
+        final nonce = _algorithm.newNonce();
+        final secretBox = await _algorithm.encrypt(
+          bytes,
+          secretKey: key,
+          nonce: nonce,
+        );
+
+        // Serialize: Base64(Nonce + CipherText + Mac)
+        final combined = nonce + secretBox.cipherText + secretBox.mac.bytes;
+        final line = base64Encode(combined);
+
+        await file.writeAsString('$line\n', mode: FileMode.append, flush: true);
+      } catch (e) {
+        // Fallback: Print to console if file logging fails
+        // ignore: avoid_print
+        print('Failed to write secure log: $e');
       }
-
-      // Encrypt
-      final bytes = utf8.encode(entry);
-      final nonce = _algorithm.newNonce();
-      final secretBox = await _algorithm.encrypt(
-        bytes,
-        secretKey: key,
-        nonce: nonce,
-      );
-
-      // Serialize: Base64(Nonce + CipherText + Mac)
-      // AesGcm: CipherText + Mac are separate in Dart's SecretBox, but usually concatenated in standard formats.
-      // SecretBox: nonce, cipherText, mac.
-      final combined = nonce + secretBox.cipherText + secretBox.mac.bytes;
-      final line = base64Encode(combined);
-
-      await file.writeAsString('$line\n', mode: FileMode.append);
-    } catch (e) {
-      // Fallback: Print to console if file logging fails (should not happen in prod ideally)
-      // ignore: avoid_print
-      print('Failed to write secure log: $e');
-    }
+    });
   }
 
   /// Retrieves all logs decrypted from the last 7 days.
@@ -90,19 +92,31 @@ class EncryptedLogService {
         final lines = await file.readAsLines();
         for (final line in lines) {
           try {
-            if (line.isEmpty) continue;
-            final data = base64Decode(line);
+            // Remove any whitespace that might have been introduced during writing/reading
+            final sanitizedLine = line.replaceAll(RegExp(r'\s+'), '');
 
-            // Extract Nonce (12 bytes for AesGcm usually, but verify algorithm)
-            // AesGcm nonce length is 12 bytes standard.
+            if (sanitizedLine.isEmpty) continue;
+
+            // Fix missing padding if truncated
+            String paddedLine = sanitizedLine;
+            if (paddedLine.length % 4 != 0) {
+              paddedLine = paddedLine.padRight(
+                paddedLine.length + (4 - (paddedLine.length % 4)),
+                '=',
+              );
+            }
+
+            final data = base64Decode(paddedLine);
+
+            // Extract Nonce (12 bytes for AesGcm standard)
             const nonceLength = 12;
             const macLength = 16;
 
-            if (data.length < nonceLength + macLength) continue;
+            if (data.length < nonceLength + macLength) {
+              throw const FormatException('Data too short for AES-GCM');
+            }
 
             final nonce = data.sublist(0, nonceLength);
-            // Mac is at the end? Or after ciphertext?
-            // In my serialization above: Nonce + CipherText + Mac
             final macBytes = data.sublist(data.length - macLength);
             final cipherText = data.sublist(
               nonceLength,
@@ -122,7 +136,11 @@ class EncryptedLogService {
 
             buffer.writeln(utf8.decode(clearBytes));
           } catch (e) {
-            buffer.writeln('[Decryption Error]: $e');
+            // Include the problematic line snippet if it's a format error to help debugging
+            final snippet = line.length > 30
+                ? '${line.substring(0, 30)}...'
+                : line;
+            buffer.writeln('[Decryption Error] ($snippet): $e');
           }
         }
       }

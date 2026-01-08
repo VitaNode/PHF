@@ -203,78 +203,85 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
   Future<void> syncRecordIndex(String recordId) async {
     final database = await dbService.database;
 
-    // 1. Fetch Record Info
-    final List<Map<String, dynamic>> recordRows = await database.query(
-      'records',
-      columns: ['hospital_name', 'notes', 'person_id'],
-      where: 'id = ?',
-      whereArgs: [recordId],
-    );
-    if (recordRows.isEmpty) {
-      await deleteIndex(recordId);
-      return;
-    }
-    final recordRow = recordRows.first;
-    final hospitalName = recordRow['hospital_name'] as String? ?? '';
-    final notes = recordRow['notes'] as String? ?? '';
-    final personId = recordRow['person_id'] as String;
-
-    // 2. Fetch Images Info (OCR Text & Tags)
-    final List<Map<String, dynamic>> imageRows = await database.query(
-      'images',
-      columns: ['ocr_text', 'tags'],
-      where: 'record_id = ?',
-      whereArgs: [recordId],
-      orderBy: 'page_index ASC',
-    );
-
-    final StringBuffer ocrBuffer = StringBuffer();
-    final Set<String> tagIds = {};
-
-    for (var row in imageRows) {
-      if (row['ocr_text'] != null) {
-        ocrBuffer.writeln(row['ocr_text'] as String);
-        ocrBuffer.writeln(); // Spacing
-      }
-
-      if (row['tags'] != null) {
-        try {
-          final decoded = jsonDecode(row['tags'] as String);
-          if (decoded is List) {
-            tagIds.addAll(decoded.map((e) => e.toString()));
-          }
-        } catch (_) {}
-      }
-    }
-
-    // 3. Resolve Tag Names
-    final StringBuffer tagNamesBuffer = StringBuffer();
-    if (tagIds.isNotEmpty) {
-      final placeholder = List.filled(tagIds.length, '?').join(',');
-      final List<Map<String, dynamic>> tagRows = await database.query(
-        'tags',
-        columns: ['name'],
-        where: 'id IN ($placeholder)',
-        whereArgs: tagIds.toList(),
-      );
-      for (var row in tagRows) {
-        tagNamesBuffer.write('${row['name']} ');
-      }
-    }
-
-    final ocrText = ocrBuffer.toString();
-    final tagNames = tagNamesBuffer.toString();
-
-    // 4. Construct Content (Aggregate for fallback)
-    final content = [hospitalName, tagNames, notes, ocrText].join('\n');
-
-    // 5. Update FTS Index with CJK segmentation
     await database.transaction((txn) async {
+      // 1. Fetch Record Info
+      final List<Map<String, dynamic>> recordRows = await txn.query(
+        'records',
+        columns: ['hospital_name', 'notes', 'person_id'],
+        where: 'id = ?',
+        whereArgs: [recordId],
+      );
+
+      if (recordRows.isEmpty) {
+        await txn.delete(
+          'ocr_search_index',
+          where: 'record_id = ?',
+          whereArgs: [recordId],
+        );
+        return;
+      }
+
+      final recordRow = recordRows.first;
+      final hospitalName = recordRow['hospital_name'] as String? ?? '';
+      final notes = recordRow['notes'] as String? ?? '';
+      final personId = recordRow['person_id'] as String;
+
+      // 2. Fetch Images Info (OCR Text & Tags)
+      final List<Map<String, dynamic>> imageRows = await txn.query(
+        'images',
+        columns: ['ocr_text', 'tags'],
+        where: 'record_id = ?',
+        whereArgs: [recordId],
+        orderBy: 'page_index ASC',
+      );
+
+      final StringBuffer ocrBuffer = StringBuffer();
+      final Set<String> tagIds = {};
+
+      for (var row in imageRows) {
+        if (row['ocr_text'] != null) {
+          ocrBuffer.writeln(row['ocr_text'] as String);
+          ocrBuffer.writeln(); // Spacing
+        }
+
+        if (row['tags'] != null) {
+          try {
+            final decoded = jsonDecode(row['tags'] as String);
+            if (decoded is List) {
+              tagIds.addAll(decoded.map((e) => e.toString()));
+            }
+          } catch (_) {}
+        }
+      }
+
+      // 3. Resolve Tag Names
+      final StringBuffer tagNamesBuffer = StringBuffer();
+      if (tagIds.isNotEmpty) {
+        final placeholder = List.filled(tagIds.length, '?').join(',');
+        final List<Map<String, dynamic>> tagRows = await txn.query(
+          'tags',
+          columns: ['name'],
+          where: 'id IN ($placeholder)',
+          whereArgs: tagIds.toList(),
+        );
+        for (var row in tagRows) {
+          tagNamesBuffer.write('${row['name']} ');
+        }
+      }
+
+      final ocrText = ocrBuffer.toString();
+      final tagNames = tagNamesBuffer.toString();
+
+      // 4. Construct Content (Aggregate for fallback)
+      final content = [hospitalName, tagNames, notes, ocrText].join('\n');
+
+      // 5. Update FTS Index with CJK segmentation
       await txn.delete(
         'ocr_search_index',
         where: 'record_id = ?',
         whereArgs: [recordId],
       );
+
       await txn.insert('ocr_search_index', {
         'record_id': recordId,
         'person_id': personId,

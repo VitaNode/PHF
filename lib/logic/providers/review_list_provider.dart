@@ -17,9 +17,12 @@ class ReviewListController extends _$ReviewListController {
 
     // 监听 OCR 任务，当有任务完成时，刷新待确认列表
     ref.listen(ocrPendingCountProvider, (previous, next) {
-      if (previous != null && next.hasValue && previous.hasValue) {
-        if (next.value != previous.value) {
-          refresh();
+      if (next.hasValue) {
+        final nextCount = next.value!;
+        final prevCount = previous?.value ?? -1;
+
+        if (nextCount != prevCount) {
+          Future.microtask(() => refresh());
         }
       }
     });
@@ -33,11 +36,15 @@ class ReviewListController extends _$ReviewListController {
   }
 
   Future<void> refresh() async {
+    if (state.isLoading && state.value != null) return;
+
     final personId = await ref.read(currentPersonIdControllerProvider.future);
     if (personId == null) return;
 
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchRecords(personId));
+    final newState = await AsyncValue.guard(() => _fetchRecords(personId));
+    if (newState.hasValue) {
+      state = newState;
+    }
   }
 
   /// 归档记录 (Approve)

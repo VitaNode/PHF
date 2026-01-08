@@ -349,7 +349,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           ref
               .read(talkerProvider)
               .info('[RecordDetailPage] OCR update detected. Reloading data.');
-          _loadData();
+
+          Future.microtask(() {
+            if (mounted) _loadData();
+          });
         }
       }
     });
