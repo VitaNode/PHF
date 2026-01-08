@@ -1,9 +1,13 @@
 # Project Review Status Summary
 
 **Last Updated**: 2026-01-08
-**Coverage**: T0 - Issue #113 (Feedback & Encrypted Logging)
+**Coverage**: T0 - Issue #98 (FTS5 Security Reinforcement)
 
 ## Approved Features (Highlights)
+- [x] **Issue #98**: FTS5 搜索索引多用户隔离加固。
+    - **Schema**: 确保 `ocr_search_index` 虚拟表包含 `person_id` 列 (UNINDEXED)。
+    - **Logic**: 在 `RecordRepository.searchRecords` 和 `SearchRepository.search` 中强制执行 `fts.person_id = ?` 过滤。
+    - **Testing**: 补全了 `repository_test.dart` 中的 FTS 架构定义，并增加了跨用户搜索隔离的安全性测试。
 - [x] **Issue #113**: Feedback System & Encrypted Logging.
     - **Secure Logging**: Implemented `EncryptedLogService` with AES-256-GCM, automatic rotation (daily files), and PII masking (`LogMaskingService`).
     - **Feedback UI**: Added `FeedbackPage` with secure "Copy Logs" functionality (decrypts in memory), Email integration, and GitHub Issues link.
@@ -83,7 +87,6 @@ Phase 3 (Governance & Store Readiness) is now complete.
     - **Fix (2026-01-06)**: Resolved `RenderFlex` overflow in `CollapsibleOcrCard`.
 
 ## 🟡 Pending Issues / Technical Debt (New for Phase 4)
-- **Security/Hardening**: `ocr_search_index` (FTS5) lacks explicit `person_id` column for deep isolation.
 - **Robustness**: `SearchRepository.search` requires refactoring due to structural logic issues.
 
 ## 🔴 Blockers
