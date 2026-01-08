@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../logic/providers/auth_provider.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/pin_keyboard.dart';
@@ -143,6 +144,8 @@ class _SecurityOnboardingPageState
   }
 
   void _finishOnboarding() {
+    // 关键：在进入首页前执行解锁，防止全局 builder 立即拦截
+    ref.read(authStateControllerProvider.notifier).unlock();
     Navigator.of(context).pushReplacementNamed('/home');
   }
 
