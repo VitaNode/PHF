@@ -20,8 +20,6 @@ import 'package:phf/presentation/pages/ingestion/ingestion_page.dart';
 import 'package:phf/presentation/pages/search/global_search_page.dart';
 import 'package:phf/presentation/pages/timeline/widgets/filter_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talker_flutter/talker_flutter.dart';
-import 'package:phf/logic/providers/logging_provider.dart';
 import 'package:phf/logic/providers/timeline_provider.dart';
 import 'package:phf/presentation/widgets/personnel_tabs.dart';
 
@@ -36,7 +34,6 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final talker = ref.watch(talkerProvider);
     final timelineState = ref.watch(timelineControllerProvider).value;
     final hasFilters =
         (timelineState?.filterTags?.isNotEmpty ?? false) ||
@@ -53,17 +50,6 @@ class HomePage extends ConsumerWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bug_report_outlined, color: Colors.orange),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) => TalkerScreen(talker: talker),
-                ),
-              );
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {

@@ -1,9 +1,13 @@
 # Project Review Status Summary
 
-**Last Updated**: 2026-01-06
-**Coverage**: T0 - T3.8.4 (Enhanced OCR UI)
+**Last Updated**: 2026-01-08
+**Coverage**: T0 - Issue #113 (Feedback & Encrypted Logging)
 
 ## Approved Features (Highlights)
+- [x] **Issue #113**: Feedback System & Encrypted Logging.
+    - **Secure Logging**: Implemented `EncryptedLogService` with AES-256-GCM, automatic rotation (daily files), and PII masking (`LogMaskingService`).
+    - **Feedback UI**: Added `FeedbackPage` with secure "Copy Logs" functionality (decrypts in memory), Email integration, and GitHub Issues link.
+    - **Hardening**: Removed debug log access from Home Page top bar.
 - [x] **T20.4**: 全局搜索 (FTS5 + Highlight).
     - **Fix (2026-01-06)**: Enabled Chinese search support in FTS5 by implementing manual CJK character segmentation during indexing and query parsing (Issue #95).
     - **Fix (2026-01-06)**: Upgraded FTS5 index to version 9 with `unicode61` tokenizer fallback.
