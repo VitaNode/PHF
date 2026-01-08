@@ -17,7 +17,6 @@ library;
 /// - **2025-12-31**: T21.2 级联删除逻辑优化 - 当一个 Record 下的所有图片被用户手动删除后，
 ///   自动删除该 Record 实体及其关联的 OCR 队列任务。同时删除 FTS5 搜索索引中的相关记录。
 /// - **2026-01-08**: 修复：在更新标签或元数据时，同步更新 FTS5 搜索索引以防止数据失真（Issue #98）。
-library;
 import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../data/models/image.dart';
