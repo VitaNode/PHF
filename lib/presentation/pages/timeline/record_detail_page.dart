@@ -90,7 +90,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             flex: 6,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
-              child: _isEditing ? _buildEditView() : _buildInfoView(currentImage),
+              child: _isEditing
+                  ? _buildEditView()
+                  : _buildInfoView(currentImage),
             ),
           ),
         ],

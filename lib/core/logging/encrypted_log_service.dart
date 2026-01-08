@@ -77,90 +77,53 @@ class EncryptedLogService {
   }
 
   /// Retrieves all logs decrypted from the last 7 days.
+
   Future<String> getDecryptedLogs() async {
     final key = await _getSecretKey();
+
     final buffer = StringBuffer();
+
     final dir = await getApplicationDocumentsDirectory();
 
     // Iterate last 7 days
+
     for (int i = 0; i < _retentionDays; i++) {
       final date = DateTime.now().subtract(Duration(days: i));
+
       final dateStr = DateFormat('yyyyMMdd').format(date);
+
       final file = File('${dir.path}/$_logFileNamePrefix$dateStr.txt');
 
-      if (await file.exists()) {
-        final lines = await file.readAsLines();
-        for (final line in lines) {
-          try {
-            // Remove any whitespace that might have been introduced during writing/reading
-            final sanitizedLine = line.replaceAll(RegExp(r'\s+'), '');
+      if (!(await file.exists())) continue;
 
-            if (sanitizedLine.isEmpty) continue;
+      final lines = await file.readAsLines();
 
-            // Fix missing padding if truncated
-            String paddedLine = sanitizedLine;
-            if (paddedLine.length % 4 != 0) {
-              paddedLine = paddedLine.padRight(
-                paddedLine.length + (4 - (paddedLine.length % 4)),
-                '=',
-              );
-            }
-
-            final data = base64Decode(paddedLine);
-
-            // Extract Nonce (12 bytes for AesGcm standard)
-            const nonceLength = 12;
-            const macLength = 16;
-
-            if (data.length < nonceLength + macLength) {
-              throw const FormatException('Data too short for AES-GCM');
-            }
-
-            final nonce = data.sublist(0, nonceLength);
-            final macBytes = data.sublist(data.length - macLength);
-            final cipherText = data.sublist(
-              nonceLength,
-              data.length - macLength,
-            );
-
-            final secretBox = SecretBox(
-              cipherText,
-              nonce: nonce,
-              mac: Mac(macBytes),
-            );
-
-            final clearBytes = await _algorithm.decrypt(
-              secretBox,
-              secretKey: key,
-            );
-
-            buffer.writeln(utf8.decode(clearBytes));
-          } catch (e) {
-            // Include the problematic line snippet if it's a format error to help debugging
-            final snippet = line.length > 30
-                ? '${line.substring(0, 30)}...'
-                : line;
-            buffer.writeln('[Decryption Error] ($snippet): $e');
-          }
-        }
+      for (final line in lines) {
+        await _processLogLine(line, key, buffer);
       }
     }
+
     return buffer.toString();
   }
 
   /// Prunes old logs (Older than 7 days).
+
   Future<void> pruneOldLogs() async {
     final dir = await getApplicationDocumentsDirectory();
+
     final List<FileSystemEntity> files = dir.listSync();
 
     final now = DateTime.now();
+
     final cutoff = now.subtract(const Duration(days: _retentionDays));
+
     final dateFormat = DateFormat('yyyyMMdd');
 
     for (var entity in files) {
       if (entity is! File) continue;
 
       final filename = entity.uri.pathSegments.last;
+
       if (!filename.startsWith(_logFileNamePrefix) ||
           !filename.endsWith('.txt')) {
         continue;
@@ -170,6 +133,7 @@ class EncryptedLogService {
         final datePart = filename
             .replaceFirst(_logFileNamePrefix, '')
             .replaceFirst('.txt', '');
+
         final fileDate = dateFormat.parse(datePart);
 
         if (fileDate.isBefore(cutoff)) {
@@ -179,6 +143,62 @@ class EncryptedLogService {
         // Ignore parse errors
       }
     }
+  }
+
+  Future<void> _processLogLine(
+    String line,
+
+    SecretKey key,
+
+    StringBuffer buffer,
+  ) async {
+    try {
+      // Remove any whitespace that might have been introduced during writing/reading
+
+      final sanitizedLine = line.replaceAll(RegExp(r'\s+'), '');
+
+      if (sanitizedLine.isEmpty) return;
+
+      // Fix missing padding if truncated
+
+      final paddedLine = _padBase64(sanitizedLine);
+
+      final data = base64Decode(paddedLine);
+
+      // Extract Nonce (12 bytes for AesGcm standard)
+
+      const nonceLength = 12;
+
+      const macLength = 16;
+
+      if (data.length < nonceLength + macLength) {
+        throw const FormatException('Data too short for AES-GCM');
+      }
+
+      final nonce = data.sublist(0, nonceLength);
+
+      final macBytes = data.sublist(data.length - macLength);
+
+      final cipherText = data.sublist(nonceLength, data.length - macLength);
+
+      final secretBox = SecretBox(cipherText, nonce: nonce, mac: Mac(macBytes));
+
+      final clearBytes = await _algorithm.decrypt(secretBox, secretKey: key);
+
+      buffer.writeln(utf8.decode(clearBytes));
+    } catch (e) {
+      // Include the problematic line snippet if it's a format error to help debugging
+
+      final snippet = line.length > 30 ? '${line.substring(0, 30)}...' : line;
+
+      buffer.writeln('[Decryption Error] ($snippet): $e');
+    }
+  }
+
+  String _padBase64(String input) {
+    if (input.length % 4 == 0) return input;
+
+    return input.padRight(input.length + (4 - (input.length % 4)), '=');
   }
 
   Future<SecretKey> _getSecretKey() async {
