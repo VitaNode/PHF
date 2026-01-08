@@ -16,8 +16,9 @@ EncryptedLogService encryptedLogService(Ref ref) {
 @Riverpod(keepAlive: true)
 Talker talker(Ref ref) {
   final logService = ref.watch(encryptedLogServiceProvider);
-  return TalkerFlutter.init(
+  return Talker(
     settings: TalkerSettings(maxHistoryItems: 1000),
-    observers: [TalkerFileObserver(logService)],
+    observer: TalkerFileObserver(logService),
+    logger: TalkerLogger(),
   );
 }

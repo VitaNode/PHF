@@ -12,7 +12,6 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,52 +26,53 @@ class EncryptedLogService {
   static const String _logFileNamePrefix = 'app_logs_';
 
   final LogKeyManager _keyManager;
-  final Algorithm _algorithm = AesGcm.with256bits();
-
-  EncryptedLogService({LogKeyManager? keyManager})
-      : _keyManager = keyManager ?? LogKeyManager();
-
-  SecretKey? _cachedKey;
-
-  /// Writes a log message securely.
-  Future<void> log(String message) async {
-    try {
-      final masked = LogMaskingService.mask(message);
-      final timestamp = DateTime.now().toIso8601String();
-      final entry = '[$timestamp] $masked';
-
-      final key = await _getSecretKey();
-      final file = await _getCurrentLogFile();
-
-      // Check size
-      if (await file.exists() && await file.length() > _maxFileSize) {
-        // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
-        // Ideally we might roll over, but strict requirement says "clear old or rewrite".
-        await file.delete();
+    final Cipher _algorithm = AesGcm.with256bits();
+  
+    EncryptedLogService({LogKeyManager? keyManager})
+        : _keyManager = keyManager ?? LogKeyManager();
+  
+    SecretKey? _cachedKey;
+  
+    /// Writes a log message securely.
+    Future<void> log(String message) async {
+      try {
+        final masked = LogMaskingService.mask(message);
+        final timestamp = DateTime.now().toIso8601String();
+        final entry = '[$timestamp] $masked';
+  
+        final key = await _getSecretKey();
+        final file = await _getCurrentLogFile();
+  
+        // Check size
+        if (await file.exists() && await file.length() > _maxFileSize) {
+          // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
+          // Ideally we might roll over, but strict requirement says "clear old or rewrite".
+          await file.delete();
+        }
+  
+        // Encrypt
+        final bytes = utf8.encode(entry);
+        final nonce = _algorithm.newNonce();
+        final secretBox = await _algorithm.encrypt(
+          bytes,
+          secretKey: key,
+          nonce: nonce,
+        );
+  
+        // Serialize: Base64(Nonce + CipherText + Mac)
+        // AesGcm: CipherText + Mac are separate in Dart's SecretBox, but usually concatenated in standard formats.
+        // SecretBox: nonce, cipherText, mac.
+        final combined =
+            nonce + secretBox.cipherText + secretBox.mac.bytes;
+        final line = base64Encode(combined);
+  
+        await file.writeAsString('$line\n', mode: FileMode.append);
+      } catch (e) {
+        // Fallback: Print to console if file logging fails (should not happen in prod ideally)
+        // ignore: avoid_print
+        print('Failed to write secure log: $e');
       }
-
-      // Encrypt
-      final bytes = utf8.encode(entry);
-      final nonce = _algorithm.newNonce();
-      final secretBox = await _algorithm.encrypt(
-        bytes,
-        secretKey: key,
-        nonce: nonce,
-      );
-
-      // Serialize: Base64(Nonce + CipherText + Mac)
-      // AesGcm: CipherText + Mac are separate in Dart's SecretBox, but usually concatenated in standard formats.
-      // SecretBox: nonce, cipherText, mac.
-      final combined =
-          nonce + secretBox.cipherText + secretBox.mac.bytes;
-      final line = base64Encode(combined);
-
-      await file.writeAsString('$line\n', mode: FileMode.append);
-    } catch (e) {
-      // Fallback: Print to console if file logging fails (should not happen in prod ideally)
-      print('Failed to write secure log: $e');
     }
-  }
 
   /// Retrieves all logs decrypted from the last 7 days.
   Future<String> getDecryptedLogs() async {
@@ -92,19 +92,22 @@ class EncryptedLogService {
           try {
             if (line.isEmpty) continue;
             final data = base64Decode(line);
-            
+
             // Extract Nonce (12 bytes for AesGcm usually, but verify algorithm)
             // AesGcm nonce length is 12 bytes standard.
             const nonceLength = 12;
             const macLength = 16;
-            
+
             if (data.length < nonceLength + macLength) continue;
 
             final nonce = data.sublist(0, nonceLength);
             // Mac is at the end? Or after ciphertext?
             // In my serialization above: Nonce + CipherText + Mac
             final macBytes = data.sublist(data.length - macLength);
-            final cipherText = data.sublist(nonceLength, data.length - macLength);
+            final cipherText = data.sublist(
+              nonceLength,
+              data.length - macLength,
+            );
 
             final secretBox = SecretBox(
               cipherText,
@@ -116,7 +119,7 @@ class EncryptedLogService {
               secretBox,
               secretKey: key,
             );
-            
+
             buffer.writeln(utf8.decode(clearBytes));
           } catch (e) {
             buffer.writeln('[Decryption Error]: $e');
@@ -131,7 +134,7 @@ class EncryptedLogService {
   Future<void> pruneOldLogs() async {
     final dir = await getApplicationDocumentsDirectory();
     final List<FileSystemEntity> files = dir.listSync();
-    
+
     final now = DateTime.now();
     final cutoff = now.subtract(const Duration(days: _retentionDays));
     final dateFormat = DateFormat('yyyyMMdd');
@@ -139,13 +142,14 @@ class EncryptedLogService {
     for (var entity in files) {
       if (entity is File) {
         final filename = entity.uri.pathSegments.last;
-        if (filename.startsWith(_logFileNamePrefix) && filename.endsWith('.txt')) {
+        if (filename.startsWith(_logFileNamePrefix) &&
+            filename.endsWith('.txt')) {
           try {
             final datePart = filename
                 .replaceFirst(_logFileNamePrefix, '')
                 .replaceFirst('.txt', '');
             final fileDate = dateFormat.parse(datePart);
-            
+
             if (fileDate.isBefore(cutoff)) {
               await entity.delete();
             }

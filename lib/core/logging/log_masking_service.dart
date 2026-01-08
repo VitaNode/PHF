@@ -11,8 +11,6 @@
 ///
 /// For this automated service, we focus on pattern matching for common sensitive formats.
 class LogMaskingService {
-  static const String _mask = '***';
-
   /// Masks sensitive patterns in the input text.
   static String mask(String input) {
     String output = input;
@@ -29,7 +27,7 @@ class LogMaskingService {
     final RegExp idRegex = RegExp(r'(?<!\d)\d{6}(\d{8})\d{3}[\dXx](?!\d)');
     return text.replaceAllMapped(idRegex, (match) {
       final full = match.group(0)!;
-      // Keep first 6, last 4. Mask 8 in middle? 
+      // Keep first 6, last 4. Mask 8 in middle?
       // Standard ID is 18 chars. 6(area) + 8(dob) + 4(seq).
       // We mask the DOB.
       if (full.length == 18) {

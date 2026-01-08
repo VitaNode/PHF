@@ -25,11 +25,12 @@ class LogKeyManager {
   final FlutterSecureStorage _storage;
 
   LogKeyManager({FlutterSecureStorage? storage})
-      : _storage = storage ??
-            const FlutterSecureStorage(
-              aOptions: _keyParams,
-              iOptions: _iosParams,
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: _keyParams,
+            iOptions: _iosParams,
+          );
 
   /// Get Log Encryption Key (32 bytes)
   Future<Uint8List> getLogKey() async {

@@ -90,7 +90,7 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         ),
         child: Row(
@@ -98,7 +98,7 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.primaryTeal.withOpacity(0.1),
+                color: AppTheme.primaryTeal.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: AppTheme.primaryTeal, size: 24),
@@ -186,9 +186,9 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
     );
     if (!await launchUrl(emailLaunchUri)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('无法打开邮件客户端')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('无法打开邮件客户端')));
       }
     }
   }
@@ -197,9 +197,9 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
     final Uri url = Uri.parse('https://github.com/VitaNode/PHF/issues');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('无法打开浏览器')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('无法打开浏览器')));
       }
     }
   }
@@ -208,9 +208,12 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
     setState(() => _isLoadingLogs = true);
     try {
       final info = await _getDeviceInfo();
-      final logs = await ref.read(encryptedLogServiceProvider).getDecryptedLogs();
-      
-      final clipboardContent = '''
+      final logs = await ref
+          .read(encryptedLogServiceProvider)
+          .getDecryptedLogs();
+
+      final clipboardContent =
+          '''
 === Device Info ===
 $info
 
@@ -220,15 +223,15 @@ $logs
 
       await Clipboard.setData(ClipboardData(text: clipboardContent));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已复制到剪贴板')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('导出失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
       }
     } finally {
       setState(() => _isLoadingLogs = false);
@@ -244,7 +247,8 @@ $logs
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfo.androidInfo;
       deviceModel = '${androidInfo.manufacturer} ${androidInfo.model}';
-      systemVersion = 'Android ${androidInfo.version.release} (SDK ${androidInfo.version.sdkInt})';
+      systemVersion =
+          'Android ${androidInfo.version.release} (SDK ${androidInfo.version.sdkInt})';
     } else if (Platform.isIOS) {
       final iosInfo = await deviceInfo.iosInfo;
       deviceModel = iosInfo.name;

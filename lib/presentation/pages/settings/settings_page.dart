@@ -80,9 +80,7 @@ class SettingsPage extends StatelessWidget {
             subtitle: '报告问题或提交建议',
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute<void>(
-                builder: (_) => const FeedbackPage(),
-              ),
+              MaterialPageRoute<void>(builder: (_) => const FeedbackPage()),
             ),
           ),
           const Divider(),
