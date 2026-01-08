@@ -30,9 +30,19 @@ class ReviewListController extends _$ReviewListController {
     return _fetchRecords(personId);
   }
 
-  Future<List<MedicalRecord>> _fetchRecords(String personId) async {
+  Future<void> approveRecord(String id) async {
     final repo = ref.read(recordRepositoryProvider);
-    return repo.getReviewRecords(personId);
+    await repo.updateStatus(id, RecordStatus.archived);
+    // Refresh list
+    ref.invalidateSelf();
+  }
+
+  /// 删除记录 (Delete)
+  Future<void> deleteRecord(String id) async {
+    final repo = ref.read(recordRepositoryProvider);
+    await repo.updateStatus(id, RecordStatus.deleted);
+    // Refresh list
+    ref.invalidateSelf();
   }
 
   Future<void> refresh() async {
@@ -47,19 +57,8 @@ class ReviewListController extends _$ReviewListController {
     }
   }
 
-  /// 归档记录 (Approve)
-  Future<void> approveRecord(String id) async {
+  Future<List<MedicalRecord>> _fetchRecords(String personId) async {
     final repo = ref.read(recordRepositoryProvider);
-    await repo.updateStatus(id, RecordStatus.archived);
-    // Refresh list
-    ref.invalidateSelf();
-  }
-
-  /// 删除记录 (Delete)
-  Future<void> deleteRecord(String id) async {
-    final repo = ref.read(recordRepositoryProvider);
-    await repo.updateStatus(id, RecordStatus.deleted);
-    // Refresh list
-    ref.invalidateSelf();
+    return repo.getReviewRecords(personId);
   }
 }

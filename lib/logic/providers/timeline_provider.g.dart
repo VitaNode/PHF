@@ -34,7 +34,7 @@ final class TimelineControllerProvider
 }
 
 String _$timelineControllerHash() =>
-    r'6a48106260dd72d34ad271425eeb057166d65ec8';
+    r'65c01d01398746476361a12098549ba42f4079a9';
 
 abstract class _$TimelineController extends $AsyncNotifier<HomeState> {
   FutureOr<HomeState> build();

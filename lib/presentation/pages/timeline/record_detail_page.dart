@@ -66,6 +66,38 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     super.dispose();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    _setupOcrListener();
+
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_record == null || _images.isEmpty) {
+      return const Scaffold(body: Center(child: Text('记录不存在')));
+    }
+
+    final currentImage = _images[_currentIndex];
+
+    return Scaffold(
+      backgroundColor: AppTheme.bgWhite,
+      appBar: _buildAppBar(),
+      body: Column(
+        children: [
+          Expanded(flex: 4, child: _buildImageSection()),
+          const Divider(height: 1),
+          Expanded(
+            flex: 6,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: _isEditing ? _buildEditView() : _buildInfoView(currentImage),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
@@ -304,40 +336,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         ).showSnackBar(SnackBar(content: Text('创建标签失败: $e')));
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _setupOcrListener();
-
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    if (_record == null || _images.isEmpty) {
-      return const Scaffold(body: Center(child: Text('记录不存在')));
-    }
-
-    final currentImage = _images[_currentIndex];
-
-    return Scaffold(
-      backgroundColor: AppTheme.bgWhite,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(flex: 4, child: _buildImageSection()),
-          const Divider(height: 1),
-          Expanded(
-            flex: 6,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: _isEditing
-                  ? _buildEditView()
-                  : _buildInfoView(currentImage),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _setupOcrListener() {
