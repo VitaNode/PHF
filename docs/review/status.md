@@ -39,6 +39,10 @@
     - **Logic**: Implemented time-based lock (default 1 min, options: 1 min, 5 min, Immediate).
     - **Bug Fix**: Resolved FaceID only working on cold start by re-triggering authentication on `resumed` lifecycle state.
     - **UI**: Added "Auto Lock Time" setting to Privacy & Security page and manual biometric trigger to LockScreen.
+- [x] **T3.6.5 (Issue #113)**: 问题反馈与日志加固。
+    - **Log Security**: Implemented AES-256-GCM encrypted log storage with PII redaction (LogMasker) and 7-day auto-rotation.
+    - **UI**: Added "Problem Feedback" page in Settings with mailto/GitHub links and one-click copy of decrypted/de-identified logs.
+    - **Refinement**: Removed debug log entry from homepage AppBar for production readiness.
 
 ## 🟢 Phase 3 Complete
 Phase 3 (Governance & Store Readiness) is now complete.
