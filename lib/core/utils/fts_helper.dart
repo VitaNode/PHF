@@ -1,5 +1,5 @@
 /// # FTS Helper
-/// 
+///
 /// ## Description
 /// 提供 FTS5 搜索相关的工具函数，包括 CJK 分段和查询脱敏。
 library;

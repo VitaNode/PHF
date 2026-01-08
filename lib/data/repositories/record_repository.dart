@@ -221,7 +221,8 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
         // JOIN FTS table
         // SELECT r.* FROM records r JOIN ocr_search_index fts ON r.id = fts.record_id WHERE ocr_search_index MATCH ?
         // 强化隔离：在 FTS 表中直接过滤 person_id
-        sql = '''
+        sql =
+            '''
           SELECT r.* 
           FROM records r
           JOIN ocr_search_index fts ON r.id = fts.record_id

@@ -192,7 +192,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
 
       // 3. Sync record cache
       await _syncRecordTagsCache(txn, recordId);
-      
+
       // 4. 同步 FTS 索引 (因为标签名在索引中)
       await _searchRepository?.syncRecordIndex(recordId);
     });
@@ -242,7 +242,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       );
 
       await _syncRecordMetadataCache(txn, recordId);
-      
+
       // 同步 FTS 索引
       await _searchRepository?.syncRecordIndex(recordId);
     });
