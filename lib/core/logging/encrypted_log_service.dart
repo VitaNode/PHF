@@ -28,53 +28,51 @@ class EncryptedLogService {
   static const String _logFileNamePrefix = 'app_logs_';
 
   final LogKeyManager _keyManager;
-    final Cipher _algorithm = AesGcm.with256bits();
-  
-    EncryptedLogService({LogKeyManager? keyManager})
-        : _keyManager = keyManager ?? LogKeyManager();
-  
-    SecretKey? _cachedKey;
-  
-    /// Writes a log message securely.
-    Future<void> log(String message) async {
-      try {
-        final masked = LogMaskingService.mask(message);
-        final timestamp = DateTime.now().toIso8601String();
-        final entry = '[$timestamp] $masked';
-  
-        final key = await _getSecretKey();
-        final file = await _getCurrentLogFile();
-  
-        // Check size
-        if (await file.exists() && await file.length() > _maxFileSize) {
-          // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
-          // Ideally we might roll over, but strict requirement says "clear old or rewrite".
-          await file.delete();
-        }
-  
-        // Encrypt
-        final bytes = utf8.encode(entry);
-        final nonce = _algorithm.newNonce();
-        final secretBox = await _algorithm.encrypt(
-          bytes,
-          secretKey: key,
-          nonce: nonce,
-        );
-  
-        // Serialize: Base64(Nonce + CipherText + Mac)
-        // AesGcm: CipherText + Mac are separate in Dart's SecretBox, but usually concatenated in standard formats.
-        // SecretBox: nonce, cipherText, mac.
-        final combined =
-            nonce + secretBox.cipherText + secretBox.mac.bytes;
-        final line = base64Encode(combined);
-  
-        await file.writeAsString('$line\n', mode: FileMode.append);
-      } catch (e) {
-        // Fallback: Print to console if file logging fails (should not happen in prod ideally)
-        // ignore: avoid_print
-        print('Failed to write secure log: $e');
+  final Cipher _algorithm = AesGcm.with256bits();
+  SecretKey? _cachedKey;
+
+  EncryptedLogService({LogKeyManager? keyManager})
+    : _keyManager = keyManager ?? LogKeyManager();
+
+  /// Writes a log message securely.
+  Future<void> log(String message) async {
+    try {
+      final masked = LogMaskingService.mask(message);
+      final timestamp = DateTime.now().toIso8601String();
+      final entry = '[$timestamp] $masked';
+
+      final key = await _getSecretKey();
+      final file = await _getCurrentLogFile();
+
+      // Check size
+      if (await file.exists() && await file.length() > _maxFileSize) {
+        // Rotate: For now, just delete and recreate to respect the 2MB "clear" rule.
+        // Ideally we might roll over, but strict requirement says "clear old or rewrite".
+        await file.delete();
       }
+
+      // Encrypt
+      final bytes = utf8.encode(entry);
+      final nonce = _algorithm.newNonce();
+      final secretBox = await _algorithm.encrypt(
+        bytes,
+        secretKey: key,
+        nonce: nonce,
+      );
+
+      // Serialize: Base64(Nonce + CipherText + Mac)
+      // AesGcm: CipherText + Mac are separate in Dart's SecretBox, but usually concatenated in standard formats.
+      // SecretBox: nonce, cipherText, mac.
+      final combined = nonce + secretBox.cipherText + secretBox.mac.bytes;
+      final line = base64Encode(combined);
+
+      await file.writeAsString('$line\n', mode: FileMode.append);
+    } catch (e) {
+      // Fallback: Print to console if file logging fails (should not happen in prod ideally)
+      // ignore: avoid_print
+      print('Failed to write secure log: $e');
     }
+  }
 
   /// Retrieves all logs decrypted from the last 7 days.
   Future<String> getDecryptedLogs() async {
@@ -142,23 +140,25 @@ class EncryptedLogService {
     final dateFormat = DateFormat('yyyyMMdd');
 
     for (var entity in files) {
-      if (entity is File) {
-        final filename = entity.uri.pathSegments.last;
-        if (filename.startsWith(_logFileNamePrefix) &&
-            filename.endsWith('.txt')) {
-          try {
-            final datePart = filename
-                .replaceFirst(_logFileNamePrefix, '')
-                .replaceFirst('.txt', '');
-            final fileDate = dateFormat.parse(datePart);
+      if (entity is! File) continue;
 
-            if (fileDate.isBefore(cutoff)) {
-              await entity.delete();
-            }
-          } catch (e) {
-            // Ignore parse errors
-          }
+      final filename = entity.uri.pathSegments.last;
+      if (!filename.startsWith(_logFileNamePrefix) ||
+          !filename.endsWith('.txt')) {
+        continue;
+      }
+
+      try {
+        final datePart = filename
+            .replaceFirst(_logFileNamePrefix, '')
+            .replaceFirst('.txt', '');
+        final fileDate = dateFormat.parse(datePart);
+
+        if (fileDate.isBefore(cutoff)) {
+          await entity.delete();
         }
+      } catch (e) {
+        // Ignore parse errors
       }
     }
   }
