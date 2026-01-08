@@ -16,7 +16,11 @@ import '../../models/search_result.dart';
 abstract interface class ISearchRepository {
   /// 执行全文搜索
   /// 返回符合条件的 SearchResult 列表（包含片段高亮）
-  Future<List<SearchResult>> search(String query, String personId);
+  Future<List<SearchResult>> search(
+    String query,
+    String personId, {
+    DatabaseExecutor? executor,
+  });
 
   /// 更新或插入 OCR 索引
   Future<void> updateIndex(
