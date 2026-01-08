@@ -46,9 +46,7 @@ void main() {
     when(
       mockPathService.imagesDirPath,
     ).thenReturn(p.join(tempTestDir.path, 'images'));
-    when(
-      mockPathService.dbDirPath,
-    ).thenReturn(p.join(tempTestDir.path, 'db'));
+    when(mockPathService.dbDirPath).thenReturn(p.join(tempTestDir.path, 'db'));
     when(mockPathService.sandboxRoot).thenReturn(tempTestDir.path);
 
     // Mock methods
@@ -192,8 +190,9 @@ void main() {
 
       // 4. Clear the sandbox to simulate a fresh install or deletion
       await Directory(p.join(tempTestDir.path, 'db')).delete(recursive: true);
-      await Directory(p.join(tempTestDir.path, 'images'))
-          .delete(recursive: true);
+      await Directory(
+        p.join(tempTestDir.path, 'images'),
+      ).delete(recursive: true);
       await Directory(p.join(tempTestDir.path, 'db')).create();
       await Directory(p.join(tempTestDir.path, 'images')).create();
 
