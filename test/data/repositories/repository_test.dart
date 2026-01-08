@@ -53,12 +53,15 @@ void main() {
       'CREATE TABLE ocr_queue (id TEXT PRIMARY KEY, image_id TEXT REFERENCES images(id) ON DELETE CASCADE, status TEXT, retry_count INTEGER, last_error TEXT, created_at_ms INTEGER, updated_at_ms INTEGER)',
     );
     await db.execute(
-      'CREATE VIRTUAL TABLE ocr_search_index USING fts5(record_id UNINDEXED, content)',
+      'CREATE VIRTUAL TABLE ocr_search_index USING fts5(record_id UNINDEXED, person_id UNINDEXED, hospital_name, tags, ocr_text, notes, content)',
     );
 
     // Basic Data
     await db.execute(
       "INSERT INTO persons (id, nickname, created_at_ms) VALUES ('p1', 'Tester', 12345)",
+    );
+    await db.execute(
+      "INSERT INTO persons (id, nickname, created_at_ms) VALUES ('p2', 'Other User', 12345)",
     );
     await db.execute(
       "INSERT INTO tags (id, name, created_at_ms) VALUES ('t1', 'Blood', 12345)",
@@ -78,7 +81,63 @@ void main() {
     await db.close();
   });
 
-  group('RecordRepository', () {
+  group('RecordRepository Security Tests', () {
+    test('getRecords with query should isolate by person_id', () async {
+      // 1. Seed records for two users
+      await db.insert('records', {
+        'id': 'r1',
+        'person_id': 'p1',
+        'status': 'archived',
+        'created_at_ms': 0,
+        'updated_at_ms': 0,
+      });
+      await db.insert('ocr_search_index', {
+        'record_id': 'r1',
+        'person_id': 'p1',
+        'content': 'Secret data for p1',
+      });
+
+      await db.insert('records', {
+        'id': 'r2',
+        'person_id': 'p2',
+        'status': 'archived',
+        'created_at_ms': 0,
+        'updated_at_ms': 0,
+      });
+      await db.insert('ocr_search_index', {
+        'record_id': 'r2',
+        'person_id': 'p2',
+        'content': 'Secret data for p2',
+      });
+
+      // 2. User 1 searches for their own data
+      final results1 = await recordRepo.searchRecords(
+        personId: 'p1',
+        query: 'Secret',
+      );
+      expect(results1.length, 1);
+      expect(results1.first.id, 'r1');
+
+      // 3. User 1 searches for User 2's data (keyword is same, but person_id differs)
+      // Even if keyword matches, it should only return r1 because of person_id filter
+      final results1Overlap = await recordRepo.searchRecords(
+        personId: 'p1',
+        query: 'data',
+      );
+      expect(results1Overlap.length, 1);
+      expect(results1Overlap.first.id, 'r1');
+
+      // 4. User 2 searches for their own data
+      final results2 = await recordRepo.searchRecords(
+        personId: 'p2',
+        query: 'Secret',
+      );
+      expect(results2.length, 1);
+      expect(results2.first.id, 'r2');
+    });
+  });
+
+  group('RecordRepository Tests', () {
     test('saveRecord and getRecordById', () async {
       final record = MedicalRecord(
         id: 'r1',
@@ -223,6 +282,7 @@ void main() {
         });
         await db.insert('ocr_search_index', {
           'record_id': 'r3',
+          'person_id': 'p1',
           'content': 'Hospital report content',
         });
 
