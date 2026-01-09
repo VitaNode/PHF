@@ -118,6 +118,21 @@ PaperHealth (PHF) 旨在通过 **100% 本地运行** 的方式，为用户提供
 
 ---
 
+# Phase 4: UI/UE Overhaul, Advanced Intelligence, Data Insights (Next)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Roadmap Overview
 - **Phase 1**: Core Architecture, Camera/Gallery, AES/SQLCipher (Done)
 - **Phase 2**: Offline OCR, SMART Extraction, FTS5 Search (Done)
