@@ -4,6 +4,10 @@
 **Coverage**: T0 - Issue #96 (Backup/Restore Fix)
 
 ## Approved Features (Highlights)
+- [x] **Issue #128**: 修复解锁后自动跳转到首页的问题。
+    - **Architecture**: 在 `MaterialApp.builder` 中使用 `Stack` 保留 `Navigator` 状态。
+    - **UX**: 确保 App 在解锁后能恢复到之前的页面（如：详情页、设置页），而不是重置到首页。
+    - **Safety**: 在锁定状态下通过 `AbsorbPointer` 禁用背景页面的交互。
 - [x] **Issue #96**: 修复数据恢复失效及 UI 刷新延迟。
     - **Backup**: 修正了备份 ZIP 中的目录结构，确保数据库恢复到 `db/` 子目录而非沙盒根目录。
     - **Restore**: 增强了恢复后的状态刷新逻辑，显式重置所有核心业务 Provider，确保 UI 立即感知数据变更。
