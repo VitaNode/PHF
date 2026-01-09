@@ -4,36 +4,36 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Hindi (`hi`).
+class AppLocalizationsHi extends AppLocalizations {
+  AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
   String get appTitle => 'PaperHealth';
 
   @override
-  String get common_save => 'Save';
+  String get common_save => 'सहेजें';
 
   @override
-  String get common_edit => 'Edit';
+  String get common_edit => 'संपादित करें';
 
   @override
-  String get common_delete => 'Delete';
+  String get common_delete => 'हटाएं';
 
   @override
-  String get common_cancel => 'Cancel';
+  String get common_cancel => 'रद्द करें';
 
   @override
-  String get common_confirm => 'Confirm';
+  String get common_confirm => 'पुष्टि करें';
 
   @override
-  String get lock_screen_title => 'Please enter PIN to unlock';
+  String get lock_screen_title => 'अनलॉक करने के लिए कृपया पिन दर्ज करें';
 
   @override
-  String get lock_screen_error => 'Incorrect PIN, please try again';
+  String get lock_screen_error => 'गलत पिन, कृपया पुनः प्रयास करें';
 
   @override
-  String get lock_screen_biometric_tooltip => 'Unlock with biometrics';
+  String get lock_screen_biometric_tooltip => 'बायोमेट्रिक्स के साथ अनलॉक करें';
 
   @override
   String get ingestion_title => 'Preview & Processing';

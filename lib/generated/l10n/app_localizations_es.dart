@@ -4,36 +4,36 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Spanish Castilian (`es`).
+class AppLocalizationsEs extends AppLocalizations {
+  AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
   String get appTitle => 'PaperHealth';
 
   @override
-  String get common_save => 'Save';
+  String get common_save => 'Guardar';
 
   @override
-  String get common_edit => 'Edit';
+  String get common_edit => 'Editar';
 
   @override
-  String get common_delete => 'Delete';
+  String get common_delete => 'Eliminar';
 
   @override
-  String get common_cancel => 'Cancel';
+  String get common_cancel => 'Cancelar';
 
   @override
-  String get common_confirm => 'Confirm';
+  String get common_confirm => 'Confirmar';
 
   @override
-  String get lock_screen_title => 'Please enter PIN to unlock';
+  String get lock_screen_title => 'Por favor, ingrese el PIN para desbloquear';
 
   @override
-  String get lock_screen_error => 'Incorrect PIN, please try again';
+  String get lock_screen_error => 'PIN incorrecto, por favor intente de nuevo';
 
   @override
-  String get lock_screen_biometric_tooltip => 'Unlock with biometrics';
+  String get lock_screen_biometric_tooltip => 'Desbloquear con biometría';
 
   @override
   String get ingestion_title => 'Preview & Processing';

@@ -1,0 +1,12 @@
+{
+  "@@locale": "es",
+  "appTitle": "PaperHealth",
+  "common_save": "Guardar",
+  "common_edit": "Editar",
+  "common_delete": "Eliminar",
+  "common_cancel": "Cancelar",
+  "common_confirm": "Confirmar",
+  "lock_screen_title": "Por favor, ingrese el PIN para desbloquear",
+  "lock_screen_error": "PIN incorrecto, por favor intente de nuevo",
+  "lock_screen_biometric_tooltip": "Desbloquear con biometría"
+}

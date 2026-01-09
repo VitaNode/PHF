@@ -1,0 +1,12 @@
+{
+  "@@locale": "vi",
+  "appTitle": "PaperHealth",
+  "common_save": "Lưu",
+  "common_edit": "Chỉnh sửa",
+  "common_delete": "Xóa",
+  "common_cancel": "Hủy",
+  "common_confirm": "Xác nhận",
+  "lock_screen_title": "Vui lòng nhập mã PIN để mở khóa",
+  "lock_screen_error": "Mã PIN không đúng, vui lòng thử lại",
+  "lock_screen_biometric_tooltip": "Mở khóa bằng sinh trắc học"
+}

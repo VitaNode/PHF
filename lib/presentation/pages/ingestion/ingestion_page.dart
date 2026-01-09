@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../logic/providers/ingestion_provider.dart';
 import '../../../logic/providers/states/ingestion_state.dart';
 import '../../theme/app_theme.dart';
@@ -78,7 +79,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('预览与处理'),
+        title: Text(AppLocalizations.of(context)!.ingestion_title),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
@@ -97,19 +98,51 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
           ? null
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 12.0,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      '元数据将在保存后由背景 OCR 自动识别',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        AppLocalizations.of(context)!.ingestion_grouped_report,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.ingestion_grouped_report_hint,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.textHint,
+                        ),
+                      ),
+                      value: state.isGroupedReport,
+                      onChanged: (val) => notifier.toggleGroupedReport(val),
+                      activeTrackColor: AppTheme.primary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)!.ingestion_ocr_hint,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       child: ActiveButton(
-                        text: '开始处理并归档',
+                        text: AppLocalizations.of(
+                          context,
+                        )!.ingestion_submit_button,
                         onPressed: () => notifier.submit(),
                         isLoading: state.status == IngestionStatus.processing,
                       ),
@@ -128,9 +161,15 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
         children: [
           const Icon(Icons.photo_outlined, size: 64, color: AppTheme.textHint),
           const SizedBox(height: 16),
-          const Text('请添加病历照片', style: TextStyle(color: AppTheme.textHint)),
+          Text(
+            AppLocalizations.of(context)!.ingestion_empty_hint,
+            style: const TextStyle(color: AppTheme.textHint),
+          ),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _showPickerMenu, child: const Text('立即添加')),
+          ElevatedButton(
+            onPressed: _showPickerMenu,
+            child: Text(AppLocalizations.of(context)!.ingestion_add_now),
+          ),
         ],
       ),
     );

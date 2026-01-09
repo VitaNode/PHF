@@ -26,5 +26,25 @@
   },
   "lock_screen_title": "Please enter PIN to unlock",
   "lock_screen_error": "Incorrect PIN, please try again",
-  "lock_screen_biometric_tooltip": "Unlock with biometrics"
+  "lock_screen_biometric_tooltip": "Unlock with biometrics",
+  "ingestion_title": "Preview & Processing",
+  "ingestion_empty_hint": "Please add medical record photos",
+  "ingestion_add_now": "Add Now",
+  "ingestion_ocr_hint": "Metadata will be recognized by background OCR after saving",
+  "ingestion_submit_button": "Start Processing & Archive",
+  "ingestion_grouped_report": "Mark as a multi-page report",
+  "ingestion_grouped_report_hint": "SLM will treat these images as a single continuous document",
+  "review_edit_title": "Verify Information",
+  "review_edit_confirm": "Confirm & Archive",
+  "review_edit_basic_info": "Basic Info (Tap to Edit)",
+  "review_edit_hospital_label": "Hospital/Institution",
+  "review_edit_date_label": "Visit Date",
+  "review_edit_confidence": "OCR Confidence",
+  "review_edit_page_indicator": "Image {current} / {total} (Please verify each page)",
+  "@review_edit_page_indicator": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  }
 }

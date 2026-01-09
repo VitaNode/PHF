@@ -4,36 +4,36 @@ import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
 
-/// The translations for English (`en`).
-class AppLocalizationsEn extends AppLocalizations {
-  AppLocalizationsEn([String locale = 'en']) : super(locale);
+/// The translations for Vietnamese (`vi`).
+class AppLocalizationsVi extends AppLocalizations {
+  AppLocalizationsVi([String locale = 'vi']) : super(locale);
 
   @override
   String get appTitle => 'PaperHealth';
 
   @override
-  String get common_save => 'Save';
+  String get common_save => 'Lưu';
 
   @override
-  String get common_edit => 'Edit';
+  String get common_edit => 'Chỉnh sửa';
 
   @override
-  String get common_delete => 'Delete';
+  String get common_delete => 'Xóa';
 
   @override
-  String get common_cancel => 'Cancel';
+  String get common_cancel => 'Hủy';
 
   @override
-  String get common_confirm => 'Confirm';
+  String get common_confirm => 'Xác nhận';
 
   @override
-  String get lock_screen_title => 'Please enter PIN to unlock';
+  String get lock_screen_title => 'Vui lòng nhập mã PIN để mở khóa';
 
   @override
-  String get lock_screen_error => 'Incorrect PIN, please try again';
+  String get lock_screen_error => 'Mã PIN không đúng, vui lòng thử lại';
 
   @override
-  String get lock_screen_biometric_tooltip => 'Unlock with biometrics';
+  String get lock_screen_biometric_tooltip => 'Mở khóa bằng sinh trắc học';
 
   @override
   String get ingestion_title => 'Preview & Processing';

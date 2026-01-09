@@ -6,6 +6,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_th.dart';
+import 'app_localizations_vi.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -95,6 +101,12 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('es'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('pt'),
+    Locale('th'),
+    Locale('vi'),
     Locale('zh'),
   ];
 
@@ -151,6 +163,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock with biometrics'**
   String get lock_screen_biometric_tooltip;
+
+  /// No description provided for @ingestion_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview & Processing'**
+  String get ingestion_title;
+
+  /// No description provided for @ingestion_empty_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add medical record photos'**
+  String get ingestion_empty_hint;
+
+  /// No description provided for @ingestion_add_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Now'**
+  String get ingestion_add_now;
+
+  /// No description provided for @ingestion_ocr_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata will be recognized by background OCR after saving'**
+  String get ingestion_ocr_hint;
+
+  /// No description provided for @ingestion_submit_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Processing & Archive'**
+  String get ingestion_submit_button;
+
+  /// No description provided for @ingestion_grouped_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as a multi-page report'**
+  String get ingestion_grouped_report;
+
+  /// No description provided for @ingestion_grouped_report_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'SLM will treat these images as a single continuous document'**
+  String get ingestion_grouped_report_hint;
+
+  /// No description provided for @review_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Information'**
+  String get review_edit_title;
+
+  /// No description provided for @review_edit_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Archive'**
+  String get review_edit_confirm;
+
+  /// No description provided for @review_edit_basic_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info (Tap to Edit)'**
+  String get review_edit_basic_info;
+
+  /// No description provided for @review_edit_hospital_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital/Institution'**
+  String get review_edit_hospital_label;
+
+  /// No description provided for @review_edit_date_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit Date'**
+  String get review_edit_date_label;
+
+  /// No description provided for @review_edit_confidence.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR Confidence'**
+  String get review_edit_confidence;
+
+  /// No description provided for @review_edit_page_indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {current} / {total} (Please verify each page)'**
+  String review_edit_page_indicator(int current, int total);
 }
 
 class _AppLocalizationsDelegate
@@ -163,8 +259,16 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'en',
+    'es',
+    'hi',
+    'id',
+    'pt',
+    'th',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -175,6 +279,18 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'vi':
+      return AppLocalizationsVi();
     case 'zh':
       return AppLocalizationsZh();
   }

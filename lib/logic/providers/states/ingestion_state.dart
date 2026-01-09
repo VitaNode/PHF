@@ -16,5 +16,6 @@ abstract class IngestionState with _$IngestionState {
     @Default(IngestionStatus.idle) IngestionStatus status,
     String? errorMessage,
     @Default([]) List<String> selectedTagIds,
+    @Default(false) bool isGroupedReport,
   }) = _IngestionState;
 }

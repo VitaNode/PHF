@@ -1,0 +1,12 @@
+{
+  "@@locale": "th",
+  "appTitle": "PaperHealth",
+  "common_save": "บันทึก",
+  "common_edit": "แก้ไข",
+  "common_delete": "ลบ",
+  "common_cancel": "ยกเลิก",
+  "common_confirm": "ยืนยัน",
+  "lock_screen_title": "กรุณาใส่รหัส PIN เพื่อปลดล็อก",
+  "lock_screen_error": "รหัส PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง",
+  "lock_screen_biometric_tooltip": "ปลดล็อกด้วยไบโอเมตริกซ์"
+}

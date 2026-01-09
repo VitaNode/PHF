@@ -1,0 +1,12 @@
+{
+  "@@locale": "hi",
+  "appTitle": "PaperHealth",
+  "common_save": "सहेजें",
+  "common_edit": "संपादित करें",
+  "common_delete": "हटाएं",
+  "common_cancel": "रद्द करें",
+  "common_confirm": "पुष्टि करें",
+  "lock_screen_title": "अनलॉक करने के लिए कृपया पिन दर्ज करें",
+  "lock_screen_error": "गलत पिन, कृपया पुनः प्रयास करें",
+  "lock_screen_biometric_tooltip": "बायोमेट्रिक्स के साथ अनलॉक करें"
+}
