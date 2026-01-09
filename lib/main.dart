@@ -1,3 +1,14 @@
+/// # Main Entry Point
+///
+/// ## Description
+/// 应用的入口点，负责初始化全局服务、配置主题、路由以及全局拦截器（如锁屏）。
+///
+/// ## Architecture
+/// - **Provider Initialization**: 使用 `ProviderContainer` 在 `runApp` 之前预热异步服务。
+/// - **Global Interceptor**: 在 `MaterialApp.builder` 中实现全局锁屏拦截逻辑。
+/// - **Navigation Preservation**: 使用 `Stack` 和 `AbsorbPointer` 确保在锁定期间保留 `Navigator` 状态，并在解锁后恢复至先前的页面堆栈。
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/pages/home/home_page.dart';
@@ -73,15 +84,23 @@ class PaperHealthApp extends ConsumerWidget {
             final isDisclaimerAccepted =
                 ref.watch(isDisclaimerAcceptedProvider).value ?? false;
 
-            // 只有当：已接受免责声明、已设置密码、且处于锁定状态时，才强制显示锁屏
-            if (isDisclaimerAccepted && hasLock && isLocked) {
-              return LockScreen(
-                onAuthenticated: () {
-                  ref.read(authStateControllerProvider.notifier).unlock();
-                },
-              );
-            }
-            return child!;
+            final showLockScreen = isDisclaimerAccepted && hasLock && isLocked;
+
+            return Stack(
+              children: [
+                // 即使显示锁屏，也保留 child (Navigator) 在树中，以维持页面堆栈
+                if (child != null)
+                  AbsorbPointer(absorbing: showLockScreen, child: child),
+
+                // 只有当：已接受免责声明、已设置密码、且处于锁定状态时，才强制显示锁屏
+                if (showLockScreen)
+                  LockScreen(
+                    onAuthenticated: () {
+                      ref.read(authStateControllerProvider.notifier).unlock();
+                    },
+                  ),
+              ],
+            );
           },
         );
       },
