@@ -16,6 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/presentation/widgets/focus_zoom_overlay.dart';
+import 'package:phf/logic/services/slm/layout_parser.dart';
+import 'package:phf/data/models/slm/slm_data_block.dart';
 import '../../../data/models/record.dart';
 import '../../../data/models/image.dart';
 import '../../../data/models/ocr_result.dart';
@@ -43,6 +45,11 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   int _currentImageIndex = 0;
   late PageController _pageController;
 
+  // New: Structured data blocks
+  List<SLMDataBlock> _currentBlocks = [];
+  final List<TextEditingController> _blockControllers = [];
+  final List<FocusNode> _blockFocusNodes = [];
+
   @override
   void initState() {
     super.initState();
@@ -58,8 +65,20 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     _hospitalController.dispose();
     _hospitalFocus.dispose();
     _dateFocus.dispose();
+    _disposeBlockResources();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _disposeBlockResources() {
+    for (final c in _blockControllers) {
+      c.dispose();
+    }
+    for (final f in _blockFocusNodes) {
+      f.dispose();
+    }
+    _blockControllers.clear();
+    _blockFocusNodes.clear();
   }
 
   void _updateControllersForIndex(int index) {
@@ -67,9 +86,30 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     if (index < 0 || index >= images.length) return;
 
     final img = images[index];
-    _hospitalController.text =
-        img.hospitalName ?? widget.record.hospitalName ?? '';
+    _hospitalController.text = img.hospitalName ?? widget.record.hospitalName ?? '';
     _visitDate = img.visitDate ?? widget.record.notedAt;
+
+    // Parse blocks for structured editing
+    _disposeBlockResources();
+    OcrResult? ocr;
+    if (img.ocrRawJson != null) {
+      try {
+        ocr = OcrResult.fromJson(jsonDecode(img.ocrRawJson!) as Map<String, dynamic>);
+      } catch (_) {}
+    }
+
+    if (ocr != null) {
+      _currentBlocks = LayoutParser().parse(ocr);
+      for (final block in _currentBlocks) {
+        final controller = TextEditingController(text: block.rawText);
+        final focusNode = FocusNode();
+        focusNode.addListener(() => setState(() {}));
+        _blockControllers.add(controller);
+        _blockFocusNodes.add(focusNode);
+      }
+    } else {
+      _currentBlocks = [];
+    }
   }
 
   void _onImageChanged(int index) {
@@ -82,19 +122,29 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   Future<void> _approve() async {
     try {
       final recordRepo = ref.read(recordRepositoryProvider);
+      final imageRepo = ref.read(imageRepositoryProvider);
       final reviewNotifier = ref.read(reviewListControllerProvider.notifier);
 
-      // 1. Save changes and mark as verified (Automatic in Repository update)
+      // 1. Aggregated OCR text if edited
+      if (_blockControllers.isNotEmpty) {
+        final newFullText = _blockControllers.map((c) => c.text).join('\n');
+        await imageRepo.updateOCRData(
+          widget.record.images[_currentImageIndex].id,
+          newFullText,
+        );
+      }
+
+      // 2. Save changes and mark as verified (Automatic in Repository update)
       await recordRepo.updateRecordMetadata(
         widget.record.id,
         hospitalName: _hospitalController.text,
         visitDate: _visitDate,
       );
 
-      // 2. Approve status
+      // 3. Approve status
       await reviewNotifier.approveRecord(widget.record.id);
 
-      // 3. Refresh timeline
+      // 4. Refresh timeline
       ref.invalidate(timelineControllerProvider);
 
       if (mounted) {
@@ -112,10 +162,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   PreferredSizeWidget _buildAppBar() {
     final l10n = AppLocalizations.of(context)!;
     return AppBar(
-      title: Text(
-        l10n.review_edit_title,
-        style: const TextStyle(color: Colors.black),
-      ),
+      title: Text(l10n.review_edit_title, style: const TextStyle(color: Colors.black)),
       backgroundColor: Colors.white,
       elevation: 0,
       iconTheme: const IconThemeData(color: Colors.black),
@@ -163,12 +210,8 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                       return OCRHighlightView(
                         imageProvider: imageProvider,
                         ocrResult: currentOcr,
-                        actualImageSize:
-                            (img.width != null && img.height != null)
-                            ? Size(
-                                img.width!.toDouble(),
-                                img.height!.toDouble(),
-                              )
+                        actualImageSize: (img.width != null && img.height != null)
+                            ? Size(img.width!.toDouble(), img.height!.toDouble())
                             : null,
                       );
                     },
@@ -190,6 +233,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
                       child: IconButton(
@@ -218,6 +262,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
                       child: IconButton(
@@ -242,22 +287,14 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                    ),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Text(
-                    l10n.review_edit_page_indicator(
-                      _currentImageIndex + 1,
-                      images.length,
-                    ),
+                    l10n.review_edit_page_indicator(_currentImageIndex + 1, images.length),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -274,16 +311,21 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   }
 
   Widget _buildZoomOverlay(MedicalImage currentImage) {
-    if (!_hospitalFocus.hasFocus && !_dateFocus.hasFocus) {
-      return const SizedBox(height: 8);
-    }
-    const rect = [0.0, 0.0, 1.0, 0.25];
+    final finalRect = (_hospitalFocus.hasFocus || _dateFocus.hasFocus)
+        ? const [0.0, 0.0, 1.0, 0.25]
+        : (() {
+            final idx = _blockFocusNodes.indexWhere((f) => f.hasFocus);
+            return idx != -1 ? _currentBlocks[idx].boundingBox : null;
+          })();
+
+    if (finalRect == null) return const SizedBox(height: 8);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: FocusZoomOverlay(
         imagePath: currentImage.filePath,
         encryptionKey: currentImage.encryptionKey,
-        normalizedRect: rect,
+        normalizedRect: finalRect,
       ),
     );
   }
@@ -306,10 +348,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
               _buildZoomOverlay(currentImage),
               Text(
                 l10n.review_edit_basic_info,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -325,39 +364,67 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
               ),
               const SizedBox(height: 16),
               _buildDatePicker(currentImage, isLowConfidence, warningColor),
+              const SizedBox(height: 32),
+              
+              // New: Structured Content Editor
+              if (_blockControllers.isNotEmpty) ...[
+                const Text(
+                  '识别内容 (可点击逐行校对)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '点击下方文字，上方将自动放大对应图片区域',
+                  style: TextStyle(fontSize: 11, color: AppTheme.textHint),
+                ),
+                const SizedBox(height: 16),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _blockControllers.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final block = _currentBlocks[index];
+                    final isBlockLow = block.confidence < 0.8;
+                    return TextField(
+                      controller: _blockControllers[index],
+                      focusNode: _blockFocusNodes[index],
+                      maxLines: null,
+                      style: AppTheme.monoStyle.copyWith(fontSize: 14),
+                      decoration: InputDecoration(
+                        filled: isBlockLow,
+                        fillColor: isBlockLow ? warningColor : Colors.grey.shade50,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        isDense: true,
+                      ),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: 16),
               if (currentImage.ocrConfidence != null)
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isLowConfidence
-                        ? Colors.orange.shade50
-                        : AppTheme.primaryTeal.withValues(alpha: 0.05),
+                    color: isLowConfidence ? Colors.orange.shade50 : AppTheme.primaryTeal.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isLowConfidence
-                          ? Colors.orange.shade200
-                          : AppTheme.primaryTeal.withValues(alpha: 0.2),
+                      color: isLowConfidence ? Colors.orange.shade200 : AppTheme.primaryTeal.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        isLowConfidence
-                            ? Icons.warning_amber
-                            : Icons.auto_awesome,
+                        isLowConfidence ? Icons.warning_amber : Icons.auto_awesome,
                         size: 16,
-                        color: isLowConfidence
-                            ? Colors.orange
-                            : AppTheme.primaryTeal,
+                        color: isLowConfidence ? Colors.orange : AppTheme.primaryTeal,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${l10n.review_edit_confidence}: ${(currentImage.ocrConfidence! * 100).toStringAsFixed(1)}%',
                         style: TextStyle(
-                          color: isLowConfidence
-                              ? Colors.orange
-                              : AppTheme.primaryTeal,
+                          color: isLowConfidence ? Colors.orange : AppTheme.primaryTeal,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -387,9 +454,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       child: AbsorbPointer(
         child: TextField(
           controller: TextEditingController(
-            text: _visitDate != null
-                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
-                : '',
+            text: _visitDate != null ? DateFormat('yyyy-MM-dd').format(_visitDate!) : '',
           ),
           focusNode: _dateFocus,
           decoration: InputDecoration(
