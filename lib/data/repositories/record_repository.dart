@@ -19,7 +19,6 @@ library;
 
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../core/utils/fts_helper.dart';
-import '../../data/models/image.dart';
 import '../../data/models/record.dart';
 import 'base_repository.dart';
 import 'interfaces/record_repository.dart';
@@ -94,9 +93,9 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
       orderBy: 'page_index ASC',
     );
 
-    final images = imageMaps.map((m) => _mapToImage(m)).toList();
+    final images = imageMaps.map((m) => mapToImage(m)).toList();
 
-    return _mapToRecord(row, images);
+    return mapToRecord(row, images);
   }
 
   @override
@@ -118,25 +117,11 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     final recordIds = maps.map((m) => m['id'] as String).toList();
 
     // 优化：一次性获取所有相关的图片元数据，避免 N+1 查询
-    final String placeholders = List.filled(recordIds.length, '?').join(',');
-    final List<Map<String, dynamic>> imageMaps = await exec.query(
-      'images',
-      where: 'record_id IN ($placeholders)',
-      whereArgs: recordIds,
-      orderBy: 'page_index ASC',
-    );
-
-    // 按 record_id 分组
-    final Map<String, List<MedicalImage>> imagesByRecord = {};
-    for (var imgMap in imageMaps) {
-      final rid = imgMap['record_id'] as String;
-      imagesByRecord.putIfAbsent(rid, () => []);
-      imagesByRecord[rid]!.add(_mapToImage(imgMap));
-    }
+    final imagesByRecord = await fetchImagesForRecords(exec, recordIds);
 
     return maps.map((m) {
       final rid = m['id'] as String;
-      return _mapToRecord(m, imagesByRecord[rid] ?? []);
+      return mapToRecord(m, imagesByRecord[rid] ?? []);
     }).toList();
   }
 
@@ -261,7 +246,7 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     }
 
     final List<Map<String, dynamic>> maps = await exec.rawQuery(sql, args);
-    return maps.map((m) => _mapToRecord(m, [])).toList();
+    return maps.map((m) => mapToRecord(m, [])).toList();
   }
 
   @override
@@ -358,99 +343,11 @@ class RecordRepository extends BaseRepository implements IRecordRepository {
     final recordIds = maps.map((m) => m['id'] as String).toList();
 
     // Fetch Images for N+1 optimization
-    final String placeholders = List.filled(recordIds.length, '?').join(',');
-    final List<Map<String, dynamic>> imageMaps = await exec.query(
-      'images',
-      where: 'record_id IN ($placeholders)',
-      whereArgs: recordIds,
-      orderBy: 'page_index ASC',
-    );
-
-    final Map<String, List<MedicalImage>> imagesByRecord = {};
-    for (var imgMap in imageMaps) {
-      final rid = imgMap['record_id'] as String;
-      imagesByRecord.putIfAbsent(rid, () => []);
-      imagesByRecord[rid]!.add(_mapToImage(imgMap));
-    }
+    final imagesByRecord = await fetchImagesForRecords(exec, recordIds);
 
     return maps.map((m) {
       final rid = m['id'] as String;
-      return _mapToRecord(m, imagesByRecord[rid] ?? []);
+      return mapToRecord(m, imagesByRecord[rid] ?? []);
     }).toList();
-  }
-
-  // --- Helpers ---
-
-  MedicalRecord _mapToRecord(
-    Map<String, dynamic> row,
-    List<MedicalImage> images,
-  ) {
-    // 还原 DateTime
-    final visitDateMs = row['visit_date_ms'] as int?;
-    final createdAtMs = row['created_at_ms'] as int;
-    final updatedAtMs = row['updated_at_ms'] as int;
-
-    final notedAt = visitDateMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(visitDateMs)
-        : DateTime.fromMillisecondsSinceEpoch(
-            createdAtMs,
-          ); // Fallback to creation date
-
-    final visitEndDate = row['visit_end_date_ms'] != null
-        ? DateTime.fromMillisecondsSinceEpoch(row['visit_end_date_ms'] as int)
-        : null;
-    final createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs);
-    final updatedAt = DateTime.fromMillisecondsSinceEpoch(updatedAtMs);
-
-    // 还原 Status
-    final statusStr = row['status'] as String;
-    final status = RecordStatus.values.firstWhere(
-      (e) => e.name == statusStr,
-      orElse: () => RecordStatus.archived,
-    );
-
-    return MedicalRecord(
-      id: row['id'] as String,
-      personId: row['person_id'] as String,
-      groupId: row['group_id'] as String?,
-      hospitalName: row['hospital_name'] as String?,
-      notes: row['notes'] as String?,
-      notedAt: notedAt,
-      visitEndDate: visitEndDate,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      status: status,
-      tagsCache: row['tags_cache'] as String?,
-      images: images,
-    );
-  }
-
-  MedicalImage _mapToImage(Map<String, dynamic> row) {
-    return MedicalImage.fromJson({
-      'id': row['id'],
-      'recordId': row['record_id'],
-      'encryptionKey': row['encryption_key'],
-      'thumbnailEncryptionKey':
-          row['thumbnail_encryption_key'] ?? row['encryption_key'],
-      'filePath': row['file_path'],
-      'thumbnailPath': row['thumbnail_path'],
-      'mimeType': row['mime_type'],
-      'fileSize': row['file_size'],
-      'displayOrder': row['page_index'],
-      'width': row['width'],
-      'height': row['height'],
-      'ocrText': row['ocr_text'],
-      'ocrRawJson': row['ocr_raw_json'],
-      'ocrConfidence': row['ocr_confidence'],
-      'hospitalName': row['hospital_name'],
-      'visitDate': row['visit_date_ms'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(
-              row['visit_date_ms'] as int,
-            ).toIso8601String()
-          : null,
-      'createdAt': DateTime.fromMillisecondsSinceEpoch(
-        row['created_at_ms'] as int,
-      ).toIso8601String(),
-    });
   }
 }
