@@ -183,7 +183,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     // Verify Collapsible card is present
-    // Note: CollapsibleOcrCard might still use hardcoded text internally, 
+    // Note: CollapsibleOcrCard might still use hardcoded text internally,
     // but the tooltip and BottomSheet should be localized.
     expect(find.text('OCR 识别文本'), findsOneWidget);
 
