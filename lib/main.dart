@@ -17,6 +17,8 @@ import 'presentation/pages/onboarding/security_onboarding_page.dart';
 import 'presentation/pages/onboarding/medical_disclaimer_page.dart';
 import 'presentation/pages/auth/lock_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'logic/providers/auth_provider.dart';
 import 'logic/services/background_worker_service.dart';
@@ -64,9 +66,16 @@ class PaperHealthApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: 'PaperHealth',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       // 使用 AppLoader 处理初始路由分发
       home: const AppLoader(),
       routes: {

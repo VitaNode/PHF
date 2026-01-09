@@ -43,7 +43,7 @@ import 'seeds/database_seeder.dart';
 
 class SQLCipherDatabaseService {
   static const String _dbName = 'phf_encrypted.db';
-  static const int _dbVersion = 9;
+  static const int _dbVersion = 10;
 
   final MasterKeyManager keyManager;
   final PathProviderService pathService;
@@ -169,6 +169,8 @@ class SQLCipherDatabaseService {
         id              TEXT PRIMARY KEY,
         person_id       TEXT NOT NULL REFERENCES persons(id) ON DELETE CASCADE,
         status          TEXT NOT NULL DEFAULT 'processing',
+        is_verified     INTEGER DEFAULT 0,
+        group_id        TEXT,
         visit_date_ms   INTEGER,
         visit_date_iso  TEXT,
         hospital_name   TEXT,
@@ -489,6 +491,16 @@ class SQLCipherDatabaseService {
           tokenize = "unicode61"
         )
       ''');
+    }
+
+    if (oldVersion < 10) {
+      // Upgrade to v10: Phase 4 SLM Data Pipeline support
+      try {
+        await db.execute(
+          'ALTER TABLE records ADD COLUMN is_verified INTEGER DEFAULT 0',
+        );
+        await db.execute('ALTER TABLE records ADD COLUMN group_id TEXT');
+      } catch (_) {}
     }
 
     await batch.commit();
