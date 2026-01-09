@@ -9,6 +9,9 @@
 /// 2. **Row Clustering**: 基于 Y 轴坐标和高度，将 Lines 聚类为逻辑行。
 /// 3. **Column Sorting**: 在每一行内，基于 X 轴坐标对 Lines 进行排序。
 /// 4. **Transformation**: 将排序后的 Lines 转换为 `SLMDataBlock`。
+///
+/// ## Repair Logs
+/// - [2026-01-09] 修复：实现了按页隔离的聚类逻辑，防止多页文档内容在 Y 轴坐标接近时发生混淆。
 library;
 
 import '../../../data/models/ocr_result.dart';
@@ -17,92 +20,86 @@ import '../../../data/models/slm/slm_data_block.dart';
 class LayoutParser {
   /// 将 OCR 结果解析为有序的 SLM 数据块列表
   List<SLMDataBlock> parse(OcrResult ocrResult) {
-    // 1. Flatten all lines from all pages
-    final allLines = <_LineContext>[];
-    for (final page in ocrResult.pages) {
-      for (final block in page.blocks) {
-        for (final line in block.lines) {
-          allLines.add(_LineContext(line, page.pageNumber));
-        }
-      }
-    }
-
-    if (allLines.isEmpty) return [];
-
-    // 2. Row Clustering
-    // Sort by Y first to make clustering easier
-    allLines.sort((a, b) => a.line.y.compareTo(b.line.y));
-
-    final rows = <List<_LineContext>>[];
-
-    for (final ctx in allLines) {
-      bool added = false;
-
-      // Try to add to an existing row
-      // We iterate backwards to find the closest row (usually the last one)
-      for (int i = rows.length - 1; i >= 0; i--) {
-        final row = rows[i];
-        final rowY = _calculateRowY(row);
-        final rowH = _calculateRowHeight(row);
-
-        // Threshold: 垂直中心距离小于行高的一半
-        final centerDiff = (ctx.line.y + ctx.line.h / 2) - (rowY + rowH / 2);
-        if (centerDiff.abs() < rowH * 0.5) {
-          row.add(ctx);
-          added = true;
-          break;
-        }
-      }
-
-      if (!added) {
-        rows.add([ctx]);
-      }
-    }
-
-    // 3. Column Sorting & 4. Transformation
     final result = <SLMDataBlock>[];
 
-    for (final row in rows) {
-      // Sort lines in row by X coordinate
-      row.sort((a, b) => a.line.x.compareTo(b.line.x));
+    // 按页处理，防止多页混淆
+    for (final page in ocrResult.pages) {
+      final pageLines = <OcrLine>[];
+      for (final block in page.blocks) {
+        for (final line in block.lines) {
+          pageLines.add(line);
+        }
+      }
 
-      for (final ctx in row) {
-        result.add(
-          SLMDataBlock(
-            rawText: ctx.line.text,
-            confidence: ctx.line.confidence,
-            boundingBox: [ctx.line.x, ctx.line.y, ctx.line.w, ctx.line.h],
-            // normalizedText and other fields will be filled by subsequent processors
-          ),
-        );
+      if (pageLines.isEmpty) continue;
+
+      // 1. Row Clustering for this page
+      // Sort by Y first to make clustering easier
+      pageLines.sort((a, b) => a.y.compareTo(b.y));
+
+      final rows = <List<OcrLine>>[];
+
+      for (final line in pageLines) {
+        bool added = false;
+
+        // Try to add to an existing row
+        for (int i = rows.length - 1; i >= 0; i--) {
+          final row = rows[i];
+          final rowY = _calculateRowY(row);
+          final rowH = _calculateRowHeight(row);
+
+          // Threshold: 垂直中心距离小于行高的一半
+          final centerDiff = (line.y + line.h / 2) - (rowY + rowH / 2);
+          if (centerDiff.abs() < rowH * 0.5) {
+            row.add(line);
+            added = true;
+            break;
+          }
+        }
+
+        if (!added) {
+          rows.add([line]);
+        }
+      }
+
+      // 2. Column Sorting & Transformation
+      for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        final row = rows[rowIndex];
+        // Sort lines in row by X coordinate
+        row.sort((a, b) => a.x.compareTo(b.x));
+
+        for (final line in row) {
+          result.add(
+            SLMDataBlock(
+              rawText: line.text,
+              confidence: line.confidence,
+              boundingBox: [line.x, line.y, line.w, line.h],
+              // 我们在这里暂存 row_index 信息，如果模型支持
+              // 虽然 SLMDataBlock 实体中目前没有 rowIndex，但有序列表已足够
+            ),
+          );
+        }
       }
     }
 
     return result;
   }
 
-  double _calculateRowY(List<_LineContext> row) {
+  double _calculateRowY(List<OcrLine> row) {
     if (row.isEmpty) return 0.0;
     double sum = 0.0;
-    for (var ctx in row) {
-      sum += ctx.line.y;
+    for (var line in row) {
+      sum += line.y;
     }
     return sum / row.length;
   }
 
-  double _calculateRowHeight(List<_LineContext> row) {
+  double _calculateRowHeight(List<OcrLine> row) {
     if (row.isEmpty) return 0.0;
     double sum = 0.0;
-    for (var ctx in row) {
-      sum += ctx.line.h;
+    for (var line in row) {
+      sum += line.h;
     }
     return sum / row.length;
   }
-}
-
-class _LineContext {
-  final OcrLine line;
-  final int pageNumber; // Reserved for multi-page support
-
-  _LineContext(this.line, this.pageNumber);
 }
