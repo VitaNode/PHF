@@ -1,0 +1,12 @@
+{
+  "@@locale": "zh",
+  "appTitle": "纸上健康",
+  "common_save": "保存",
+  "common_edit": "编辑",
+  "common_delete": "删除",
+  "common_cancel": "取消",
+  "common_confirm": "确认",
+  "lock_screen_title": "请输入 PIN 码解锁",
+  "lock_screen_error": "PIN 码错误，请重新输入",
+  "lock_screen_biometric_tooltip": "使用生物识别解锁"
+}

@@ -1,0 +1,30 @@
+{
+  "@@locale": "en",
+  "appTitle": "PaperHealth",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "common_save": "Save",
+  "@common_save": {
+    "description": "General save button text"
+  },
+  "common_edit": "Edit",
+  "@common_edit": {
+    "description": "General edit button text"
+  },
+  "common_delete": "Delete",
+  "@common_delete": {
+    "description": "General delete button text"
+  },
+  "common_cancel": "Cancel",
+  "@common_cancel": {
+    "description": "General cancel button text"
+  },
+  "common_confirm": "Confirm",
+  "@common_confirm": {
+    "description": "General confirm button text"
+  },
+  "lock_screen_title": "Please enter PIN to unlock",
+  "lock_screen_error": "Incorrect PIN, please try again",
+  "lock_screen_biometric_tooltip": "Unlock with biometrics"
+}

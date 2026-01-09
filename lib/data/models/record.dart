@@ -6,6 +6,8 @@
 /// ## Fields
 /// - `id`: 唯一标识 (UUID).
 /// - `personId`: 所属用户的 ID.
+/// - `isVerified`: 数据是否已完成人工校验 (Phase 4).
+/// - `groupId`: 跨页/相关文档的组 ID (Phase 4).
 /// - `hospitalName`: 就诊医院名称.
 /// - `notes`: 备注/笔记.
 /// - `notedAt`: 事件发生时间.
@@ -42,6 +44,8 @@ abstract class MedicalRecord with _$MedicalRecord {
   const factory MedicalRecord({
     required String id,
     required String personId,
+    @Default(false) bool isVerified,
+    String? groupId,
     String? hospitalName,
     String? notes,
     required DateTime notedAt,
