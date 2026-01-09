@@ -144,6 +144,39 @@
 | **T3.4.3** | **Backup & Restore UI** | 导出/导入操作界面，支持系统分享对话框调用。 | T3.3.2 |
 | **T3.4.4** | **Store Compliance & Assets** | 1. 静态 Markdown 隐私政策页面。<br>2. App Icon & Splash Screen。DoD: 运行 `flutter build` 无 Asset 缺失。 | - |
 
+---
+
+## Phase 4: SLM Data Pipeline & Internationalization (数据管道与国际化)
+**Goal**: 构建 SLM 预处理管道，实现多语言全球化支持与 UI 交互增强。
+
+### 4.1: Infrastructure & i18n (基础设施与国际化)
+**Goal**: 建立多语言支持体系与数据标记位。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T4.1.1** | **i18n Setup (8 Languages)** | 集成 `flutter_localizations` 并初始化 ARB 文件（英、西、葡、印尼、越、泰、印地、中）。DoD: 切换系统语言后应用内硬编码字符串自动更新。 | - |
+| **T4.1.2** | **Schema Update (Verification & PII)** | 1. `records` 表新增 `is_verified` 状态。<br>2. 验证数据库升级后旧数据默认 `is_verified = 0`。 | Phase 3 |
+
+### 4.2: SLM Data Pipeline (SLM 数据管道)
+**Goal**: 实现从原始 OCR 到结构化脱敏数据的转换。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T4.2.1** | **Layout-Aware Parser** | 实现基于 Bounding Box 聚类的行列重组算法，支持化验单表格对齐。DoD: 单元测试验证复杂表格图片的文本重组顺序符合人类阅读逻辑。 | Phase 2 |
+| **T4.2.2** | **Privacy Masking & Normalization** | 1. 实现本地 PII 脱敏（姓名、住址、号码）。<br>2. 医学单位归一化逻辑。DoD: 验证输出的文本已过滤敏感词且单位写法统一。 | - |
+| **T4.2.3** | **Markdown Export Protocol** | 实现将结构化 Block 转化为 Markdown 表格的逻辑，优化 SLM 推理。DoD: 验证导出的字符串可被标准 Markdown 渲染器正确解析。 | T4.2.1 |
+
+### 4.3: UI/UX Enhancements (界面与交互增强)
+**Goal**: 提供更高效的数据校验与全球化适配。
+
+| ID | Task | DoD (验收标准) | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **T4.3.1** | **Confidence-based Highlighting** | 在详情编辑页，对置信度 < 0.8 的文本块应用橙色底纹提示。DoD: 视觉验证低置信度区域醒目。 | Phase 2 |
+| **T4.3.2** | **Focus Zoom Overlay** | 实现点击字段时弹出原始图片对应区域的局部放大浮层。DoD: 验证点击“结果值”输入框时，上方清晰显示原图中对应位置的裁剪图。 | T1.4, T4.2.1 |
+| **T4.3.3** | **Dynamic i18n UI Refinement** | 针对泰语、印地语等特殊语系，优化文本高度与行间距分配，防止溢出。 | T4.1.1 |
+| **T4.3.4** | **Multi-page Session Management UI** | 在录入流中支持“跨页报告”标记，建立 page_group 关联。DoD: 验证同一报告下的多张图片被赋予相同的 group_id。 | Phase 1 |
+
+
 
 
 
