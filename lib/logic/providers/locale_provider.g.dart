@@ -33,7 +33,7 @@ final class LocaleControllerProvider
   LocaleController create() => LocaleController();
 }
 
-String _$localeControllerHash() => r'4c6c6cf5e431c12e132149a6d8ef42d7f19e2bba';
+String _$localeControllerHash() => r'382abd13944019a7ae82f0f6200fad65dc8a874a';
 
 abstract class _$LocaleController extends $AsyncNotifier<Locale?> {
   FutureOr<Locale?> build();
