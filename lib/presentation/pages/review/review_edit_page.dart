@@ -136,9 +136,9 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('归档失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('归档失败: $e')));
       }
     }
   }
