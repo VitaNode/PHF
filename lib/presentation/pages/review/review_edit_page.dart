@@ -80,14 +80,17 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     if (index < 0 || index >= images.length) return;
 
     final img = images[index];
-    _hospitalController.text = img.hospitalName ?? widget.record.hospitalName ?? '';
+    _hospitalController.text =
+        img.hospitalName ?? widget.record.hospitalName ?? '';
     _visitDate = img.visitDate ?? widget.record.notedAt;
 
     _disposeBlockResources();
     OcrResult? ocr;
     if (img.ocrRawJson != null) {
       try {
-        ocr = OcrResult.fromJson(jsonDecode(img.ocrRawJson!) as Map<String, dynamic>);
+        ocr = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
@@ -113,7 +116,10 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
 
       if (_blockControllers.isNotEmpty) {
         final newFullText = _blockControllers.map((c) => c.text).join('\n');
-        await imageRepo.updateOCRData(widget.record.images[_currentImageIndex].id, newFullText);
+        await imageRepo.updateOCRData(
+          widget.record.images[_currentImageIndex].id,
+          newFullText,
+        );
       }
 
       await recordRepo.updateRecordMetadata(
@@ -127,21 +133,30 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
 
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('归档失败: $e')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('归档失败: $e')));
     }
   }
 
   PreferredSizeWidget _buildAppBar() {
     final l10n = AppLocalizations.of(context)!;
     return AppBar(
-      title: Text(l10n.review_edit_title, style: const TextStyle(color: Colors.black)),
+      title: Text(
+        l10n.review_edit_title,
+        style: const TextStyle(color: Colors.black),
+      ),
       backgroundColor: Colors.white,
       elevation: 0,
       iconTheme: const IconThemeData(color: Colors.black),
       actions: [
         TextButton(
           onPressed: _approve,
-          child: Text(l10n.review_edit_confirm, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          child: Text(
+            l10n.review_edit_confirm,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
@@ -182,22 +197,29 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
-            onPressed: _currentImageIndex > 0 ? () {
-              setState(() {
-                _currentImageIndex--;
-                _updateControllersForIndex(_currentImageIndex);
-              });
-            } : null,
+            onPressed: _currentImageIndex > 0
+                ? () {
+                    setState(() {
+                      _currentImageIndex--;
+                      _updateControllersForIndex(_currentImageIndex);
+                    });
+                  }
+                : null,
           ),
-          Text('第 ${_currentImageIndex + 1} / $total 页', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            '第 ${_currentImageIndex + 1} / $total 页',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
-            onPressed: _currentImageIndex < total - 1 ? () {
-              setState(() {
-                _currentImageIndex++;
-                _updateControllersForIndex(_currentImageIndex);
-              });
-            } : null,
+            onPressed: _currentImageIndex < total - 1
+                ? () {
+                    setState(() {
+                      _currentImageIndex++;
+                      _updateControllersForIndex(_currentImageIndex);
+                    });
+                  }
+                : null,
           ),
         ],
       ),
@@ -219,7 +241,11 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       },
       child: AbsorbPointer(
         child: TextField(
-          controller: TextEditingController(text: _visitDate != null ? DateFormat('yyyy-MM-dd').format(_visitDate!) : ''),
+          controller: TextEditingController(
+            text: _visitDate != null
+                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
+                : '',
+          ),
           focusNode: _dateFocus,
           decoration: InputDecoration(
             labelText: l10n.review_edit_date_label,
@@ -239,7 +265,8 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     if (images.isEmpty) return const SizedBox();
     final currentImage = images[_currentImageIndex];
     final l10n = AppLocalizations.of(context)!;
-    final isLowConfidence = currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
+    final isLowConfidence =
+        currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
     final warningColor = Colors.orange.shade50;
 
     return Scaffold(
@@ -255,7 +282,13 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.review_edit_basic_info, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    l10n.review_edit_basic_info,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _hospitalController,
@@ -270,18 +303,28 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                   ),
                   const SizedBox(height: 16),
                   _buildDatePicker(isLowConfidence, warningColor),
-                  
+
                   const SizedBox(height: 32),
                   if (_blockControllers.isNotEmpty) ...[
-                    const Text('识别内容 (可点击逐行校对)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text(
+                      '识别内容 (可点击逐行校对)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    const Text('点击下方文字，上方将自动放大对应图片区域', style: TextStyle(fontSize: 11, color: AppTheme.textHint)),
+                    const Text(
+                      '点击下方文字，上方将自动放大对应图片区域',
+                      style: TextStyle(fontSize: 11, color: AppTheme.textHint),
+                    ),
                     const SizedBox(height: 16),
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _blockControllers.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final block = _currentBlocks[index];
                         final isBlockLow = block.confidence < 0.8;
@@ -292,9 +335,14 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                           style: AppTheme.monoStyle.copyWith(fontSize: 14),
                           decoration: InputDecoration(
                             filled: isBlockLow,
-                            fillColor: isBlockLow ? warningColor : Colors.grey.shade50,
+                            fillColor: isBlockLow
+                                ? warningColor
+                                : Colors.grey.shade50,
                             border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             isDense: true,
                           ),
                         );

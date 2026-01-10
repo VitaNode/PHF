@@ -111,7 +111,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: _buildAppBar(),
-      body: _isEditing 
+      body: _isEditing
           ? _buildImmersiveEditView(currentImage)
           : _buildStandardDetailView(currentImage),
     );
@@ -135,7 +135,8 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   Widget _buildImmersiveEditView(MedicalImage currentImage) {
     final l10n = AppLocalizations.of(context)!;
-    final isLowConfidence = currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
+    final isLowConfidence =
+        currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
     final warningColor = Colors.orange.shade50;
 
     return Column(
@@ -147,7 +148,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.review_edit_basic_info, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  l10n.review_edit_basic_info,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _hospitalController,
@@ -161,18 +168,25 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 ),
                 const SizedBox(height: 16),
                 _buildDatePicker(currentImage, isLowConfidence, warningColor),
-                
+
                 const SizedBox(height: 32),
                 if (_blockControllers.isNotEmpty) ...[
-                  const Text('识别内容 (可点击逐行校对)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    '识别内容 (可点击逐行校对)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('点击下方文字，上方将自动放大对应图片区域', style: TextStyle(fontSize: 11, color: AppTheme.textHint)),
+                  const Text(
+                    '点击下方文字，上方将自动放大对应图片区域',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textHint),
+                  ),
                   const SizedBox(height: 16),
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _blockControllers.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final block = _currentBlocks[index];
                       final isBlockLow = block.confidence < 0.8;
@@ -183,9 +197,14 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                         style: AppTheme.monoStyle.copyWith(fontSize: 14),
                         decoration: InputDecoration(
                           filled: isBlockLow,
-                          fillColor: isBlockLow ? warningColor : Colors.grey.shade50,
+                          fillColor: isBlockLow
+                              ? warningColor
+                              : Colors.grey.shade50,
                           border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           isDense: true,
                         ),
                       );
@@ -193,7 +212,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                   ),
                 ],
                 const SizedBox(height: 32),
-                const Text('管理标签', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  '管理标签',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 _buildTagSelector(),
                 const SizedBox(height: 32),
@@ -266,7 +288,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     OcrResult? ocr;
     if (img.ocrRawJson != null) {
       try {
-        ocr = OcrResult.fromJson(jsonDecode(img.ocrRawJson!) as Map<String, dynamic>);
+        ocr = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
@@ -327,7 +351,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
       }
     }
   }
@@ -342,7 +368,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         title: const Text('删除确认'),
         content: const Text('确定要删除当前这张图片吗？此操作不可撤销。'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
@@ -368,7 +397,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
       }
     }
   }
@@ -381,15 +412,23 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider);
       await ocrQueueRepo.enqueue(currentImage.id);
       await BackgroundWorkerService().triggerProcessing();
-      unawaited(BackgroundWorkerService().startForegroundProcessing(talker: ref.read(talkerProvider)));
+      unawaited(
+        BackgroundWorkerService().startForegroundProcessing(
+          talker: ref.read(talkerProvider),
+        ),
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已重新加入识别队列，请稍候...')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('已重新加入识别队列，请稍候...')));
       }
       await Future<void>.delayed(const Duration(seconds: 2));
       await _loadData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
       }
       setState(() => _isLoading = false);
     }
@@ -411,9 +450,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       ref.invalidate(allTagsProvider);
       final currentIds = [..._images[_currentIndex].tagIds, newTag.id];
       setState(() {
-        _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds);
+        _images[_currentIndex] = _images[_currentIndex].copyWith(
+          tagIds: currentIds,
+        );
       });
-      await ref.read(imageRepositoryProvider).updateImageTags(_images[_currentIndex].id, currentIds);
+      await ref
+          .read(imageRepositoryProvider)
+          .updateImageTags(_images[_currentIndex].id, currentIds);
       await ref.read(timelineControllerProvider.notifier).refresh();
     } catch (_) {}
   }
@@ -421,7 +464,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   void _setupOcrListener() {
     ref.listen(ocrPendingCountProvider, (previous, next) {
       if (next.hasValue && next.value! < (previous?.value ?? 0)) {
-        Future.microtask(() { if (mounted) _loadData(); });
+        Future.microtask(() {
+          if (mounted) _loadData();
+        });
       }
     });
   }
@@ -437,7 +482,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         if (_isEditing)
           TextButton(
             onPressed: _saveChanges,
-            child: Text(l10n.detail_save, style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.detail_save,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         IconButton(
           icon: const Icon(Icons.description_outlined),
@@ -461,14 +509,19 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             return Center(
               child: GestureDetector(
                 onTap: () => _showFullImage(index),
-                child: SecureImage(imagePath: img.filePath, encryptionKey: img.encryptionKey, fit: BoxFit.contain),
+                child: SecureImage(
+                  imagePath: img.filePath,
+                  encryptionKey: img.encryptionKey,
+                  fit: BoxFit.contain,
+                ),
               ),
             );
           },
         ),
         if (_images.length > 1) ...[
           if (_currentIndex > 0) _buildNavButton(isLeft: true),
-          if (_currentIndex < _images.length - 1) _buildNavButton(isLeft: false),
+          if (_currentIndex < _images.length - 1)
+            _buildNavButton(isLeft: false),
         ],
         _buildPageIndicator(),
       ],
@@ -478,7 +531,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   void _showFullImage(int index) {
     Navigator.push<int>(
       context,
-      MaterialPageRoute<int>(builder: (context) => FullImageViewer(images: _images, initialIndex: _currentIndex)),
+      MaterialPageRoute<int>(
+        builder: (context) =>
+            FullImageViewer(images: _images, initialIndex: _currentIndex),
+      ),
     ).then((newIndex) {
       if (newIndex is int && mounted) _pageController.jumpToPage(newIndex);
     });
@@ -490,14 +546,27 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       child: Padding(
         padding: EdgeInsets.only(left: isLeft ? 12 : 0, right: isLeft ? 0 : 12),
         child: Container(
-          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            shape: BoxShape.circle,
+          ),
           child: IconButton(
-            icon: Icon(isLeft ? Icons.chevron_left : Icons.chevron_right, color: Colors.white, size: 28),
+            icon: Icon(
+              isLeft ? Icons.chevron_left : Icons.chevron_right,
+              color: Colors.white,
+              size: 28,
+            ),
             onPressed: () {
               if (isLeft) {
-                _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               } else {
-                _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               }
             },
           ),
@@ -508,12 +577,20 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   Widget _buildPageIndicator() {
     return Positioned(
-      bottom: 16, left: 0, right: 0,
+      bottom: 16,
+      left: 0,
+      right: 0,
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(16)),
-          child: Text('${_currentIndex + 1} / ${_images.length}', style: const TextStyle(color: Colors.white, fontSize: 12)),
+          decoration: BoxDecoration(
+            color: Colors.black54,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            '${_currentIndex + 1} / ${_images.length}',
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
         ),
       ),
     );
@@ -522,7 +599,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   Widget _buildInfoView(MedicalImage img) {
     final hospital = img.hospitalName ?? _record?.hospitalName ?? '未填写';
     final date = img.visitDate ?? _record?.notedAt;
-    final dateStr = date != null ? DateFormat('yyyy-MM-dd').format(date) : '未知日期';
+    final dateStr = date != null
+        ? DateFormat('yyyy-MM-dd').format(date)
+        : '未知日期';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,7 +610,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         const SizedBox(height: 16),
         _buildInfoItem('就诊日期', dateStr, isMono: true),
         const SizedBox(height: 24),
-        const Text('标签', style: TextStyle(fontSize: 12, color: AppTheme.textHint)),
+        const Text(
+          '标签',
+          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+        ),
         const SizedBox(height: 8),
         _buildTagList(img),
         const SizedBox(height: 24),
@@ -545,26 +627,54 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     );
   }
 
-  Widget _buildInfoItem(String label, String value, {bool isTitle = false, bool isMono = false}) {
+  Widget _buildInfoItem(
+    String label,
+    String value, {
+    bool isTitle = false,
+    bool isMono = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textHint)),
-        Text(value, style: isMono ? AppTheme.monoStyle.copyWith(fontSize: 16) : TextStyle(fontSize: 18, fontWeight: isTitle ? FontWeight.bold : null)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
+        ),
+        Text(
+          value,
+          style: isMono
+              ? AppTheme.monoStyle.copyWith(fontSize: 16)
+              : TextStyle(
+                  fontSize: 18,
+                  fontWeight: isTitle ? FontWeight.bold : null,
+                ),
+        ),
       ],
     );
   }
 
   Widget _buildTagList(MedicalImage img) {
-    if (img.tagIds.isEmpty) return const Text('无标签', style: TextStyle(color: AppTheme.textHint, fontSize: 14));
-    return Wrap(spacing: 8, runSpacing: 8, children: img.tagIds.map<Widget>((tid) => _TagNameChip(tagId: tid)).toList());
+    if (img.tagIds.isEmpty)
+      return const Text(
+        '无标签',
+        style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+      );
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: img.tagIds
+          .map<Widget>((tid) => _TagNameChip(tagId: tid))
+          .toList(),
+    );
   }
 
   Widget _buildOcrCard(MedicalImage img) {
     OcrResult? ocrResult;
     if (img.ocrRawJson != null) {
       try {
-        ocrResult = OcrResult.fromJson(jsonDecode(img.ocrRawJson!) as Map<String, dynamic>);
+        ocrResult = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
     return CollapsibleOcrCard(text: img.ocrText ?? '', ocrResult: ocrResult);
@@ -629,7 +739,11 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       },
       child: AbsorbPointer(
         child: TextField(
-          controller: TextEditingController(text: _visitDate != null ? DateFormat('yyyy-MM-dd').format(_visitDate!) : ''),
+          controller: TextEditingController(
+            text: _visitDate != null
+                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
+                : '',
+          ),
           focusNode: _dateFocus,
           decoration: InputDecoration(
             labelText: l10n.review_edit_date_label,
@@ -648,14 +762,28 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       selectedTagIds: _images[_currentIndex].tagIds,
       onToggle: (tid) async {
         final currentIds = [..._images[_currentIndex].tagIds];
-        if (currentIds.contains(tid)) { currentIds.remove(tid); } else { currentIds.add(tid); }
+        if (currentIds.contains(tid)) {
+          currentIds.remove(tid);
+        } else {
+          currentIds.add(tid);
+        }
         final oldIds = _images[_currentIndex].tagIds;
-        setState(() { _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds); });
+        setState(() {
+          _images[_currentIndex] = _images[_currentIndex].copyWith(
+            tagIds: currentIds,
+          );
+        });
         try {
-          await ref.read(imageRepositoryProvider).updateImageTags(_images[_currentIndex].id, currentIds);
+          await ref
+              .read(imageRepositoryProvider)
+              .updateImageTags(_images[_currentIndex].id, currentIds);
           await ref.read(timelineControllerProvider.notifier).refresh();
         } catch (e) {
-          setState(() { _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: oldIds); });
+          setState(() {
+            _images[_currentIndex] = _images[_currentIndex].copyWith(
+              tagIds: oldIds,
+            );
+          });
         }
       },
       onReorder: (oldIdx, newIdx) async {
@@ -664,12 +792,22 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         if (oldIdx < newIdx) newIdx -= 1;
         final item = currentIds.removeAt(oldIdx);
         currentIds.insert(newIdx, item);
-        setState(() { _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: currentIds); });
+        setState(() {
+          _images[_currentIndex] = _images[_currentIndex].copyWith(
+            tagIds: currentIds,
+          );
+        });
         try {
-          await ref.read(imageRepositoryProvider).updateImageTags(_images[_currentIndex].id, currentIds);
+          await ref
+              .read(imageRepositoryProvider)
+              .updateImageTags(_images[_currentIndex].id, currentIds);
           await ref.read(timelineControllerProvider.notifier).refresh();
         } catch (e) {
-          setState(() { _images[_currentIndex] = _images[_currentIndex].copyWith(tagIds: originalIds); });
+          setState(() {
+            _images[_currentIndex] = _images[_currentIndex].copyWith(
+              tagIds: originalIds,
+            );
+          });
         }
       },
       onCreate: _handleCreateTag,
@@ -687,7 +825,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             _updateControllersForIndex(_currentIndex);
           });
         },
-        child: Text(l10n.detail_cancel_edit, style: const TextStyle(color: AppTheme.textGrey)),
+        child: Text(
+          l10n.detail_cancel_edit,
+          style: const TextStyle(color: AppTheme.textGrey),
+        ),
       ),
     );
   }
@@ -698,7 +839,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     OcrResult? ocrResult;
     if (img.ocrRawJson != null) {
       try {
-        ocrResult = OcrResult.fromJson(jsonDecode(img.ocrRawJson!) as Map<String, dynamic>);
+        ocrResult = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
     showModalBottomSheet<void>(
@@ -706,8 +849,14 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6, minChildSize: 0.4, maxChildSize: 0.9,
-        builder: (context, scrollController) => _OcrResultSheet(text: img.ocrText ?? '', result: ocrResult, scrollController: scrollController),
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => _OcrResultSheet(
+          text: img.ocrText ?? '',
+          result: ocrResult,
+          scrollController: scrollController,
+        ),
       ),
     );
   }
@@ -717,7 +866,11 @@ class _OcrResultSheet extends StatefulWidget {
   final String text;
   final OcrResult? result;
   final ScrollController scrollController;
-  const _OcrResultSheet({required this.text, this.result, required this.scrollController});
+  const _OcrResultSheet({
+    required this.text,
+    this.result,
+    required this.scrollController,
+  });
   @override
   State<_OcrResultSheet> createState() => _OcrResultSheetState();
 }
@@ -728,7 +881,10 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,16 +892,33 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(l10n.detail_ocr_result, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                l10n.detail_ocr_result,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Row(
                 children: [
                   if (widget.result != null)
                     TextButton.icon(
-                      onPressed: () => setState(() => _isEnhanced = !_isEnhanced),
-                      icon: Icon(_isEnhanced ? Icons.text_fields : Icons.auto_awesome, size: 18),
-                      label: Text(_isEnhanced ? l10n.detail_view_raw : l10n.detail_view_enhanced),
+                      onPressed: () =>
+                          setState(() => _isEnhanced = !_isEnhanced),
+                      icon: Icon(
+                        _isEnhanced ? Icons.text_fields : Icons.auto_awesome,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _isEnhanced
+                            ? l10n.detail_view_raw
+                            : l10n.detail_view_enhanced,
+                      ),
                     ),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
                 ],
               ),
             ],
@@ -753,13 +926,30 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
           const Divider(),
           Expanded(
             child: widget.result != null
-                ? EnhancedOcrView(result: widget.result!, isEnhancedMode: _isEnhanced, scrollController: widget.scrollController)
-                : SingleChildScrollView(controller: widget.scrollController, child: SelectableText(widget.text, style: AppTheme.monoStyle.copyWith(fontSize: 16, height: 1.5))),
+                ? EnhancedOcrView(
+                    result: widget.result!,
+                    isEnhancedMode: _isEnhanced,
+                    scrollController: widget.scrollController,
+                  )
+                : SingleChildScrollView(
+                    controller: widget.scrollController,
+                    child: SelectableText(
+                      widget.text,
+                      style: AppTheme.monoStyle.copyWith(
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.check), label: const Text('完成')),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.check),
+              label: const Text('完成'),
+            ),
           ),
         ],
       ),
@@ -775,11 +965,28 @@ class _TagNameChip extends ConsumerWidget {
     final allTagsAsync = ref.watch(allTagsProvider);
     return allTagsAsync.when(
       data: (allTags) {
-        final tag = allTags.firstWhere((t) => t.id == tagId, orElse: () => Tag(id: '', name: '?', createdAt: DateTime(0), color: ''));
+        final tag = allTags.firstWhere(
+          (t) => t.id == tagId,
+          orElse: () =>
+              Tag(id: '', name: '?', createdAt: DateTime(0), color: ''),
+        );
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(color: AppTheme.primaryTeal.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2))),
-          child: Text(tag.name, style: const TextStyle(fontSize: 12, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.primaryTeal.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Text(
+            tag.name,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppTheme.primaryTeal,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         );
       },
       loading: () => const SizedBox(),
