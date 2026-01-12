@@ -91,8 +91,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
               Text(
                 l10n.search_searching_person(currentPerson != null
                     ? L10nHelper.getPersonName(context, currentPerson)
-                    : "...",
-                ),
+                    : "..."),
                 style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
               ),
             ],
@@ -242,7 +241,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
               children: [
                 TextSpan(text: '${l10n.search_empty_title} '),
                 TextSpan(
-                  text: '"${_searchController.text}"',
+                  text: '"${_searchController.text}" ',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryTeal,
@@ -454,7 +453,7 @@ class _SearchTagChip extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

@@ -65,7 +65,6 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
   }
 
   Future<void> _selectDateRange() async {
-    final l10n = AppLocalizations.of(context)!;
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2000),
