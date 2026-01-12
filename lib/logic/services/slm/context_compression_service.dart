@@ -35,9 +35,9 @@ class ContextCompressionService {
   }
 
   bool _isPageNumber(String line) {
-    // 匹配 "Page 1", "1 / 5", "- 1 -", "第 1 页"
+    // 匹配 "Page 1", "Page 1 of 5", "1 / 5", "- 1 -", "第 1 页"
     final pageRegex = RegExp(
-      r'^(Page\s*\d+|第\s*\d+\s*页|\d+\s*\/\s*\d+|-\s*\d+\s*-)$',
+      r'^(Page\s*\d+(\s*of\s*\d+)?|第\s*\d+\s*页|\d+\s*\/\s*\d+|-\s*\d+\s*-)$',
       caseSensitive: false,
     );
     return pageRegex.hasMatch(line);

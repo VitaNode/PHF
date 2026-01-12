@@ -84,7 +84,8 @@ void callbackDispatcher() {
                              // T25.4: Context Compression Service Check
                              final compression = ContextCompressionService();
                              talker.info('[BackgroundWorker] Compression Service ready: ${compression.hashCode}');
-                             // Placeholder: In Phase 5, we will fetch 'archived' records              // and run compression.compress(record.ocrText) here.
+                             // TODO(Phase 5): Fetch 'archived' records and run compression.compress(record.ocrText) here.
+                             // This placeholder ensures the dependency chain is valid for T25.
             } else {
               talker.info(
                 '[BackgroundWorker] Power low/discharging. Skipping SLM.',
