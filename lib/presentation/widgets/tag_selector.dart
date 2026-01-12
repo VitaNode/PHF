@@ -114,7 +114,8 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
 
   bool _checkExactMatch(List<Tag> allTags) {
     return allTags.any((t) {
-      final localizedMatch = L10nHelper.getTagName(context, t).toLowerCase() ==
+      final localizedMatch =
+          L10nHelper.getTagName(context, t).toLowerCase() ==
           _searchQuery.toLowerCase().trim();
       final rawMatch =
           t.name.toLowerCase() == _searchQuery.toLowerCase().trim();

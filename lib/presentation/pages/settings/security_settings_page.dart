@@ -253,9 +253,11 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(enabled
-              ? l10n.settings_security_biometrics_enabled_failed
-              : l10n.settings_security_biometrics_disabled_failed),
+          content: Text(
+            enabled
+                ? l10n.settings_security_biometrics_enabled_failed
+                : l10n.settings_security_biometrics_disabled_failed,
+          ),
           backgroundColor: AppTheme.errorRed,
         ),
       );

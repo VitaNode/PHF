@@ -329,10 +329,30 @@ class SQLCipherDatabaseService {
       // 5. Seed System Tags
       final now = DateTime.now().millisecondsSinceEpoch;
       final tags = [
-        {'id': 'sys_tag_1', 'name': isEn ? 'Lab Result' : '检验', 'color': '#009688', 'order_index': 1},
-        {'id': 'sys_tag_2', 'name': isEn ? 'Examination' : '检查', 'color': '#26A69A', 'order_index': 2},
-        {'id': 'sys_tag_3', 'name': isEn ? 'Medical Record' : '病历', 'color': '#00796B', 'order_index': 3},
-        {'id': 'sys_tag_4', 'name': isEn ? 'Prescription' : '处方', 'color': '#4DB6AC', 'order_index': 4},
+        {
+          'id': 'sys_tag_1',
+          'name': isEn ? 'Lab Result' : '检验',
+          'color': '#009688',
+          'order_index': 1,
+        },
+        {
+          'id': 'sys_tag_2',
+          'name': isEn ? 'Examination' : '检查',
+          'color': '#26A69A',
+          'order_index': 2,
+        },
+        {
+          'id': 'sys_tag_3',
+          'name': isEn ? 'Medical Record' : '病历',
+          'color': '#00796B',
+          'order_index': 3,
+        },
+        {
+          'id': 'sys_tag_4',
+          'name': isEn ? 'Prescription' : '处方',
+          'color': '#4DB6AC',
+          'order_index': 4,
+        },
       ];
 
       for (var tag in tags) {

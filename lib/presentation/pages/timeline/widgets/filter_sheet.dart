@@ -202,13 +202,20 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
               if (tags.isEmpty) {
                 return Text(
                   l10n.tag_management_empty,
-                  style: const TextStyle(color: AppTheme.textHint, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppTheme.textHint,
+                    fontSize: 13,
+                  ),
                 );
               }
               // 按本地化名称排序
               final sortedTags = List<Tag>.from(tags)
-                ..sort((a, b) => L10nHelper.getTagName(context, a)
-                    .compareTo(L10nHelper.getTagName(context, b)));
+                ..sort(
+                  (a, b) => L10nHelper.getTagName(
+                    context,
+                    a,
+                  ).compareTo(L10nHelper.getTagName(context, b)),
+                );
 
               return Wrap(
                 spacing: 8,

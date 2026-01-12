@@ -224,11 +224,10 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
     await showDialog<void>(
       context: context,
 
-            builder: (context) => AlertDialog(
+      builder: (context) => AlertDialog(
+        title: Text(isEditing ? l10n.tag_edit_title : l10n.tag_add_title),
 
-              title: Text(isEditing ? l10n.tag_edit_title : l10n.tag_add_title),
-
-              content: TextField(
+        content: TextField(
           controller: nameCtrl,
 
           decoration: InputDecoration(
