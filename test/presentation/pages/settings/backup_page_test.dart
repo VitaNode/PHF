@@ -8,9 +8,7 @@ import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/presentation/pages/settings/backup_page.dart';
 
-@GenerateNiceMocks([
-  MockSpec<AppMetaRepository>(),
-])
+@GenerateNiceMocks([MockSpec<AppMetaRepository>()])
 import 'backup_page_test.mocks.dart';
 
 void main() {
@@ -22,9 +20,7 @@ void main() {
 
   Widget createTestWidget() {
     return ProviderScope(
-      overrides: [
-        appMetaRepositoryProvider.overrideWithValue(mockMetaRepo),
-      ],
+      overrides: [appMetaRepositoryProvider.overrideWithValue(mockMetaRepo)],
       child: const MaterialApp(
         localizationsDelegates: [
           AppLocalizations.delegate,

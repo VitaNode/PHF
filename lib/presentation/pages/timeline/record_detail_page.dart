@@ -177,12 +177,18 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 if (_blockControllers.isNotEmpty) ...[
                   Text(
                     l10n.review_edit_ocr_section,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     l10n.review_edit_ocr_hint,
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textHint),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textHint,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ListView.separated(

@@ -89,9 +89,11 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
               ),
               const SizedBox(width: 4),
               Text(
-                l10n.search_searching_person(currentPerson != null
-                    ? L10nHelper.getPersonName(context, currentPerson)
-                    : "..."),
+                l10n.search_searching_person(
+                  currentPerson != null
+                      ? L10nHelper.getPersonName(context, currentPerson)
+                      : "...",
+                ),
                 style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
               ),
             ],
