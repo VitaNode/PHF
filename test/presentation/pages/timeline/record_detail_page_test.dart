@@ -192,7 +192,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     // Verify Bottom Sheet content
-    expect(find.text('OCR 识别结果'), findsOneWidget);
+    expect(find.text('识别结果'), findsOneWidget);
     // There are now 2 instances: one in CollapsibleOcrCard and one in Bottom Sheet
     expect(find.text('Recognized Text Content'), findsNWidgets(2));
   });

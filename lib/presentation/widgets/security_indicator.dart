@@ -11,6 +11,9 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import 'package:phf/generated/l10n/app_localizations.dart';
+
 import '../theme/app_theme.dart';
 
 class SecurityIndicator extends StatelessWidget {
@@ -20,30 +23,45 @@ class SecurityIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+
       decoration: BoxDecoration(
         color: AppTheme.bgGrey,
+
         borderRadius: BorderRadius.circular(20), // Pill shape
+
         border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
+
       child: Row(
         mainAxisSize: MainAxisSize.min,
+
         children: [
           Icon(
             isSecure ? Icons.lock : Icons.lock_open,
+
             size: 14,
+
             color: isSecure ? AppTheme.primaryTeal : AppTheme.warningOrange,
           ),
+
           const SizedBox(width: 6),
+
           Text(
             isSecure
-                ? 'AES-256 Encrypted On-Device'
-                : 'Encryption Not Verified',
+                ? l10n.security_status_encrypted
+                : l10n.security_status_unverified,
+
             style: const TextStyle(
               fontSize: 10,
+
               fontWeight: FontWeight.w600,
+
               color: AppTheme.textGrey,
+
               fontFamily: AppTheme.fontPool,
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 
 class PendingReviewBanner extends StatelessWidget {
@@ -14,7 +15,7 @@ class PendingReviewBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (count <= 0) return const SizedBox.shrink();
-
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -40,16 +41,23 @@ class PendingReviewBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '有 $count 项病历待确认',
+                      l10n.timeline_pending_review(count),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryTeal,
                         fontSize: 16,
                       ),
                     ),
-                    const Text(
-                      '点击进入校对页，提高数据准确性',
-                      style: TextStyle(color: AppTheme.textHint, fontSize: 12),
+                    Text(
+                      l10n.timeline_pending_hint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.textHint,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),

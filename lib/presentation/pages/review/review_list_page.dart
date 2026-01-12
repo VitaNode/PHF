@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'package:phf/logic/providers/review_list_provider.dart';
 import 'package:phf/logic/providers/timeline_provider.dart';
@@ -14,9 +15,13 @@ class ReviewListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncRecords = ref.watch(reviewListControllerProvider);
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('待确认病历', style: TextStyle(color: Colors.black)),
+        title: Text(
+          l10n.review_list_title,
+          style: const TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -24,10 +29,10 @@ class ReviewListPage extends ConsumerWidget {
       body: asyncRecords.when(
         data: (records) {
           if (records.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                '没有待确认的病历',
-                style: TextStyle(color: AppTheme.textHint),
+                l10n.review_list_empty,
+                style: const TextStyle(color: AppTheme.textHint),
               ),
             );
           }

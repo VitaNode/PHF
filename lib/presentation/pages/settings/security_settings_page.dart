@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../logic/providers/security_settings_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/pin_keyboard.dart';
@@ -28,11 +29,11 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(securitySettingsControllerProvider);
-
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('隐私与安全'),
+        title: Text(l10n.settings_privacy_security),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
@@ -42,22 +43,24 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryTeal),
         ),
-        error: (e, st) => Center(child: Text('加载失败: $e')),
+        error: (e, st) =>
+            Center(child: Text(l10n.common_load_failed(e.toString()))),
       ),
     );
   }
 
   Widget _buildBody(SecuritySettingsState state) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       children: [
         ListView(
           children: [
-            _buildSectionTitle('应用锁'),
+            _buildSectionTitle(l10n.settings_security_app_lock),
             _buildListTile(
               context,
               icon: Icons.lock_reset_outlined,
-              title: '修改 PIN 码',
-              subtitle: '更改用于解锁应用的 6 位数字密码',
+              title: l10n.settings_security_change_pin,
+              subtitle: l10n.settings_security_change_pin_desc,
               onTap: _handleChangePin,
             ),
             const Divider(height: 1),
@@ -69,13 +72,13 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
                   Icons.fingerprint,
                   color: AppTheme.primaryTeal,
                 ),
-                title: const Text(
-                  '生物识别解锁',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                title: Text(
+                  l10n.settings_security_biometrics,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text(
-                  '启用指纹或面容快速解锁',
-                  style: TextStyle(fontSize: 12),
+                subtitle: Text(
+                  l10n.settings_security_biometrics_desc,
+                  style: const TextStyle(fontSize: 12),
                 ),
                 value: state.isBiometricsEnabled,
                 activeThumbColor: AppTheme.primaryTeal,
@@ -86,7 +89,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
               ),
             ],
             const SizedBox(height: 24),
-            _buildInfoCard(),
+            _buildInfoCard(l10n),
           ],
         ),
         if (state.isLoading)
@@ -119,14 +122,15 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     BuildContext context,
     SecuritySettingsState state,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       leading: const Icon(Icons.timer_outlined, color: AppTheme.primaryTeal),
-      title: const Text(
-        '自动锁定时间',
-        style: TextStyle(fontWeight: FontWeight.bold),
+      title: Text(
+        l10n.settings_security_lock_timeout,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
-        '当前设置: ${_getLockTimeoutText(state.lockTimeout)}',
+        '当前设置: ${_getLockTimeoutText(context, state.lockTimeout)}',
         style: const TextStyle(fontSize: 12),
       ),
       trailing: const Icon(Icons.chevron_right, size: 20),
@@ -134,24 +138,41 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     );
   }
 
-  String _getLockTimeoutText(int seconds) {
-    if (seconds <= 0) return '立即';
-    if (seconds == 60) return '离开 1 分钟后';
-    if (seconds == 300) return '离开 5 分钟后';
-    return '离开 ${seconds ~/ 60} 分钟后';
+  String _getLockTimeoutText(BuildContext context, int seconds) {
+    final l10n = AppLocalizations.of(context)!;
+    if (seconds <= 0) return l10n.settings_security_timeout_immediate;
+    if (seconds == 60) return l10n.settings_security_timeout_1min;
+    if (seconds == 300) return l10n.settings_security_timeout_5min;
+    return l10n.settings_security_timeout_custom(seconds ~/ 60);
   }
 
   void _showLockTimeoutDialog(BuildContext context, int currentTimeout) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('选择自动锁定时间'),
+        title: Text(l10n.settings_security_lock_timeout),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTimeoutOption(context, '立即', 0, currentTimeout),
-            _buildTimeoutOption(context, '离开 1 分钟后', 60, currentTimeout),
-            _buildTimeoutOption(context, '离开 5 分钟后', 300, currentTimeout),
+            _buildTimeoutOption(
+              context,
+              l10n.settings_security_timeout_immediate,
+              0,
+              currentTimeout,
+            ),
+            _buildTimeoutOption(
+              context,
+              l10n.settings_security_timeout_1min,
+              60,
+              currentTimeout,
+            ),
+            _buildTimeoutOption(
+              context,
+              l10n.settings_security_timeout_5min,
+              300,
+              currentTimeout,
+            ),
           ],
         ),
       ),
@@ -198,7 +219,7 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -206,15 +227,15 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
         color: AppTheme.bgGray.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 20, color: AppTheme.textHint),
-          SizedBox(width: 12),
+          const Icon(Icons.info_outline, size: 20, color: AppTheme.textHint),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'PaperHealth 采用本地加密技术，您的 PIN 码及生物识别信息仅存储在设备的系统安全隔离区，任何第三方（包括开发者）均无法获取。',
-              style: TextStyle(
+              l10n.settings_security_info_card,
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
                 height: 1.5,
@@ -227,13 +248,18 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
   }
 
   Future<void> _handleToggleBiometrics(bool enabled) async {
+    final l10n = AppLocalizations.of(context)!;
     final success = await ref
         .read(securitySettingsControllerProvider.notifier)
         .toggleBiometrics(enabled);
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(enabled ? '启用生物识别失败' : '禁用生物识别失败'),
+          content: Text(
+            enabled
+                ? l10n.settings_security_biometrics_enabled_failed
+                : l10n.settings_security_biometrics_disabled_failed,
+          ),
           backgroundColor: AppTheme.errorRed,
         ),
       );
@@ -241,36 +267,41 @@ class _SecuritySettingsPageState extends ConsumerState<SecuritySettingsPage> {
   }
 
   Future<void> _handleChangePin() async {
-    final oldPin = await _showPinDialog(title: '请输入当前 PIN 码');
+    final l10n = AppLocalizations.of(context)!;
+    final oldPin = await _showPinDialog(
+      title: l10n.settings_security_pin_current,
+    );
     if (oldPin == null) return;
-
     if (!mounted) return;
-    final newPin = await _showPinDialog(title: '请输入新 PIN 码');
+    final newPin = await _showPinDialog(title: l10n.settings_security_pin_new);
     if (newPin == null) return;
-
     if (!mounted) return;
-    final confirmPin = await _showPinDialog(title: '请再次输入新 PIN 码');
+    final confirmPin = await _showPinDialog(
+      title: l10n.settings_security_pin_confirm,
+    );
     if (confirmPin == null) return;
-
     if (newPin != confirmPin) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('两次输入的新 PIN 码不一致'),
+          SnackBar(
+            content: Text(l10n.settings_security_pin_mismatch),
             backgroundColor: AppTheme.errorRed,
           ),
         );
       }
       return;
     }
-
     final success = await ref
         .read(securitySettingsControllerProvider.notifier)
         .changePin(oldPin, newPin);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? 'PIN 码修改成功' : '当前 PIN 码错误，修改失败'),
+          content: Text(
+            success
+                ? l10n.settings_security_pin_success
+                : l10n.settings_security_pin_error,
+          ),
           backgroundColor: success ? AppTheme.successGreen : AppTheme.errorRed,
         ),
       );

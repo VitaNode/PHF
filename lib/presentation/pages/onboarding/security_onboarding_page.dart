@@ -16,6 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../logic/providers/auth_provider.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../theme/app_theme.dart';
@@ -72,6 +73,7 @@ class _SecurityOnboardingPageState
   }
 
   void _handlePinComplete() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_isConfirming) {
       // Switch to Confirm Mode
       setState(() {
@@ -92,23 +94,22 @@ class _SecurityOnboardingPageState
           _isConfirming = false; // Restart
         });
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('PIN 码不一致，请重新输入')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.settings_security_pin_mismatch)),
+          );
         }
       }
     }
   }
 
   Future<void> _savePin() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isProcessing = true;
     });
-
     try {
       final securityService = ref.read(securityServiceProvider);
       await securityService.setPin(_pin);
-
       if (_canCheckBiometrics) {
         setState(() {
           _showBioStep = true;
@@ -119,26 +120,27 @@ class _SecurityOnboardingPageState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
-        setState(() {
-          _isProcessing = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.common_load_failed(e.toString()))),
+        );
       }
+      setState(() {
+        _isProcessing = false;
+      });
     }
   }
 
   Future<void> _enableBiometrics() async {
+    final l10n = AppLocalizations.of(context)!;
     final securityService = ref.read(securityServiceProvider);
     final success = await securityService.enableBiometrics();
     if (success) {
       _finishOnboarding();
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('生物识别验证失败或取消')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.settings_security_pin_error)),
+        );
       }
     }
   }
@@ -155,6 +157,7 @@ class _SecurityOnboardingPageState
       return _buildBioStep();
     }
 
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       body: SafeArea(
@@ -163,7 +166,9 @@ class _SecurityOnboardingPageState
             const SizedBox(height: 60),
             // Header
             Text(
-              _isConfirming ? '确认 PIN 码' : '创建 PIN 码',
+              _isConfirming
+                  ? l10n.settings_security_pin_confirm
+                  : l10n.settings_security_pin_new,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -172,7 +177,9 @@ class _SecurityOnboardingPageState
             ),
             const SizedBox(height: 12),
             Text(
-              _isConfirming ? '请再次输入以确认' : '为了保护您的隐私，请设置 6 位数字密码',
+              _isConfirming
+                  ? l10n.settings_security_pin_confirm
+                  : l10n.lock_screen_title,
               style: const TextStyle(
                 fontSize: 14,
                 color: AppTheme.textSecondary,
@@ -214,6 +221,7 @@ class _SecurityOnboardingPageState
   }
 
   Widget _buildBioStep() {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       body: SafeArea(
@@ -224,19 +232,22 @@ class _SecurityOnboardingPageState
             children: [
               const Icon(Icons.fingerprint, size: 80, color: AppTheme.primary),
               const SizedBox(height: 24),
-              const Text(
-                '启用生物识别',
-                style: TextStyle(
+              Text(
+                l10n.settings_security_biometrics,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                '使用 FaceID 或指纹更快捷地解锁应用',
+              Text(
+                l10n.settings_security_biometrics_desc,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
+                ),
               ),
               const SizedBox(height: 48),
               SizedBox(
@@ -250,15 +261,15 @@ class _SecurityOnboardingPageState
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('立即启用'),
+                  child: Text(l10n.ingestion_add_now),
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: _finishOnboarding,
-                child: const Text(
-                  '稍后设置',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                child: Text(
+                  l10n.common_cancel,
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
             ],

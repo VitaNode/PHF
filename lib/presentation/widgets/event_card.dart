@@ -11,11 +11,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../data/models/image.dart';
 import '../../data/models/record.dart';
 import '../../data/models/tag.dart';
 import '../../logic/providers/core_providers.dart';
 import '../theme/app_theme.dart';
+import '../utils/l10n_helper.dart';
 import '../widgets/app_card.dart';
 import '../widgets/secure_image.dart';
 
@@ -35,6 +37,7 @@ class EventCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dateStr = _formatDateRange(record.notedAt, record.visitEndDate);
     final allTagsAsync = ref.watch(allTagsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return AppCard(
       onTap: onTap,
@@ -70,7 +73,7 @@ class EventCard extends ConsumerWidget {
                 // Hospital Name
                 Expanded(
                   child: Text(
-                    record.hospitalName ?? '未命名记录',
+                    record.hospitalName ?? l10n.review_edit_hospital_label,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -89,9 +92,10 @@ class EventCard extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: allTagsAsync.when(
-                data: (allTags) => _buildImageGrid(record.images, allTags),
-                loading: () => _buildImageGrid(record.images, []),
-                error: (_, _) => _buildImageGrid(record.images, []),
+                data: (allTags) =>
+                    _buildImageGrid(context, record.images, allTags),
+                loading: () => _buildImageGrid(context, record.images, []),
+                error: (_, _) => _buildImageGrid(context, record.images, []),
               ),
             )
           else
@@ -119,7 +123,7 @@ class EventCard extends ConsumerWidget {
                 // Display count of images
                 if (record.images.length > 6)
                   Text(
-                    '共 ${record.images.length} 张图片 >',
+                    '${l10n.common_image_count(record.images.length)} >',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppTheme.textHint,
@@ -133,7 +137,11 @@ class EventCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildImageGrid(List<MedicalImage> images, List<Tag> allTags) {
+  Widget _buildImageGrid(
+    BuildContext context,
+    List<MedicalImage> images,
+    List<Tag> allTags,
+  ) {
     // Show 4 to 6 images in a grid
     final int displayCount = images.length > 6 ? 6 : images.length;
     final List<MedicalImage> displayImages = images.take(displayCount).toList();
@@ -162,7 +170,7 @@ class EventCard extends ConsumerWidget {
                     Tag(id: '', name: '', createdAt: DateTime(0), color: ''),
               );
               if (firstTag.name.isNotEmpty) {
-                firstTagName = firstTag.name;
+                firstTagName = L10nHelper.getTagName(context, firstTag);
               }
             }
 

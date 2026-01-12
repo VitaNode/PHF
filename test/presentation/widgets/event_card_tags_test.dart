@@ -12,6 +12,8 @@ import 'package:phf/data/models/image.dart';
 import 'package:phf/data/models/record.dart';
 import 'package:phf/data/models/tag.dart';
 import 'package:phf/data/repositories/interfaces/tag_repository.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/widgets/event_card.dart';
@@ -46,6 +48,14 @@ void main() {
         ),
       ],
       child: MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: EventCard(record: record, firstImage: image),
         ),
@@ -152,7 +162,7 @@ void main() {
         updatedAt: DateTime.now(),
         notes: noteText,
         status: RecordStatus.archived,
-        tagsCache: jsonEncode([tagName]),
+        tagsCache: jsonEncode([tagId]),
         images: [], // populated below
       );
 

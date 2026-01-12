@@ -78,7 +78,12 @@ MasterKeyManager masterKeyManager(Ref ref) {
 SQLCipherDatabaseService databaseService(Ref ref) {
   final km = ref.watch(masterKeyManagerProvider);
   final pp = ref.watch(pathProviderServiceProvider);
-  final service = SQLCipherDatabaseService(keyManager: km, pathService: pp);
+  final locale = Platform.localeName.split('_')[0]; // e.g. 'zh' or 'en'
+  final service = SQLCipherDatabaseService(
+    keyManager: km,
+    pathService: pp,
+    locale: locale,
+  );
   ref.onDispose(() => service.close());
   return service;
 }

@@ -284,27 +284,25 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     String recordId,
   ) async {
     // 1. Query all tags for this record
-    // Join images -> image_tags -> tags to get Names
+    // Use DISTINCT on tag_id
     final List<Map<String, dynamic>> results = await exec.rawQuery(
       '''
-      SELECT DISTINCT t.name 
-      FROM tags t
-      INNER JOIN image_tags it ON t.id = it.tag_id
+      SELECT DISTINCT it.tag_id
+      FROM image_tags it
       INNER JOIN images i ON it.image_id = i.id
       WHERE i.record_id = ?
-      ORDER BY t.created_at_ms ASC
     ''',
       [recordId],
     );
 
-    final List<String> tagNames = results
-        .map((row) => row['name'] as String)
+    final List<String> tagIds = results
+        .map((row) => row['tag_id'] as String)
         .toList();
 
     // 2. Update record
     await exec.update(
       'records',
-      {'tags_cache': jsonEncode(tagNames)},
+      {'tags_cache': jsonEncode(tagIds)},
       where: 'id = ?',
       whereArgs: [recordId],
     );
