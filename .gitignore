@@ -45,3 +45,6 @@ android/gradlew.bat
 .qwen/tmp/
 .pub-cache/
 .worktrees/
+
+.qwen/
+gha-creds-*.json

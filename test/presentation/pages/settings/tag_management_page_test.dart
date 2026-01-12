@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -8,6 +9,7 @@ import 'package:phf/data/models/tag.dart';
 import 'package:phf/data/repositories/interfaces/person_repository.dart';
 import 'package:phf/data/repositories/interfaces/tag_repository.dart';
 import 'package:phf/data/repositories/app_meta_repository.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/presentation/pages/settings/tag_management_page.dart';
 
@@ -70,7 +72,17 @@ void main() {
         personRepositoryProvider.overrideWithValue(mockPersonRepo),
         appMetaRepositoryProvider.overrideWithValue(mockMetaRepo),
       ],
-      child: const MaterialApp(home: TagManagementPage()),
+      child: const MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('zh'),
+        home: TagManagementPage(),
+      ),
     );
   }
 
@@ -110,7 +122,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('删除标签'), findsOneWidget);
-    expect(find.textContaining('确定要删除标签 "My Report" 吗？'), findsOneWidget);
+    expect(find.textContaining('确定要删除标签 My Report 吗？'), findsOneWidget);
   });
 
   testWidgets('Confirming delete calls repository', (

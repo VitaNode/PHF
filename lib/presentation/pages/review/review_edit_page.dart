@@ -136,9 +136,10 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('归档失败: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.review_approve_failed(e.toString()))),
+        );
       }
     }
   }
@@ -192,6 +193,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
 
   Widget _buildImageNav(int total) {
     if (total <= 1) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Colors.black.withValues(alpha: 0.05),
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -210,7 +212,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
                 : null,
           ),
           Text(
-            '第 ${_currentImageIndex + 1} / $total 页',
+            l10n.review_edit_page_indicator(_currentImageIndex + 1, total),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           IconButton(
@@ -312,17 +314,20 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
 
                   const SizedBox(height: 32),
                   if (_blockControllers.isNotEmpty) ...[
-                    const Text(
-                      '识别内容 (可点击逐行校对)',
-                      style: TextStyle(
+                    Text(
+                      l10n.review_edit_ocr_section,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '点击下方文字，上方将自动放大对应图片区域',
-                      style: TextStyle(fontSize: 11, color: AppTheme.textHint),
+                    Text(
+                      l10n.review_edit_ocr_hint,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textHint,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ListView.separated(

@@ -192,7 +192,7 @@ void main() {
 
       final List<dynamic> tags =
           jsonDecode(fetchedRecord!.tagsCache!) as List<dynamic>;
-      expect(tags, containsAll(['Blood', 'XRay']));
+      expect(tags, containsAll(['t1', 't2']));
     });
 
     test('deleteImage triggers sync (removes tags)', () async {
@@ -229,7 +229,7 @@ void main() {
       // Pre-sync manually or assume state
       await db.update(
         'records',
-        {'tags_cache': '["Blood"]'},
+        {'tags_cache': '["t1"]'},
         where: 'id = ?',
         whereArgs: ['r2'],
       );

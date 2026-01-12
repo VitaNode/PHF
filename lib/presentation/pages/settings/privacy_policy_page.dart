@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
@@ -21,16 +22,24 @@ class PrivacyPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
+
       appBar: AppBar(
-        title: const Text('隐私政策'),
+        title: Text(l10n.settings_privacy_policy),
+
         backgroundColor: AppTheme.bgWhite,
+
         foregroundColor: AppTheme.textPrimary,
+
         elevation: 0,
       ),
+
       body: FutureBuilder<String>(
         future: rootBundle.loadString('assets/privacy_policy.md'),
+
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -39,7 +48,9 @@ class PrivacyPolicyPage extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('加载失败: ${snapshot.error}'));
+            return Center(
+              child: Text(l10n.common_load_failed(snapshot.error.toString())),
+            );
           }
 
           return Markdown(

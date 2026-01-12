@@ -30,6 +30,7 @@ import '../../../logic/providers/ocr_status_provider.dart';
 import '../../../logic/providers/person_provider.dart';
 import '../../../logic/services/background_worker_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/l10n_helper.dart';
 import '../../widgets/secure_image.dart';
 import '../../widgets/tag_selector.dart';
 import '../../widgets/full_image_viewer.dart';
@@ -99,11 +100,14 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   Widget build(BuildContext context) {
     _setupOcrListener();
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     if (_record == null || _images.isEmpty) {
-      return const Scaffold(body: Center(child: Text('记录不存在')));
+      return Scaffold(body: Center(child: Text(l10n.detail_record_not_found)));
     }
 
     final currentImage = _images[_currentIndex];
@@ -171,14 +175,14 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                 _buildDatePicker(currentImage, isLowConfidence, warningColor),
                 const SizedBox(height: 32),
                 if (_blockControllers.isNotEmpty) ...[
-                  const Text(
-                    '识别内容 (可点击逐行校对)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    l10n.review_edit_ocr_section,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '点击下方文字，上方将自动放大对应图片区域',
-                    style: TextStyle(fontSize: 11, color: AppTheme.textHint),
+                  Text(
+                    l10n.review_edit_ocr_hint,
+                    style: const TextStyle(fontSize: 11, color: AppTheme.textHint),
                   ),
                   const SizedBox(height: 16),
                   ListView.separated(
@@ -213,9 +217,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
                   ),
                 ],
                 const SizedBox(height: 32),
-                const Text(
-                  '管理标签',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.detail_manage_tags,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 _buildTagSelector(),
@@ -354,36 +358,34 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.detail_save_error(e.toString()))));
       }
     }
   }
 
   Future<void> _deleteCurrentImage() async {
     if (_images.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentImage = _images[_currentIndex];
-
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除确认'),
-        content: const Text('确定要删除当前这张图片吗？此操作不可撤销。'),
+        title: Text(l10n.detail_image_delete_title),
+        content: Text(l10n.detail_image_delete_confirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
     );
-
     if (confirm != true) return;
-
     try {
       final imageRepo = ref.read(imageRepositoryProvider);
       await imageRepo.deleteImage(currentImage.id);
@@ -398,15 +400,16 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.common_load_failed(e.toString()))),
+        );
       }
     }
   }
 
   Future<void> _retriggerOCR() async {
     if (_images.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentImage = _images[_currentIndex];
     setState(() => _isLoading = true);
     try {
@@ -421,17 +424,18 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('已重新加入识别队列，请稍候...')));
+        ).showSnackBar(SnackBar(content: Text(l10n.detail_ocr_queued)));
       }
       await Future<void>.delayed(const Duration(seconds: 2));
       await _loadData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.detail_ocr_failed(e.toString()))),
+        );
       }
-      setState(() => _isLoading = false);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -598,22 +602,20 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   }
 
   Widget _buildInfoView(MedicalImage img) {
-    final hospital = img.hospitalName ?? _record?.hospitalName ?? '未填写';
+    final l10n = AppLocalizations.of(context)!;
+    final hospital = img.hospitalName ?? _record?.hospitalName ?? '';
     final date = img.visitDate ?? _record?.notedAt;
-    final dateStr = date != null
-        ? DateFormat('yyyy-MM-dd').format(date)
-        : '未知日期';
-
+    final dateStr = date != null ? DateFormat('yyyy-MM-dd').format(date) : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoItem('医院', hospital, isTitle: true),
+        _buildInfoItem(l10n.detail_hospital_label, hospital, isTitle: true),
         const SizedBox(height: 16),
-        _buildInfoItem('就诊日期', dateStr, isMono: true),
+        _buildInfoItem(l10n.detail_date_label, dateStr, isMono: true),
         const SizedBox(height: 24),
-        const Text(
-          '标签',
-          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+        Text(
+          l10n.detail_tags_label,
+          style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
         ),
         const SizedBox(height: 8),
         _buildTagList(img),
@@ -656,9 +658,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   Widget _buildTagList(MedicalImage img) {
     if (img.tagIds.isEmpty) {
-      return const Text(
-        '无标签',
-        style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+      return Text(
+        AppLocalizations.of(context)!.detail_no_tags,
+        style: const TextStyle(color: AppTheme.textHint, fontSize: 14),
       );
     }
     return Wrap(
@@ -952,7 +954,7 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
             child: ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.check),
-              label: const Text('完成'),
+              label: Text(l10n.common_confirm),
             ),
           ),
         ],
@@ -984,7 +986,7 @@ class _TagNameChip extends ConsumerWidget {
             ),
           ),
           child: Text(
-            tag.name,
+            L10nHelper.getTagName(context, tag),
             style: const TextStyle(
               fontSize: 12,
               color: AppTheme.primaryTeal,

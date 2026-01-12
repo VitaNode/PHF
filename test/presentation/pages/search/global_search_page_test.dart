@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -8,6 +9,7 @@ import 'package:phf/data/models/search_result.dart';
 import 'package:phf/data/models/person.dart';
 import 'package:phf/data/repositories/app_meta_repository.dart';
 import 'package:phf/data/repositories/interfaces/search_repository.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/pages/search/global_search_page.dart';
@@ -56,7 +58,17 @@ void main() {
           ),
         ),
       ],
-      child: const MaterialApp(home: GlobalSearchPage()),
+      child: const MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('zh'),
+        home: GlobalSearchPage(),
+      ),
     );
   }
 

@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/presentation/theme/app_theme.dart';
 import 'package:phf/presentation/widgets/active_button.dart';
 import 'package:phf/presentation/widgets/security_indicator.dart';
 
 void main() {
-  // Helper to pump widget with Theme
+  // Helper to pump widget with Theme and Localization
   Widget createTestWidget(Widget child) {
     return MaterialApp(
       theme: AppTheme.lightTheme,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: Scaffold(body: Center(child: child)),
     );
   }

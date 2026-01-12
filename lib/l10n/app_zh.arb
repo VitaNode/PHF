@@ -6,6 +6,24 @@
   "common_delete": "删除",
   "common_cancel": "取消",
   "common_confirm": "确认",
+  "common_retry": "重试",
+  "common_refresh": "刷新",
+  "common_reset": "重置",
+  "common_image_count": "共 {count} 张图片",
+  "security_status_encrypted": "设备端 AES-256 加密",
+  "security_status_unverified": "加密未验证",
+  "@common_image_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "common_loading": "加载中...",
+  "common_load_failed": "加载失败: {error}",
+  "@common_load_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "lock_screen_title": "请输入 PIN 码解锁",
   "lock_screen_error": "PIN 码错误，请重新输入",
   "lock_screen_biometric_tooltip": "使用生物识别解锁",
@@ -16,6 +34,15 @@
   "ingestion_submit_button": "开始处理并归档",
   "ingestion_grouped_report": "标记为同一份跨页报告",
   "ingestion_grouped_report_hint": "开启后，SLM 将把这些图片视为一个连续的完整报告进行分析",
+  "ingestion_take_photo": "拍照",
+  "ingestion_pick_gallery": "从相册选择",
+  "ingestion_processing_queue": "已进入后台 OCR 处理队列...",
+  "ingestion_save_error": "保存受阻: {error}",
+  "@ingestion_save_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "review_edit_title": "校对信息",
   "review_edit_confirm": "确认归档",
   "review_edit_basic_info": "基本信息 (可点击修改)",
@@ -23,6 +50,22 @@
   "review_edit_date_label": "就诊日期",
   "review_edit_confidence": "OCR 置信度",
   "review_edit_page_indicator": "图片 {current} / {total} (请核对每页信息)",
+  "@review_edit_page_indicator": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "review_list_title": "待确认病历",
+  "review_list_empty": "暂无待确认病历",
+  "review_edit_ocr_section": "识别内容 (可点击逐行校对)",
+  "review_edit_ocr_hint": "点击下方文字，上方将自动放大对应图片区域",
+  "review_approve_failed": "归档失败: {error}",
+  "@review_approve_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
   "settings_title": "设置",
   "settings_section_profiles": "档案与分类",
   "settings_manage_profiles": "管理档案",
@@ -43,15 +86,155 @@
   "settings_privacy_policy": "隐私政策",
   "settings_privacy_policy_desc": "查看应用隐私保护声明",
   "settings_version": "版本信息",
-  "detail_title": "病历详情",
-  "detail_edit_title": "编辑详情",
+  "settings_security_app_lock": "应用锁",
+  "settings_security_change_pin": "修改 PIN 码",
+  "settings_security_change_pin_desc": "更改用于解锁应用的 6 位数字密码",
+  "settings_security_lock_timeout": "自动锁定时间",
+  "settings_security_timeout_immediate": "立即",
+  "settings_security_timeout_1min": "离开 1 分钟后",
+  "settings_security_timeout_5min": "离开 5 分钟后",
+  "settings_security_timeout_custom": "离开 {minutes} 分钟后",
+  "@settings_security_timeout_custom": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "settings_security_biometrics": "生物识别解锁",
+  "settings_security_biometrics_desc": "开启后支持使用指纹或面容识别",
+  "settings_security_biometrics_enabled_failed": "启用生物识别失败",
+  "settings_security_biometrics_disabled_failed": "禁用生物识别失败",
+  "settings_security_info_card": "PaperHealth 采用本地加密技术，您的 PIN 码及生物识别信息仅存储在设备的系统安全隔离区，任何第三方（包括开发者）均无法获取。",
+  "settings_security_pin_current": "请输入当前 PIN 码",
+  "settings_security_pin_new": "请输入新 PIN 码",
+  "settings_security_pin_confirm": "请再次输入新 PIN 码",
+  "settings_security_pin_mismatch": "两次输入的新 PIN 码不一致",
+  "settings_security_pin_success": "PIN 码修改成功",
+  "settings_security_pin_error": "当前 PIN 码错误，修改失败",
+  "person_management_empty": "暂无档案",
+  "person_management_default": "默认档案",
+  "person_delete_title": "删除档案",
+  "person_delete_confirm": "确定要删除 {name} 吗？如果该档案下存在记录，删除将被拒绝。",
+  "@person_delete_confirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "person_edit_title": "编辑档案",
+  "person_add_title": "新建档案",
+  "person_field_nickname": "昵称",
+  "person_field_nickname_hint": "请输入姓名或称呼",
+  "person_field_color": "选择档案颜色",
+  "tag_management_empty": "暂无标签",
+  "tag_management_custom": "自定义标签",
+  "tag_management_system": "系统内置",
+  "tag_add_title": "新建标签",
+  "tag_edit_title": "编辑标签",
+  "tag_delete_title": "删除标签",
+  "tag_delete_confirm": "确定要删除标签 {name} 吗？此操作会从所有关联的图片中移除该标签。",
+  "@tag_delete_confirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "tag_field_name": "标签名称",
+  "tag_field_name_hint": "例：化验单、胸透",
+  "tag_reorder_title": "调整排序",
+  "tag_create_new": "创建新标签: {query}",
+  "@tag_create_new": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "feedback_info": "我们致力于保护您的隐私，App 为纯离线运行。\n如需反馈问题，请通过以下方式与我们联系。",
+  "feedback_email": "发送邮件",
+  "feedback_github": "GitHub Issues",
+  "feedback_github_desc": "提交 Bug 或建议",
+  "feedback_logs_section": "系统诊断",
+  "feedback_logs_copy": "一键复制日志",
+  "feedback_logs_exporting": "正在导出...",
+  "feedback_logs_hint": "将复制设备信息及已脱敏的日志到剪贴板，方便您粘贴到邮件或 Issue 中。",
+  "feedback_error_email": "无法打开邮件客户端",
+  "feedback_error_browser": "无法打开浏览器",
+  "feedback_copied": "已复制到剪贴板",
+  "detail_hospital_label": "医院",
+  "detail_date_label": "就诊日期",
+  "detail_tags_label": "关联标签",
+  "detail_image_delete_title": "删除确认",
+  "detail_image_delete_confirm": "确定要删除当前这张图片吗？此操作不可撤销。",
+  "detail_ocr_queued": "已重新加入识别队列，请稍候...",
+  "detail_ocr_failed": "重新识别失败: {error}",
+  "detail_ocr_text": "识别文本",
+  "detail_ocr_title": "OCR 识别文本",
+  "detail_ocr_result": "识别结果",
+  "detail_title": "记录详情",
+  "detail_edit_title": "编辑记录",
+  "detail_save": "保存修改",
+  "detail_edit_page": "编辑图片",
   "detail_retrigger_ocr": "重新识别",
-  "detail_delete_page": "删除此页",
-  "detail_edit_page": "编辑此页",
-  "detail_save": "保存",
-  "detail_ocr_text": "查看识别文本",
+  "detail_delete_page": "删除图片",
   "detail_cancel_edit": "取消编辑",
-  "detail_ocr_result": "OCR 识别结果",
   "detail_view_raw": "查看原文",
-  "detail_view_enhanced": "智能增强"
+  "detail_view_enhanced": "智能增强",
+  "detail_ocr_collapse": "收起",
+  "detail_ocr_expand": "展开全文",
+  "detail_record_not_found": "记录不存在",
+  "detail_manage_tags": "管理标签",
+  "detail_no_tags": "无标签",
+  "detail_save_error": "保存失败: {error}",
+  "@detail_save_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "home_empty_records": "暂无记录",
+  "timeline_pending_review": "有 {count} 项病历待确认",
+  "@timeline_pending_review": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "timeline_pending_hint": "点击核对并归档",
+  "disclaimer_title": "医疗免责声明",
+  "disclaimer_welcome": "欢迎使用 PaperHealth.",
+  "disclaimer_intro": "在您开始使用本应用之前，请务必仔细阅读以下免责声明：",
+  "disclaimer_point_1_title": "1. 非医疗建议",
+  "disclaimer_point_1_desc": "PaperHealth (以下简称“本应用”) 仅作为个人医疗记录整理和数字化工具，不提供任何形式的医疗诊断、建议或治疗方案。应用内的任何内容均不应被视为专业医疗意见。",
+  "disclaimer_point_2_title": "2. OCR 准确性",
+  "disclaimer_point_2_desc": "本应用通过 OCR (文字识别) 技术提取的信息可能存在误差。用户在参考这些信息时，必须核对原始纸质报告或数字原件。开发者不保证识别结果的 100% 准确性。",
+  "disclaimer_point_3_title": "3. 专业咨询",
+  "disclaimer_point_3_desc": "任何医疗决策应咨询专业医疗机构或医生。因依赖本应用提供的信息而导致的任何直接或间接后果，本应用及其开发者不承担法律责任。",
+  "disclaimer_point_4_title": "4. 本地数据存储",
+  "disclaimer_point_4_desc": "本应用承诺所有数据仅在本地加密存储，不上传至任何云端服务器。用户需自行负责其设备的物理安全、PIN 码隐私及数据备份。",
+  "disclaimer_point_5_title": "5. 紧急情况",
+  "disclaimer_point_5_desc": "如果您正处于医疗紧急情况下，请立即拨打当地急救电话或前往最近的医院，切勿依赖本应用进行应急判断。",
+  "disclaimer_footer": "点击“同意”即表示您已阅读并接受以上全部条款。",
+  "disclaimer_checkbox": "我已阅读并同意上述医疗免责声明",
+  "disclaimer_accept_button": "同意并继续",
+  "seed_person_me": "本人",
+  "seed_tag_lab": "检验",
+  "seed_tag_exam": "检查",
+  "seed_tag_record": "病历",
+  "seed_tag_prescription": "处方",
+  "filter_title": "筛选条件",
+  "filter_date_range": "日期范围",
+  "filter_select_date_range": "选择日期范围",
+  "filter_date_to": "至",
+  "filter_tags_multi": "标签 (多选)",
+  "search_hint": "搜索 OCR 内容、医院或备注...",
+  "search_result_count": "找到 {count} 条结果",
+  "@search_result_count": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "search_initial_title": "开始搜索",
+  "search_initial_desc": "输入医院、药物、指标或标签关键词",
+  "search_empty_title": "未找到相关内容",
+  "search_empty_desc": "尝试更换关键词或检查拼写",
+  "search_searching_person": "正在搜索: {name}",
+  "@search_searching_person": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  }
 }

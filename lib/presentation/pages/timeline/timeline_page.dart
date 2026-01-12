@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/data/models/record.dart';
 import 'package:phf/logic/providers/timeline_provider.dart';
 import 'package:phf/presentation/theme/app_theme.dart';
@@ -43,11 +44,10 @@ class TimelinePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncHomeState = ref.watch(timelineControllerProvider);
-
+    final l10n = AppLocalizations.of(context)!;
     return asyncHomeState.when(
       data: (homeState) {
         final records = homeState.records;
-
         if (records.isEmpty && homeState.pendingCount == 0) {
           return Center(
             child: Column(
@@ -59,14 +59,14 @@ class TimelinePage extends ConsumerWidget {
                   color: AppTheme.textHint,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  '暂无记录，点击右下角 + 号开始录入',
-                  style: TextStyle(color: AppTheme.textHint),
+                Text(
+                  l10n.home_empty_records,
+                  style: const TextStyle(color: AppTheme.textHint),
                 ),
                 TextButton(
                   onPressed: () =>
                       ref.read(timelineControllerProvider.notifier).refresh(),
-                  child: const Text('刷新'),
+                  child: Text(l10n.common_refresh),
                 ),
               ],
             ),
@@ -126,12 +126,15 @@ class TimelinePage extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, color: AppTheme.errorRed, size: 48),
             const SizedBox(height: 16),
-            Text('加载失败: $err', textAlign: TextAlign.center),
+            Text(
+              l10n.common_load_failed(err.toString()),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () =>
                   ref.read(timelineControllerProvider.notifier).refresh(),
-              child: const Text('重试'),
+              child: Text(l10n.common_retry),
             ),
           ],
         ),

@@ -6,7 +6,7 @@
 import 'dart:async' as _i3;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:phf/logic/services/interfaces/security_service.dart' as _i2;
+import 'package:phf/data/repositories/app_meta_repository.dart' as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -23,77 +23,97 @@ import 'package:phf/logic/services/interfaces/security_service.dart' as _i2;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [ISecurityService].
+/// A class which mocks [AppMetaRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockISecurityService extends _i1.Mock implements _i2.ISecurityService {
-  MockISecurityService() {
-    _i1.throwOnMissingStub(this);
-  }
+class MockAppMetaRepository extends _i1.Mock implements _i2.AppMetaRepository {
+  @override
+  _i3.Future<String?> get(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#get, [key]),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
 
   @override
-  _i3.Future<void> setPin(String? pin) =>
+  _i3.Future<void> put(String? key, String? value) =>
       (super.noSuchMethod(
-            Invocation.method(#setPin, [pin]),
+            Invocation.method(#put, [key, value]),
             returnValue: _i3.Future<void>.value(),
             returnValueForMissingStub: _i3.Future<void>.value(),
           )
           as _i3.Future<void>);
-
-  @override
-  _i3.Future<bool> validatePin(String? inputPin) =>
-      (super.noSuchMethod(
-            Invocation.method(#validatePin, [inputPin]),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
-
-  @override
-  _i3.Future<bool> changePin(String? oldPin, String? newPin) =>
-      (super.noSuchMethod(
-            Invocation.method(#changePin, [oldPin, newPin]),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
-
-  @override
-  _i3.Future<bool> canCheckBiometrics() =>
-      (super.noSuchMethod(
-            Invocation.method(#canCheckBiometrics, []),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
-
-  @override
-  _i3.Future<bool> enableBiometrics() =>
-      (super.noSuchMethod(
-            Invocation.method(#enableBiometrics, []),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
-
-  @override
-  _i3.Future<void> disableBiometrics() =>
-      (super.noSuchMethod(
-            Invocation.method(#disableBiometrics, []),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
-          )
-          as _i3.Future<void>);
-
-  @override
-  _i3.Future<bool> isBiometricsEnabled() =>
-      (super.noSuchMethod(
-            Invocation.method(#isBiometricsEnabled, []),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> hasLock() =>
       (super.noSuchMethod(
             Invocation.method(#hasLock, []),
             returnValue: _i3.Future<bool>.value(false),
+            returnValueForMissingStub: _i3.Future<bool>.value(false),
           )
           as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setHasLock(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#setHasLock, [enabled]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<String?> getCurrentPersonId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getCurrentPersonId, []),
+            returnValue: _i3.Future<String?>.value(),
+            returnValueForMissingStub: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> setCurrentPersonId(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#setCurrentPersonId, [id]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isDisclaimerAccepted() =>
+      (super.noSuchMethod(
+            Invocation.method(#isDisclaimerAccepted, []),
+            returnValue: _i3.Future<bool>.value(false),
+            returnValueForMissingStub: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setDisclaimerAccepted(bool? accepted) =>
+      (super.noSuchMethod(
+            Invocation.method(#setDisclaimerAccepted, [accepted]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getLockTimeout() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLockTimeout, []),
+            returnValue: _i3.Future<int>.value(0),
+            returnValueForMissingStub: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<void> setLockTimeout(int? seconds) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLockTimeout, [seconds]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }

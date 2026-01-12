@@ -22,9 +22,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../logic/providers/core_providers.dart';
 import '../../data/models/tag.dart';
 import '../theme/app_theme.dart';
+import '../utils/l10n_helper.dart';
 
 class TagSelector extends ConsumerStatefulWidget {
   final List<String> selectedTagIds;
@@ -57,7 +59,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
   @override
   Widget build(BuildContext context) {
     final allTagsAsync = ref.watch(allTagsProvider);
-
+    final l10n = AppLocalizations.of(context)!;
     return allTagsAsync.when(
       data: (allTags) => _buildContent(context, allTags),
       loading: () => const SizedBox(
@@ -67,7 +69,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
       error: (err, stack) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          '加载标签失败: $err',
+          l10n.common_load_failed(err.toString()),
           style: const TextStyle(color: AppTheme.errorRed, fontSize: 12),
         ),
       ),
@@ -75,17 +77,17 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
   }
 
   Widget _buildContent(BuildContext context, List<Tag> allTags) {
+    final l10n = AppLocalizations.of(context)!;
     final filteredTags = _filterTags(allTags);
     final bool hasExactMatch = _checkExactMatch(allTags);
     final bool showCreateOption =
         _searchQuery.isNotEmpty && !hasExactMatch && widget.onCreate != null;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSearchField(),
+        _buildSearchField(l10n),
         const SizedBox(height: 12),
-        if (showCreateOption) _buildCreateOption(context),
+        if (showCreateOption) _buildCreateOption(context, l10n),
         if (filteredTags.isNotEmpty) ...[
           _buildTagsWrap(filteredTags),
           const SizedBox(height: 24),
@@ -95,7 +97,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
           const SizedBox(height: 8),
           _buildReorderHeader(),
           const SizedBox(height: 8),
-          _buildReorderList(allTags),
+          _buildReorderList(allTags, l10n),
         ],
       ],
     );
@@ -104,21 +106,27 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
   List<Tag> _filterTags(List<Tag> allTags) {
     return allTags.where((tag) {
       if (_searchQuery.isEmpty) return true;
-      return tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final localizedName = L10nHelper.getTagName(context, tag);
+      return localizedName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
 
   bool _checkExactMatch(List<Tag> allTags) {
-    return allTags.any(
-      (t) => t.name.toLowerCase() == _searchQuery.toLowerCase().trim(),
-    );
+    return allTags.any((t) {
+      final localizedMatch = L10nHelper.getTagName(context, t).toLowerCase() ==
+          _searchQuery.toLowerCase().trim();
+      final rawMatch =
+          t.name.toLowerCase() == _searchQuery.toLowerCase().trim();
+      return localizedMatch || rawMatch;
+    });
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(AppLocalizations l10n) {
     return TextField(
       controller: _searchCtrl,
       decoration: InputDecoration(
-        hintText: '搜索或创建标签...',
+        hintText: l10n.tag_field_name_hint,
         prefixIcon: const Icon(Icons.search, size: 20),
         suffixIcon: _searchQuery.isNotEmpty
             ? IconButton(
@@ -148,7 +156,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
     );
   }
 
-  Widget _buildCreateOption(BuildContext context) {
+  Widget _buildCreateOption(BuildContext context, AppLocalizations l10n) {
     return InkWell(
       onTap: () async {
         final newName = _searchQuery.trim();
@@ -161,7 +169,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('创建标签失败: $e'),
+                content: Text(l10n.common_load_failed(e.toString())),
                 backgroundColor: AppTheme.errorRed,
               ),
             );
@@ -188,7 +196,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
             ),
             const SizedBox(width: 8),
             Text(
-              '创建新标签 "$_searchQuery"',
+              l10n.tag_create_new(_searchQuery),
               style: const TextStyle(
                 color: AppTheme.primaryTeal,
                 fontWeight: FontWeight.bold,
@@ -207,7 +215,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
       children: filteredTags.map((tag) {
         final isSelected = widget.selectedTagIds.contains(tag.id);
         return FilterChip(
-          label: Text(tag.name),
+          label: Text(L10nHelper.getTagName(context, tag)),
           selected: isSelected,
           onSelected: (_) => widget.onToggle(tag.id),
           showCheckmark: true,
@@ -235,28 +243,24 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
   }
 
   Widget _buildReorderHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         const Icon(Icons.swap_vert, size: 16, color: AppTheme.textHint),
         const SizedBox(width: 4),
-        const Text(
-          '已选标签 (拖拽排序)',
-          style: TextStyle(
+        Text(
+          l10n.tag_reorder_title,
+          style: const TextStyle(
             fontSize: 12,
             color: AppTheme.textHint,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const Spacer(),
-        Text(
-          '${widget.selectedTagIds.length} 个',
-          style: const TextStyle(fontSize: 11, color: AppTheme.primaryTeal),
-        ),
       ],
     );
   }
 
-  Widget _buildReorderList(List<Tag> allTags) {
+  Widget _buildReorderList(List<Tag> allTags, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.bgGrey.withValues(alpha: 0.3),
@@ -287,13 +291,18 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
         },
         children: [
           for (int i = 0; i < widget.selectedTagIds.length; i++)
-            _buildReorderItem(allTags, widget.selectedTagIds[i], i),
+            _buildReorderItem(allTags, widget.selectedTagIds[i], i, l10n),
         ],
       ),
     );
   }
 
-  Widget _buildReorderItem(List<Tag> allTags, String id, int index) {
+  Widget _buildReorderItem(
+    List<Tag> allTags,
+    String id,
+    int index,
+    AppLocalizations l10n,
+  ) {
     final tag = allTags.firstWhere(
       (t) => t.id == id,
       orElse: () => Tag(id: id, name: '?', createdAt: DateTime(0), color: ''),
@@ -328,7 +337,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
           ),
         ),
         title: Text(
-          tag.name,
+          L10nHelper.getTagName(context, tag),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         trailing: IconButton(
@@ -338,7 +347,7 @@ class _TagSelectorState extends ConsumerState<TagSelector> {
             size: 20,
           ),
           onPressed: () => widget.onToggle(id),
-          tooltip: '移除',
+          tooltip: l10n.common_delete,
         ),
       ),
     );

@@ -9,6 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/presentation/theme/app_theme.dart';
 import '../../../../data/models/ocr_result.dart';
 import 'enhanced_ocr_view.dart';
@@ -33,66 +34,99 @@ class _CollapsibleOcrCardState extends State<CollapsibleOcrCard> {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     final hasResult = widget.ocrResult != null;
 
     return Container(
       width: double.infinity,
+
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: AppTheme.bgGrey,
+
         borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+
         border: Border.all(color: const Color(0xFFE5E5EA)),
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
             children: [
-              const Text(
-                'OCR 识别文本',
-                style: TextStyle(
+              Text(
+                l10n.detail_ocr_title,
+
+                style: const TextStyle(
                   fontSize: 12,
+
                   fontWeight: FontWeight.bold,
+
                   color: AppTheme.textHint,
                 ),
               ),
+
               Row(
                 children: [
                   if (hasResult)
                     GestureDetector(
                       onTap: () => setState(() => _isEnhanced = !_isEnhanced),
+
                       behavior: HitTestBehavior.opaque,
+
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
+
                         child: Text(
-                          _isEnhanced ? '查看原文' : '智能增强',
+                          _isEnhanced
+                              ? l10n.detail_view_raw
+                              : l10n.detail_view_enhanced,
+
                           style: const TextStyle(
                             fontSize: 12,
+
                             color: AppTheme.primaryTeal,
+
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
+
                   if (hasResult)
                     const SizedBox(
                       height: 12,
+
                       child: VerticalDivider(
                         width: 1,
+
                         color: AppTheme.textHint,
                       ),
                     ),
+
                   GestureDetector(
                     onTap: () => setState(() => _isExpanded = !_isExpanded),
+
                     behavior: HitTestBehavior.opaque,
+
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8),
+
                       child: Text(
-                        _isExpanded ? '收起' : '展开全文',
+                        _isExpanded
+                            ? l10n.detail_ocr_collapse
+                            : l10n.detail_ocr_expand,
+
                         style: const TextStyle(
                           fontSize: 12,
+
                           color: AppTheme.primaryTeal,
+
                           fontWeight: FontWeight.bold,
                         ),
                       ),

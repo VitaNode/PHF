@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../data/models/person.dart';
 import '../../../data/models/search_result.dart';
 import '../../../logic/providers/search_provider.dart';
@@ -9,20 +10,8 @@ import '../../../logic/providers/person_provider.dart';
 import '../../theme/app_theme.dart';
 import '../timeline/record_detail_page.dart';
 import '../../widgets/app_card.dart';
+import '../../utils/l10n_helper.dart';
 
-/// # GlobalSearchPage
-///
-/// ## Description
-/// 全屏搜索页面，支持基于 FTS5 的全文检索及结果高亮显示。
-///
-/// ## Features
-/// - **FTS5 Search**: 检索医院、标签、备注及 OCR 文本。
-/// - **Highlighting**: 自动解析并高亮显示匹配关键词。
-/// - **Personnel Isolated**: 仅搜索当前选中成员的记录。
-///
-/// ## Repair Logs
-/// - [2026-01-05] 修复：应用 Monospace 字体于搜索结果摘要，提升医疗数值可读性。
-/// - [2026-01-05] 修复：优化 `_parseSnippet` 逻辑，确保高亮标签正确闭合及性能。
 class GlobalSearchPage extends ConsumerStatefulWidget {
   const GlobalSearchPage({super.key});
 
@@ -56,19 +45,27 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   @override
   Widget build(BuildContext context) {
     final searchAsync = ref.watch(searchControllerProvider);
+
     final currentPerson = ref.watch(currentPersonProvider).value;
+
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppTheme.bgGrey,
+
       appBar: _buildAppBar(currentPerson),
+
       body: searchAsync.when(
         data: (results) => _buildSearchResults(results),
+
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryTeal),
         ),
+
         error: (err, stack) => Center(
           child: Text(
-            '搜索出错: $err',
+            l10n.common_load_failed(err.toString()),
+
             style: const TextStyle(color: AppTheme.errorRed),
           ),
         ),
@@ -77,24 +74,37 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   PreferredSizeWidget _buildAppBar(Person? currentPerson) {
+    final l10n = AppLocalizations.of(context)!;
+
     return AppBar(
       titleSpacing: 0,
+
       title: _buildSearchField(),
+
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(30),
+
         child: Container(
           padding: const EdgeInsets.only(left: 16, bottom: 8),
+
           alignment: Alignment.centerLeft,
+
           child: Row(
             children: [
               const Icon(
                 Icons.person_outline,
+
                 size: 14,
+
                 color: AppTheme.textHint,
               ),
+
               const SizedBox(width: 4),
+
               Text(
-                '正在搜索: ${currentPerson?.nickname ?? "加载中..."}',
+                l10n.search_searching_person(currentPerson != null
+                    ? L10nHelper.getPersonName(context, currentPerson)
+                    : "..."),
                 style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
               ),
             ],
@@ -105,49 +115,76 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   Widget _buildSearchField() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 40,
+
       margin: const EdgeInsets.only(right: 16),
+
       decoration: BoxDecoration(
         color: AppTheme.bgGrey,
+
         borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       ),
+
       child: TextField(
         controller: _searchController,
+
         autofocus: true,
+
         decoration: InputDecoration(
-          hintText: '搜索 OCR 内容、医院或备注...',
+          hintText: l10n.search_hint,
+
           hintStyle: const TextStyle(color: AppTheme.textHint, fontSize: 14),
+
           prefixIcon: const Icon(
             Icons.search,
+
             size: 20,
+
             color: AppTheme.textGrey,
           ),
+
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(
                     Icons.cancel,
+
                     size: 20,
+
                     color: AppTheme.textGrey,
                   ),
+
                   onPressed: () {
                     _searchController.clear();
+
                     setState(() {});
+
                     _onSearchChanged('');
                   },
                 )
               : null,
+
           border: InputBorder.none,
+
           enabledBorder: InputBorder.none,
+
           focusedBorder: InputBorder.none,
+
           contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
+
         style: const TextStyle(fontSize: 16),
+
         onChanged: (val) {
           setState(() {});
+
           _onSearchChanged(val);
         },
+
         textInputAction: TextInputAction.search,
+
         onSubmitted: (val) =>
             ref.read(searchControllerProvider.notifier).search(val),
       ),
@@ -155,22 +192,31 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   Widget _buildSearchResults(List<SearchResult> results) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (results.isEmpty && _searchController.text.isNotEmpty) {
       return _buildEmptyState();
     }
+
     if (results.isEmpty) {
       return _buildInitialState();
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+
           child: Text(
-            '找到 ${results.length} 条结果',
+            l10n.search_result_count(results.length),
+
             style: AppTheme.monoStyle.copyWith(
               fontSize: 12,
+
               color: AppTheme.textHint,
+
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -192,6 +238,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   Widget _buildInitialState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -202,14 +249,14 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
             color: AppTheme.primaryTeal.withValues(alpha: 0.1),
           ),
           const SizedBox(height: 16),
-          const Text(
-            '支持搜索病历内容、医院或标签',
-            style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+          Text(
+            l10n.search_initial_title,
+            style: const TextStyle(color: AppTheme.textHint, fontSize: 14),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '试试搜索 "血常规" 或 "省立医院"',
-            style: TextStyle(color: AppTheme.textHint, fontSize: 12),
+          Text(
+            l10n.search_initial_desc,
+            style: const TextStyle(color: AppTheme.textHint, fontSize: 12),
           ),
         ],
       ),
@@ -217,6 +264,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -234,7 +282,7 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
                 fontSize: 16,
               ),
               children: [
-                const TextSpan(text: '未找到相关内容 '),
+                TextSpan(text: '${l10n.search_empty_title} '),
                 TextSpan(
                   text: '"${_searchController.text}"',
                   style: const TextStyle(
@@ -246,9 +294,9 @@ class _GlobalSearchPageState extends ConsumerState<GlobalSearchPage> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '请尝试更换关键词或检查拼写',
-            style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+          Text(
+            l10n.search_empty_desc,
+            style: const TextStyle(color: AppTheme.textHint, fontSize: 14),
           ),
         ],
       ),
@@ -276,16 +324,17 @@ class _SearchResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const Divider(height: 1, color: AppTheme.bgGrey),
           if (result.snippet.isNotEmpty) _buildSnippet(),
-          _buildTags(),
+          _buildTags(context),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -298,7 +347,7 @@ class _SearchResultCard extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              result.record.hospitalName ?? '未填写医院',
+              result.record.hospitalName ?? l10n.review_edit_hospital_label,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               overflow: TextOverflow.ellipsis,
             ),
@@ -339,31 +388,67 @@ class _SearchResultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTags() {
+  Widget _buildTags(BuildContext context) {
     if (result.record.tagsCache == null || result.record.tagsCache!.isEmpty) {
       return const SizedBox.shrink();
     }
+    List<String> tagIds = [];
+    try {
+      final decoded = jsonDecode(result.record.tagsCache!);
+      if (decoded is List) {
+        tagIds = decoded.map((e) => e.toString()).toList();
+      }
+    } catch (_) {
+      // Fallback for legacy comma-separated string if any
+      tagIds = result.record.tagsCache!.split(',');
+    }
+
+    if (tagIds.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Wrap(
         spacing: 4,
-        children: result.record.tagsCache!.split(',').take(3).map((tag) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppTheme.bgGrey,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '#$tag',
-              style: const TextStyle(
-                fontSize: 10,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          );
+        children: tagIds.take(3).map((tid) {
+          return _SearchTagChip(tagId: tid);
         }).toList(),
       ),
+    );
+  }
+}
+
+class _SearchTagChip extends ConsumerWidget {
+  final String tagId;
+  const _SearchTagChip({required this.tagId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allTagsAsync = ref.watch(allTagsProvider);
+    return allTagsAsync.when(
+      data: (allTags) {
+        final tag = allTags.firstWhere(
+          (t) => t.id == tagId,
+          orElse: () =>
+              Tag(id: tagId, name: tagId, createdAt: DateTime(0), color: ''),
+        );
+        final displayName = L10nHelper.getTagName(context, tag);
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: AppTheme.bgGrey,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            '#$displayName',
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
