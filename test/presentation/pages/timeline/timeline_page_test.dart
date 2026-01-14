@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -8,6 +9,7 @@ import 'package:phf/data/models/person.dart';
 import 'package:phf/data/repositories/interfaces/image_repository.dart';
 import 'package:phf/data/repositories/interfaces/record_repository.dart';
 import 'package:phf/data/repositories/interfaces/tag_repository.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/ocr_status_provider.dart';
 import 'package:phf/logic/providers/person_provider.dart';
@@ -67,7 +69,17 @@ void main() {
           (ref) => Stream.value(pendingCount),
         ),
       ],
-      child: const MaterialApp(home: Scaffold(body: TimelinePage())),
+      child: const MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('zh'),
+        home: Scaffold(body: TimelinePage()),
+      ),
     );
   }
 
@@ -189,7 +201,17 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: Scaffold(body: TimelinePage())),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: Scaffold(body: TimelinePage()),
+        ),
       ),
     );
     await tester.pumpAndSettle();

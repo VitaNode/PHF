@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../logic/providers/ingestion_provider.dart';
 import '../../../logic/providers/states/ingestion_state.dart';
 import '../../theme/app_theme.dart';
@@ -26,6 +27,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
   }
 
   void _showPickerMenu() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -34,7 +36,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('拍照'),
+              title: Text(l10n.ingestion_take_photo),
               onTap: () {
                 Navigator.pop(context);
                 ref.read(ingestionControllerProvider.notifier).takePhoto();
@@ -42,7 +44,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('从相册选择'),
+              title: Text(l10n.ingestion_pick_gallery),
               onTap: () {
                 Navigator.pop(context);
                 ref.read(ingestionControllerProvider.notifier).pickImages();
@@ -58,27 +60,30 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(ingestionControllerProvider);
     final notifier = ref.read(ingestionControllerProvider.notifier);
+    final l10n = AppLocalizations.of(context)!;
 
     ref.listen(ingestionControllerProvider.select((s) => s.status), (
       previous,
       next,
     ) {
       if (next == IngestionStatus.success) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('已进入后台 OCR 处理队列...')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.ingestion_processing_queue)),
+        );
         Navigator.of(context).pop();
       } else if (next == IngestionStatus.error) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存受阻: ${state.errorMessage}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.ingestion_save_error(state.errorMessage ?? '')),
+          ),
+        );
       }
     });
 
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('预览与处理'),
+        title: Text(AppLocalizations.of(context)!.ingestion_title),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
@@ -97,19 +102,51 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
           ? null
           : SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 12.0,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      '元数据将在保存后由背景 OCR 自动识别',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        AppLocalizations.of(context)!.ingestion_grouped_report,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.ingestion_grouped_report_hint,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.textHint,
+                        ),
+                      ),
+                      value: state.isGroupedReport,
+                      onChanged: (val) => notifier.toggleGroupedReport(val),
+                      activeTrackColor: AppTheme.primary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)!.ingestion_ocr_hint,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.textHint,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       child: ActiveButton(
-                        text: '开始处理并归档',
+                        text: AppLocalizations.of(
+                          context,
+                        )!.ingestion_submit_button,
                         onPressed: () => notifier.submit(),
                         isLoading: state.status == IngestionStatus.processing,
                       ),
@@ -128,9 +165,15 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
         children: [
           const Icon(Icons.photo_outlined, size: 64, color: AppTheme.textHint),
           const SizedBox(height: 16),
-          const Text('请添加病历照片', style: TextStyle(color: AppTheme.textHint)),
+          Text(
+            AppLocalizations.of(context)!.ingestion_empty_hint,
+            style: const TextStyle(color: AppTheme.textHint),
+          ),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _showPickerMenu, child: const Text('立即添加')),
+          ElevatedButton(
+            onPressed: _showPickerMenu,
+            child: Text(AppLocalizations.of(context)!.ingestion_add_now),
+          ),
         ],
       ),
     );

@@ -3,9 +3,10 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i7;
 
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i6;
 import 'package:phf/core/security/master_key_manager.dart' as _i2;
 import 'package:phf/core/services/path_provider_service.dart' as _i3;
 import 'package:phf/data/datasources/local/database_service.dart' as _i5;
@@ -79,33 +80,48 @@ class MockSQLCipherDatabaseService extends _i1.Mock
           as _i3.PathProviderService);
 
   @override
-  _i6.Future<_i4.Database> get database =>
+  String get locale =>
+      (super.noSuchMethod(
+            Invocation.getter(#locale),
+            returnValue: _i6.dummyValue<String>(
+              this,
+              Invocation.getter(#locale),
+            ),
+            returnValueForMissingStub: _i6.dummyValue<String>(
+              this,
+              Invocation.getter(#locale),
+            ),
+          )
+          as String);
+
+  @override
+  _i7.Future<_i4.Database> get database =>
       (super.noSuchMethod(
             Invocation.getter(#database),
-            returnValue: _i6.Future<_i4.Database>.value(
+            returnValue: _i7.Future<_i4.Database>.value(
               _FakeDatabase_2(this, Invocation.getter(#database)),
             ),
-            returnValueForMissingStub: _i6.Future<_i4.Database>.value(
+            returnValueForMissingStub: _i7.Future<_i4.Database>.value(
               _FakeDatabase_2(this, Invocation.getter(#database)),
             ),
           )
-          as _i6.Future<_i4.Database>);
+          as _i7.Future<_i4.Database>);
 
   @override
-  _i6.Future<void> close() =>
+  _i7.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> onCreate(_i4.Database? db, int? version) =>
+  _i7.Future<void> onCreate(_i4.Database? db, int? version) =>
       (super.noSuchMethod(
             Invocation.method(#onCreate, [db, version]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 }

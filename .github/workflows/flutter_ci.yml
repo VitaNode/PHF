@@ -5,7 +5,6 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
-  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,12 +12,14 @@ concurrency:
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
 
 jobs:
   quality-check:
     name: Lint & Test
     runs-on: ubuntu-latest
+    outputs:
+      success: ${{ steps.unit-tests.outcome }}
     
     steps:
       - name: 📚 Checkout code
@@ -72,6 +73,7 @@ jobs:
           dart run dart_code_linter:metrics analyze lib | tee metrics.log
 
       - name: 🧪 Run Unit Tests
+        id: unit-tests
         run: |
           set -o pipefail
           flutter test | tee tests.log
@@ -117,3 +119,15 @@ jobs:
               repo: context.repo.repo,
               body: body
             });
+
+  automerge:
+    name: 🚀 Auto-merge
+    needs: quality-check
+    if: github.event_name == 'pull_request' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🤖 Merge Pull Request
+        run: gh pr merge --squash --delete-branch "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -44,6 +44,7 @@ abstract interface class IRecordRepository {
     String? hospitalName,
     DateTime? visitDate,
     String? notes,
+    String? groupId,
     DatabaseExecutor? executor,
   });
 

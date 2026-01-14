@@ -17,10 +17,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../data/models/person.dart';
 import '../../logic/providers/person_provider.dart';
 import '../pages/settings/personnel_management_page.dart';
 import '../theme/app_theme.dart';
+import '../utils/l10n_helper.dart';
 
 class PersonnelTabs extends ConsumerStatefulWidget {
   const PersonnelTabs({super.key});
@@ -61,51 +63,73 @@ class _PersonnelTabsState extends ConsumerState<PersonnelTabs> {
   ) {
     if (persons.isEmpty) return const SizedBox.shrink();
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 56,
+
       padding: const EdgeInsets.symmetric(vertical: 10),
+
       decoration: const BoxDecoration(
         color: AppTheme.bgWhite,
+
         border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 1)),
       ),
+
       child: Row(
         children: [
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
+
               scrollDirection: Axis.horizontal,
+
               padding: const EdgeInsets.symmetric(horizontal: 12),
+
               itemCount: persons.length,
+
               itemBuilder: (context, index) {
                 final person = persons[index];
+
                 final isSelected = person.id == currentId;
 
                 return _PersonnelTabItem(
                   person: person,
+
                   isSelected: isSelected,
+
                   onTap: () => _onTabSelected(person.id, index),
                 );
               },
             ),
           ),
+
           const VerticalDivider(
             indent: 8,
+
             endIndent: 8,
+
             color: AppTheme.bgGrey,
+
             width: 1,
           ),
+
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: AppTheme.textHint),
-            tooltip: '管理档案',
+
+            tooltip: l10n.settings_manage_profiles,
+
             onPressed: () {
               Navigator.push(
                 context,
+
                 MaterialPageRoute<void>(
                   builder: (_) => const PersonnelManagementPage(),
                 ),
               );
             },
           ),
+
           const SizedBox(width: 8),
         ],
       ),
@@ -154,7 +178,9 @@ class _PersonnelTabItem extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            person.nickname,
+            L10nHelper.getPersonName(context, person),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: isSelected ? Colors.white : AppTheme.textSecondary,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

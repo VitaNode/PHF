@@ -20,13 +20,15 @@ class DatabaseSeeder {
   /// 执行种子数据插入
   ///
   /// [batch] 必须是正在执行 `onCreate` 事务的 Batch 实例。
-  static void run(Batch batch) {
+  /// [locale] 用于选择种子数据的语言，默认为 'zh'。
+  static void run(Batch batch, {String locale = 'zh'}) {
     final now = DateTime.now().millisecondsSinceEpoch;
+    final isEn = locale.startsWith('en');
 
     // 1. Seed Default User "Me"
     batch.insert('persons', {
       'id': defaultPersonId,
-      'nickname': '本人',
+      'nickname': isEn ? 'Me' : '本人',
       'is_default': 1,
       'order_index': 0,
       'profile_color': '#009688', // Default Teal
@@ -34,29 +36,28 @@ class DatabaseSeeder {
     });
 
     // 2. Seed System Tags (Teal Palette)
-    // 颜色选取遵循 Material Design Teal 色系，保持视觉统一但有区分度。
     final tags = [
       {
         'id': 'sys_tag_1',
-        'name': '检验',
+        'name': isEn ? 'Lab Result' : '检验',
         'color': '#009688', // Teal 500
         'order_index': 1,
       },
       {
         'id': 'sys_tag_2',
-        'name': '检查',
+        'name': isEn ? 'Examination' : '检查',
         'color': '#26A69A', // Teal 400
         'order_index': 2,
       },
       {
         'id': 'sys_tag_3',
-        'name': '病历',
+        'name': isEn ? 'Medical Record' : '病历',
         'color': '#00796B', // Teal 700
         'order_index': 3,
       },
       {
         'id': 'sys_tag_4',
-        'name': '处方',
+        'name': isEn ? 'Prescription' : '处方',
         'color': '#4DB6AC', // Teal 300
         'order_index': 4,
       },

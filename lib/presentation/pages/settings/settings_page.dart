@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
+import 'package:phf/logic/providers/locale_provider.dart';
 import '../../theme/app_theme.dart';
 import 'backup_page.dart';
 import 'feedback_page.dart';
@@ -7,27 +10,29 @@ import 'privacy_policy_page.dart';
 import 'security_settings_page.dart';
 import 'tag_management_page.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('设置'),
+        title: Text(l10n.settings_title),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
       ),
       body: ListView(
         children: [
-          _buildSectionTitle('档案与分类'),
+          _buildSectionTitle(l10n.settings_section_profiles),
           _buildListTile(
             context,
             icon: Icons.people_outline,
-            title: '管理档案',
-            subtitle: '添加或编辑人员档案',
+            title: l10n.settings_manage_profiles,
+            subtitle: l10n.settings_manage_profiles_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
@@ -38,8 +43,8 @@ class SettingsPage extends StatelessWidget {
           _buildListTile(
             context,
             icon: Icons.label_outline,
-            title: '标签库管理',
-            subtitle: '维护病历分类标签',
+            title: l10n.settings_tag_library,
+            subtitle: l10n.settings_tag_library_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
@@ -47,13 +52,20 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
+          _buildListTile(
+            context,
+            icon: Icons.language_outlined,
+            title: l10n.settings_language,
+            subtitle: l10n.settings_language_desc,
+            onTap: () => _showLanguagePicker(context, ref),
+          ),
           const Divider(),
-          _buildSectionTitle('数据安全'),
+          _buildSectionTitle(l10n.settings_section_security),
           _buildListTile(
             context,
             icon: Icons.security_outlined,
-            title: '隐私与安全',
-            subtitle: '修改 PIN 码及生物识别',
+            title: l10n.settings_privacy_security,
+            subtitle: l10n.settings_privacy_security_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
@@ -64,32 +76,32 @@ class SettingsPage extends StatelessWidget {
           _buildListTile(
             context,
             icon: Icons.backup_outlined,
-            title: '备份与恢复',
-            subtitle: '导出加密备份文件',
+            title: l10n.settings_backup_restore,
+            subtitle: l10n.settings_backup_restore_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const BackupPage()),
             ),
           ),
           const Divider(),
-          _buildSectionTitle('帮助与支持'),
+          _buildSectionTitle(l10n.settings_section_support),
           _buildListTile(
             context,
             icon: Icons.feedback_outlined,
-            title: '问题反馈',
-            subtitle: '报告问题或提交建议',
+            title: l10n.settings_feedback,
+            subtitle: l10n.settings_feedback_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const FeedbackPage()),
             ),
           ),
           const Divider(),
-          _buildSectionTitle('关于'),
+          _buildSectionTitle(l10n.settings_section_about),
           _buildListTile(
             context,
             icon: Icons.privacy_tip_outlined,
-            title: '隐私政策',
-            subtitle: '查看应用隐私保护声明',
+            title: l10n.settings_privacy_policy,
+            subtitle: l10n.settings_privacy_policy_desc,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
@@ -97,13 +109,77 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.info_outline, color: AppTheme.primaryTeal),
-            title: Text('版本信息', style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('PaperHealth v1.0.0'),
+          ListTile(
+            leading: const Icon(
+              Icons.info_outline,
+              color: AppTheme.primaryTeal,
+            ),
+            title: Text(
+              l10n.settings_version,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: const Text('PaperHealth v1.0.0'),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final Map<String, String> languages = {
+      'system': '跟随系统 (Follow System)',
+      'en': 'English',
+      'zh': '中文 (Chinese)',
+      'es': 'Español (Spanish)',
+      'pt': 'Português (Portuguese)',
+      'id': 'Bahasa Indonesia (Indonesian)',
+      'vi': 'Tiếng Việt (Vietnamese)',
+      'th': 'ไทย (Thai)',
+      'hi': 'हिन्दी (Hindi)',
+    };
+
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  AppLocalizations.of(context)!.settings_language,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: languages.entries.map((entry) {
+                    return ListTile(
+                      title: Text(entry.value),
+                      onTap: () {
+                        final code = entry.key == 'system' ? null : entry.key;
+                        ref
+                            .read(localeControllerProvider.notifier)
+                            .setLocale(code);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -23,11 +23,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/person.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/person_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/l10n_helper.dart';
 
 class PersonnelManagementPage extends ConsumerStatefulWidget {
   const PersonnelManagementPage({super.key});
@@ -67,25 +69,38 @@ class _PersonnelManagementPageState
   Widget build(BuildContext context) {
     final personsAsync = ref.watch(allPersonsProvider);
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
+
       appBar: AppBar(
-        title: const Text('管理档案'),
+        title: Text(l10n.settings_manage_profiles),
+
         backgroundColor: AppTheme.bgWhite,
+
         foregroundColor: AppTheme.textPrimary,
+
         elevation: 0,
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showEditDialog(),
+
         backgroundColor: AppTheme.primaryTeal,
+
         child: const Icon(Icons.add, color: Colors.white),
       ),
+
       body: personsAsync.when(
         data: (persons) => _buildList(context, persons),
+
         loading: () => const Center(child: CircularProgressIndicator()),
+
         error: (err, stack) => Center(
           child: Text(
-            '加载失败: $err',
+            l10n.common_load_failed(err.toString()),
+
             style: const TextStyle(color: AppTheme.errorRed),
           ),
         ),
@@ -94,9 +109,14 @@ class _PersonnelManagementPageState
   }
 
   Widget _buildList(BuildContext context, List<Person> persons) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (persons.isEmpty) {
-      return const Center(
-        child: Text('暂无档案', style: TextStyle(color: AppTheme.textHint)),
+      return Center(
+        child: Text(
+          l10n.person_management_empty,
+          style: const TextStyle(color: AppTheme.textHint),
+        ),
       );
     }
 
@@ -118,6 +138,7 @@ class _PersonnelManagementPageState
   }
 
   Widget _buildItem(BuildContext context, Person person, int index) {
+    final l10n = AppLocalizations.of(context)!;
     final color = person.profileColor != null
         ? Color(int.parse(person.profileColor!.replaceAll('#', '0xFF')))
         : AppTheme.primaryTeal;
@@ -132,7 +153,9 @@ class _PersonnelManagementPageState
         leading: CircleAvatar(
           backgroundColor: color,
           child: Text(
-            person.nickname.isNotEmpty ? person.nickname[0] : '?',
+            L10nHelper.getPersonName(context, person).isNotEmpty
+                ? L10nHelper.getPersonName(context, person)[0]
+                : '?',
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -140,7 +163,7 @@ class _PersonnelManagementPageState
           ),
         ),
         title: Text(
-          person.nickname,
+          L10nHelper.getPersonName(context, person),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -149,7 +172,10 @@ class _PersonnelManagementPageState
           ),
         ),
         subtitle: person.isDefault
-            ? const Text('默认档案', style: TextStyle(fontSize: 12))
+            ? Text(
+                l10n.person_management_default,
+                style: const TextStyle(fontSize: 12),
+              )
             : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -176,14 +202,13 @@ class _PersonnelManagementPageState
     int oldIndex,
     int newIndex,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
     final item = currentList.removeAt(oldIndex);
     currentList.insert(newIndex, item);
 
-    // Optimistic Update (if needed, but usually waiting for refresh is safer for DB)
-    // Here we just call repository
     try {
       final personRepo = ref.read(personRepositoryProvider);
       await personRepo.updateOrder(currentList);
@@ -192,7 +217,7 @@ class _PersonnelManagementPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('排序失败: $e'),
+            content: Text(l10n.common_load_failed(e.toString())),
             backgroundColor: AppTheme.errorRed,
           ),
         );
@@ -201,25 +226,27 @@ class _PersonnelManagementPageState
   }
 
   Future<void> _confirmDelete(Person person) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除档案'),
-        content: Text('确定要删除 "${person.nickname}" 吗？如果该档案下存在记录，删除将被拒绝。'),
+        title: Text(l10n.person_delete_title),
+        content: Text(
+          l10n.person_delete_confirm(L10nHelper.getPersonName(context, person)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
     );
-
     if (confirm == true) {
       try {
         final personRepo = ref.read(personRepositoryProvider);
@@ -228,13 +255,13 @@ class _PersonnelManagementPageState
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('删除成功')));
+          ).showSnackBar(SnackBar(content: Text(l10n.common_confirm)));
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('删除失败: $e'), // Repository throws friendly message
+              content: Text(l10n.common_load_failed(e.toString())),
               backgroundColor: AppTheme.errorRed,
             ),
           );
@@ -282,9 +309,9 @@ class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.person != null;
-
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(isEditing ? '编辑档案' : '新建档案'),
+      title: Text(isEditing ? l10n.person_edit_title : l10n.person_add_title),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -292,16 +319,16 @@ class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
           children: [
             TextField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: '昵称',
-                hintText: '请输入姓名或称呼',
+              decoration: InputDecoration(
+                labelText: l10n.person_field_nickname,
+                hintText: l10n.person_field_nickname_hint,
               ),
               autofocus: true,
             ),
             const SizedBox(height: 20),
-            const Text(
-              '标识颜色',
-              style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+            Text(
+              l10n.person_field_color,
+              style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
             ),
             const SizedBox(height: 10),
             Wrap(
@@ -334,9 +361,9 @@ class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
-        ElevatedButton(onPressed: _save, child: const Text('保存')),
+        ElevatedButton(onPressed: _save, child: Text(l10n.common_save)),
       ],
     );
   }
@@ -344,7 +371,7 @@ class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
   Future<void> _save() async {
     final nickname = _nameCtrl.text.trim();
     if (nickname.isEmpty) return;
-
+    final l10n = AppLocalizations.of(context)!;
     try {
       final personRepo = ref.read(personRepositoryProvider);
       if (widget.person != null) {
@@ -371,7 +398,7 @@ class _PersonEditDialogState extends ConsumerState<_PersonEditDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('保存失败: $e'),
+            content: Text(l10n.common_load_failed(e.toString())),
             backgroundColor: AppTheme.errorRed,
           ),
         );

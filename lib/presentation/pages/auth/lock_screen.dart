@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/pin_keyboard.dart';
@@ -100,9 +101,11 @@ class _LockScreenState extends ConsumerState<LockScreen>
         _isProcessing = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('PIN 码错误，请重新输入')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.lock_screen_error),
+          ),
+        );
       }
     }
   }
@@ -117,9 +120,9 @@ class _LockScreenState extends ConsumerState<LockScreen>
             const SizedBox(height: 80),
             const Icon(Icons.lock_outline, size: 48, color: AppTheme.primary),
             const SizedBox(height: 24),
-            const Text(
-              '请输入 PIN 码解锁',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context)!.lock_screen_title,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
@@ -154,7 +157,9 @@ class _LockScreenState extends ConsumerState<LockScreen>
               IconButton(
                 onPressed: _authenticateWithBiometrics,
                 icon: const Icon(Icons.face, size: 40, color: AppTheme.primary),
-                tooltip: '使用生物识别解锁',
+                tooltip: AppLocalizations.of(
+                  context,
+                )!.lock_screen_biometric_tooltip,
               ),
 
             const Spacer(),

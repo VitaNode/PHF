@@ -10,6 +10,8 @@ _MedicalRecord _$MedicalRecordFromJson(Map<String, dynamic> json) =>
     _MedicalRecord(
       id: json['id'] as String,
       personId: json['personId'] as String,
+      isVerified: json['isVerified'] as bool? ?? false,
+      groupId: json['groupId'] as String?,
       hospitalName: json['hospitalName'] as String?,
       notes: json['notes'] as String?,
       notedAt: DateTime.parse(json['notedAt'] as String),
@@ -28,6 +30,8 @@ Map<String, dynamic> _$MedicalRecordToJson(_MedicalRecord instance) =>
     <String, dynamic>{
       'id': instance.id,
       'personId': instance.personId,
+      'isVerified': instance.isVerified,
+      'groupId': instance.groupId,
       'hospitalName': instance.hospitalName,
       'notes': instance.notes,
       'notedAt': instance.notedAt.toIso8601String(),

@@ -1,17 +1,23 @@
 /// # Record Detail Page
 ///
 /// ## Description
-/// 展示病历详情，支持图片轮播、OCR 结果查看及编辑。
+/// 展示病历详情，支持图片轮播、OCR 结果查看及增强型结构化编辑模式。
 ///
-/// ## Repair Logs
-/// - [2025-12-31] 修复：自动刷新数据后，保持当前的图片索引（原先会跳回第 0 张）；优化 OCR 监听逻辑，支持中间任务状态更新刷新；修复 Future.delayed 类型推导。
-/// - [2025-12-31] T21.4 详情页编辑闭环：优化保存逻辑，确保标签修改和元数据更新后立即同步 Timeline 状态；增加保存前的数据变更检查，避免无效更新。
+/// ## Features (Phase 4)
+/// - **Sticky Magnifier**: 编辑模式下，预览浮层固定在顶部，不随内容滚动。
+/// - **Immersive Edit Mode**: 编辑时隐藏原图大窗口，腾出全屏空间进行逐行校对。
+/// - **Precise Targeting**: 点击不同字段，预览区精准对焦。
 library;
 
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
+import 'package:phf/presentation/widgets/focus_zoom_overlay.dart';
+import 'package:phf/logic/services/slm/layout_parser.dart';
+import 'package:phf/data/models/slm/slm_data_block.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/image.dart';
 import '../../../data/models/ocr_result.dart';
@@ -24,6 +30,7 @@ import '../../../logic/providers/ocr_status_provider.dart';
 import '../../../logic/providers/person_provider.dart';
 import '../../../logic/services/background_worker_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/l10n_helper.dart';
 import '../../widgets/secure_image.dart';
 import '../../widgets/tag_selector.dart';
 import '../../widgets/full_image_viewer.dart';
@@ -47,34 +54,60 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   bool _isEditing = false;
   late PageController _pageController;
 
-  // Edit controllers
+  // Edit controllers & focus nodes
   late TextEditingController _hospitalController;
+  final FocusNode _hospitalFocus = FocusNode();
+  final FocusNode _dateFocus = FocusNode();
   DateTime? _visitDate;
+
+  // Structured data blocks
+  List<SLMDataBlock> _currentBlocks = [];
+  final List<TextEditingController> _blockControllers = [];
+  final List<FocusNode> _blockFocusNodes = [];
 
   @override
   void initState() {
     super.initState();
     _hospitalController = TextEditingController();
     _pageController = PageController();
+    _hospitalFocus.addListener(() => setState(() {}));
+    _dateFocus.addListener(() => setState(() {}));
     _loadData();
   }
 
   @override
   void dispose() {
     _hospitalController.dispose();
+    _hospitalFocus.dispose();
+    _dateFocus.dispose();
+    _disposeBlockResources();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _disposeBlockResources() {
+    for (final c in _blockControllers) {
+      c.dispose();
+    }
+    for (final f in _blockFocusNodes) {
+      f.dispose();
+    }
+    _blockControllers.clear();
+    _blockFocusNodes.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     _setupOcrListener();
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     if (_record == null || _images.isEmpty) {
-      return const Scaffold(body: Center(child: Text('记录不存在')));
+      return Scaffold(body: Center(child: Text(l10n.detail_record_not_found)));
     }
 
     final currentImage = _images[_currentIndex];
@@ -82,20 +115,152 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(flex: 4, child: _buildImageSection()),
-          const Divider(height: 1),
-          Expanded(
-            flex: 6,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: _isEditing
-                  ? _buildEditView()
-                  : _buildInfoView(currentImage),
+      body: _isEditing
+          ? _buildImmersiveEditView(currentImage)
+          : _buildStandardDetailView(currentImage),
+    );
+  }
+
+  Widget _buildStandardDetailView(MedicalImage currentImage) {
+    return Column(
+      children: [
+        Expanded(flex: 4, child: _buildImageSection()),
+        const Divider(height: 1),
+        Expanded(
+          flex: 6,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: _buildInfoView(currentImage),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImmersiveEditView(MedicalImage currentImage) {
+    final l10n = AppLocalizations.of(context)!;
+    final isLowConfidence =
+        currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
+    final warningColor = Colors.orange.shade50;
+
+    return Column(
+      children: [
+        _buildMagnifier(currentImage),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.review_edit_basic_info,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _hospitalController,
+                  focusNode: _hospitalFocus,
+                  onTap: () => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.review_edit_hospital_label,
+                    border: const OutlineInputBorder(),
+                    filled: isLowConfidence,
+                    fillColor: isLowConfidence ? warningColor : null,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildDatePicker(currentImage, isLowConfidence, warningColor),
+                const SizedBox(height: 32),
+                if (_blockControllers.isNotEmpty) ...[
+                  Text(
+                    l10n.review_edit_ocr_section,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.review_edit_ocr_hint,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textHint,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _blockControllers.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final block = _currentBlocks[index];
+                      final isBlockLow = block.confidence < 0.8;
+                      return TextField(
+                        controller: _blockControllers[index],
+                        focusNode: _blockFocusNodes[index],
+                        onTap: () => setState(() {}),
+                        maxLines: null,
+                        style: AppTheme.monoStyle.copyWith(fontSize: 14),
+                        decoration: InputDecoration(
+                          filled: isBlockLow,
+                          fillColor: isBlockLow
+                              ? warningColor
+                              : Colors.grey.shade50,
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          isDense: true,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                const SizedBox(height: 32),
+                Text(
+                  l10n.detail_manage_tags,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                _buildTagSelector(),
+                const SizedBox(height: 32),
+                _buildCancelEditButton(),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMagnifier(MedicalImage currentImage) {
+    List<double>? rect;
+    if (_hospitalFocus.hasFocus) {
+      rect = LayoutParser().findFieldCoordinates(_currentBlocks, 'hospital');
+    } else if (_dateFocus.hasFocus) {
+      rect = LayoutParser().findFieldCoordinates(_currentBlocks, 'date');
+    } else {
+      final idx = _blockFocusNodes.indexWhere((f) => f.hasFocus);
+      if (idx != -1) rect = _currentBlocks[idx].boundingBox;
+    }
+
+    if (rect == null) return const SizedBox.shrink();
+
+    return Container(
+      height: 160,
+      width: double.infinity,
+      color: Colors.black,
+      child: FocusZoomOverlay(
+        imagePath: currentImage.filePath,
+        encryptionKey: currentImage.encryptionKey,
+        normalizedRect: rect,
       ),
     );
   }
@@ -114,7 +279,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           _record = record;
           _images = images;
           _isLoading = false;
-          // Sync controllers with current image
           if (_images.isNotEmpty) {
             final index = _currentIndex < _images.length ? _currentIndex : 0;
             _updateControllersForIndex(index);
@@ -130,237 +294,202 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     final img = _images[index];
     _hospitalController.text = img.hospitalName ?? _record?.hospitalName ?? '';
     _visitDate = img.visitDate ?? _record?.notedAt;
+
+    _disposeBlockResources();
+    OcrResult? ocr;
+    if (img.ocrRawJson != null) {
+      try {
+        ocr = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
+        );
+      } catch (_) {}
+    }
+
+    if (ocr != null) {
+      _currentBlocks = LayoutParser().parse(ocr);
+      for (final block in _currentBlocks) {
+        final controller = TextEditingController(text: block.rawText);
+        final focusNode = FocusNode();
+        focusNode.addListener(() => setState(() {}));
+        _blockControllers.add(controller);
+        _blockFocusNodes.add(focusNode);
+      }
+    } else {
+      _currentBlocks = [];
+    }
   }
 
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
-      if (!_isEditing) {
-        _updateControllersForIndex(index);
-      }
+      _updateControllersForIndex(index);
     });
   }
 
   Future<void> _saveChanges() async {
     if (_images.isEmpty) return;
-
     final currentImage = _images[_currentIndex];
-
-    // Check if anything actually changed
-    final bool hospitalChanged =
-        _hospitalController.text !=
-        (currentImage.hospitalName ?? _record?.hospitalName ?? '');
-    final bool dateChanged =
-        _visitDate != (currentImage.visitDate ?? _record?.notedAt);
-
-    if (!hospitalChanged && !dateChanged) {
-      setState(() => _isEditing = false);
-      return;
-    }
 
     final imageRepo = ref.read(imageRepositoryProvider);
     final recordRepo = ref.read(recordRepositoryProvider);
 
     try {
-      // 1. Update Image specific metadata
+      if (_blockControllers.isNotEmpty) {
+        final newFullText = _blockControllers.map((c) => c.text).join('\n');
+        await imageRepo.updateOCRData(currentImage.id, newFullText);
+      }
+
       await imageRepo.updateImageMetadata(
         currentImage.id,
         hospitalName: _hospitalController.text,
         visitDate: _visitDate,
       );
 
-      // 2. Also update Record metadata (User might expect global change)
       await recordRepo.updateRecordMetadata(
         widget.recordId,
         hospitalName: _hospitalController.text,
         visitDate: _visitDate,
       );
 
-      // 3. Reload everything to ensure consistency
       await _loadData();
-
-      setState(() {
-        _isEditing = false;
-      });
-
-      // Notify Timeline to refresh
+      setState(() => _isEditing = false);
       await ref.read(timelineControllerProvider.notifier).refresh();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('保存成功')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.common_save)),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.detail_save_error(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
 
   Future<void> _deleteCurrentImage() async {
     if (_images.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentImage = _images[_currentIndex];
-
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除确认'),
-        content: const Text('确定要删除当前这张图片吗？此操作不可撤销。'),
+        title: Text(l10n.detail_image_delete_title),
+        content: Text(l10n.detail_image_delete_confirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorRed),
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
     );
-
     if (confirm != true) return;
-
     try {
       final imageRepo = ref.read(imageRepositoryProvider);
       await imageRepo.deleteImage(currentImage.id);
-
-      // If it was the last image, go back
       if (_images.length == 1) {
         if (mounted) Navigator.pop(context);
         return;
       }
-
-      // Notify Timeline to refresh
       ref.invalidate(timelineControllerProvider);
-
-      // Reload
       await _loadData();
       if (_currentIndex >= _images.length) {
         _currentIndex = _images.length - 1;
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.common_load_failed(e.toString()))),
+        );
       }
     }
   }
 
   Future<void> _retriggerOCR() async {
     if (_images.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentImage = _images[_currentIndex];
-
     setState(() => _isLoading = true);
     try {
       final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider);
-
-      // 1. Enqueue
       await ocrQueueRepo.enqueue(currentImage.id);
-
-      // 2. Trigger Background Worker
       await BackgroundWorkerService().triggerProcessing();
-
-      // 3. Start foreground processing (Immediate feedback)
-      // ignore: unawaited_futures
-      BackgroundWorkerService().startForegroundProcessing(
-        talker: ref.read(talkerProvider),
+      unawaited(
+        BackgroundWorkerService().startForegroundProcessing(
+          talker: ref.read(talkerProvider),
+        ),
       );
-
-      // We don't wait for completion here, but we should inform the user
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('已重新加入识别队列，请稍候...')));
+        ).showSnackBar(SnackBar(content: Text(l10n.detail_ocr_queued)));
       }
-
-      // Wait a bit and reload to see if it finished (simple UX)
       await Future<void>.delayed(const Duration(seconds: 2));
       await _loadData();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('重新识别失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.detail_ocr_failed(e.toString()))),
+        );
       }
-      setState(() => _isLoading = false);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleCreateTag(String name) async {
     final tagRepo = ref.read(tagRepositoryProvider);
     final personId = await ref.read(currentPersonIdControllerProvider.future);
-
     final newTag = Tag(
       id: const Uuid().v4(),
       name: name,
       personId: personId,
-      color: '#009688', // Default teal
+      color: '#009688',
       createdAt: DateTime.now(),
       isCustom: true,
     );
-
     try {
       await tagRepo.createTag(newTag);
-
-      // Refresh tags list so TagSelector sees it
       ref.invalidate(allTagsProvider);
-
-      // Add to current image
       final currentIds = [..._images[_currentIndex].tagIds, newTag.id];
       setState(() {
         _images[_currentIndex] = _images[_currentIndex].copyWith(
           tagIds: currentIds,
         );
       });
-
       await ref
           .read(imageRepositoryProvider)
           .updateImageTags(_images[_currentIndex].id, currentIds);
-
-      // Notify Timeline
       await ref.read(timelineControllerProvider.notifier).refresh();
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('已创建标签 "${newTag.name}"')));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('创建标签失败: $e')));
-      }
-    }
+    } catch (_) {}
   }
 
   void _setupOcrListener() {
     ref.listen(ocrPendingCountProvider, (previous, next) {
-      if (next.hasValue) {
-        final prevCount = previous?.value ?? 0;
-        final nextCount = next.value!;
-        if (nextCount < prevCount || (prevCount > 0 && nextCount == 0)) {
-          ref
-              .read(talkerProvider)
-              .info('[RecordDetailPage] OCR update detected. Reloading data.');
-
-          Future.microtask(() {
-            if (mounted) _loadData();
-          });
-        }
+      if (next.hasValue && next.value! < (previous?.value ?? 0)) {
+        Future.microtask(() {
+          if (mounted) _loadData();
+        });
       }
     });
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final l10n = AppLocalizations.of(context)!;
     return AppBar(
-      title: Text(_isEditing ? '编辑详情' : '病历详情'),
+      title: Text(_isEditing ? l10n.detail_edit_title : l10n.detail_title),
       backgroundColor: AppTheme.bgWhite,
       foregroundColor: AppTheme.textPrimary,
       elevation: 0,
@@ -368,14 +497,14 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         if (_isEditing)
           TextButton(
             onPressed: _saveChanges,
-            child: const Text(
-              '保存',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            child: Text(
+              l10n.detail_save,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         IconButton(
           icon: const Icon(Icons.description_outlined),
-          tooltip: '查看识别文本',
+          tooltip: l10n.detail_ocr_text,
           onPressed: () => _showOCRText(),
         ),
         const SizedBox(width: 8),
@@ -422,9 +551,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             FullImageViewer(images: _images, initialIndex: _currentIndex),
       ),
     ).then((newIndex) {
-      if (newIndex is int && mounted) {
-        _pageController.jumpToPage(newIndex);
-      }
+      if (newIndex is int && mounted) _pageController.jumpToPage(newIndex);
     });
   }
 
@@ -437,7 +564,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.6),
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
           child: IconButton(
             icon: Icon(
@@ -486,22 +612,20 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   }
 
   Widget _buildInfoView(MedicalImage img) {
-    final hospital = img.hospitalName ?? _record?.hospitalName ?? '未填写';
+    final l10n = AppLocalizations.of(context)!;
+    final hospital = img.hospitalName ?? _record?.hospitalName ?? '';
     final date = img.visitDate ?? _record?.notedAt;
-    final dateStr = date != null
-        ? DateFormat('yyyy-MM-dd').format(date)
-        : '未知日期';
-
+    final dateStr = date != null ? DateFormat('yyyy-MM-dd').format(date) : '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoItem('医院', hospital, isTitle: true),
+        _buildInfoItem(l10n.detail_hospital_label, hospital, isTitle: true),
         const SizedBox(height: 16),
-        _buildInfoItem('就诊日期', dateStr, isMono: true),
+        _buildInfoItem(l10n.detail_date_label, dateStr, isMono: true),
         const SizedBox(height: 24),
-        const Text(
-          '标签',
-          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+        Text(
+          l10n.detail_tags_label,
+          style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
         ),
         const SizedBox(height: 8),
         _buildTagList(img),
@@ -544,9 +668,9 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
 
   Widget _buildTagList(MedicalImage img) {
     if (img.tagIds.isEmpty) {
-      return const Text(
-        '无标签',
-        style: TextStyle(color: AppTheme.textHint, fontSize: 14),
+      return Text(
+        AppLocalizations.of(context)!.detail_no_tags,
+        style: const TextStyle(color: AppTheme.textHint, fontSize: 14),
       );
     }
     return Wrap(
@@ -559,25 +683,19 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   }
 
   Widget _buildOcrCard(MedicalImage img) {
-    return Builder(
-      builder: (context) {
-        OcrResult? ocrResult;
-        if (img.ocrRawJson != null) {
-          try {
-            ocrResult = OcrResult.fromJson(
-              jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
-            );
-          } catch (_) {}
-        }
-        return CollapsibleOcrCard(
-          text: img.ocrText ?? '',
-          ocrResult: ocrResult,
+    OcrResult? ocrResult;
+    if (img.ocrRawJson != null) {
+      try {
+        ocrResult = OcrResult.fromJson(
+          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
         );
-      },
-    );
+      } catch (_) {}
+    }
+    return CollapsibleOcrCard(text: img.ocrText ?? '', ocrResult: ocrResult);
   }
 
   Widget _buildActionButtons() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Row(
@@ -586,7 +704,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               child: OutlinedButton.icon(
                 onPressed: () => setState(() => _isEditing = true),
                 icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('编辑此页'),
+                label: Text(l10n.detail_edit_page),
               ),
             ),
             const SizedBox(width: 12),
@@ -594,7 +712,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               child: OutlinedButton.icon(
                 onPressed: _retriggerOCR,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('重新识别'),
+                label: Text(l10n.detail_retrigger_ocr),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primaryTeal,
                   side: const BorderSide(color: AppTheme.primaryTeal),
@@ -609,7 +727,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           child: OutlinedButton.icon(
             onPressed: _deleteCurrentImage,
             icon: const Icon(Icons.delete_outline, size: 18),
-            label: const Text('删除此页'),
+            label: Text(l10n.detail_delete_page),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppTheme.errorRed,
               side: const BorderSide(color: AppTheme.errorRed),
@@ -620,38 +738,13 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     );
   }
 
-  Widget _buildEditView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _hospitalController,
-          decoration: const InputDecoration(labelText: '医院名称'),
-        ),
-        const SizedBox(height: 16),
-        _buildDatePicker(),
-        const SizedBox(height: 24),
-        const Text('管理标签', style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        _buildTagSelector(),
-        const SizedBox(height: 32),
-        _buildCancelEditButton(),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-
-  Widget _buildDatePicker() {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: const Text('就诊日期'),
-      subtitle: Text(
-        _visitDate != null
-            ? DateFormat('yyyy-MM-dd').format(_visitDate!)
-            : '选择日期',
-      ),
-      trailing: const Icon(Icons.calendar_today),
+  Widget _buildDatePicker(MedicalImage img, bool isLow, Color? warnColor) {
+    final l10n = AppLocalizations.of(context)!;
+    return GestureDetector(
       onTap: () async {
+        setState(() {
+          _dateFocus.requestFocus();
+        });
         final picked = await showDatePicker(
           context: context,
           initialDate: _visitDate ?? DateTime.now(),
@@ -660,6 +753,23 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         );
         if (picked != null) setState(() => _visitDate = picked);
       },
+      child: AbsorbPointer(
+        child: TextField(
+          controller: TextEditingController(
+            text: _visitDate != null
+                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
+                : '',
+          ),
+          focusNode: _dateFocus,
+          decoration: InputDecoration(
+            labelText: l10n.review_edit_date_label,
+            filled: isLow,
+            fillColor: isLow ? warnColor : null,
+            border: const OutlineInputBorder(),
+            suffixIcon: const Icon(Icons.calendar_today),
+          ),
+        ),
+      ),
     );
   }
 
@@ -690,11 +800,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               tagIds: oldIds,
             );
           });
-          if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('更新标签失败: $e')));
-          }
         }
       },
       onReorder: (oldIdx, newIdx) async {
@@ -703,7 +808,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         if (oldIdx < newIdx) newIdx -= 1;
         final item = currentIds.removeAt(oldIdx);
         currentIds.insert(newIdx, item);
-
         setState(() {
           _images[_currentIndex] = _images[_currentIndex].copyWith(
             tagIds: currentIds,
@@ -720,11 +824,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
               tagIds: originalIds,
             );
           });
-          if (mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('重排标签失败: $e')));
-          }
         }
       },
       onCreate: _handleCreateTag,
@@ -732,6 +831,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   }
 
   Widget _buildCancelEditButton() {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: TextButton(
@@ -741,7 +841,10 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
             _updateControllersForIndex(_currentIndex);
           });
         },
-        child: const Text('取消编辑', style: TextStyle(color: AppTheme.textGrey)),
+        child: Text(
+          l10n.detail_cancel_edit,
+          style: const TextStyle(color: AppTheme.textGrey),
+        ),
       ),
     );
   }
@@ -749,7 +852,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   void _showOCRText() {
     if (_images.isEmpty) return;
     final img = _images[_currentIndex];
-
     OcrResult? ocrResult;
     if (img.ocrRawJson != null) {
       try {
@@ -758,7 +860,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
         );
       } catch (_) {}
     }
-
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -781,22 +882,20 @@ class _OcrResultSheet extends StatefulWidget {
   final String text;
   final OcrResult? result;
   final ScrollController scrollController;
-
   const _OcrResultSheet({
     required this.text,
     this.result,
     required this.scrollController,
   });
-
   @override
   State<_OcrResultSheet> createState() => _OcrResultSheetState();
 }
 
 class _OcrResultSheetState extends State<_OcrResultSheet> {
   bool _isEnhanced = true;
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -809,9 +908,12 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'OCR 识别结果',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                l10n.detail_ocr_result,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Row(
                 children: [
@@ -823,7 +925,11 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
                         _isEnhanced ? Icons.text_fields : Icons.auto_awesome,
                         size: 18,
                       ),
-                      label: Text(_isEnhanced ? '查看原文' : '智能增强'),
+                      label: Text(
+                        _isEnhanced
+                            ? l10n.detail_view_raw
+                            : l10n.detail_view_enhanced,
+                      ),
                     ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -858,7 +964,7 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
             child: ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.check),
-              label: const Text('完成'),
+              label: Text(l10n.common_confirm),
             ),
           ),
         ],
@@ -870,7 +976,6 @@ class _OcrResultSheetState extends State<_OcrResultSheet> {
 class _TagNameChip extends ConsumerWidget {
   final String tagId;
   const _TagNameChip({required this.tagId});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allTagsAsync = ref.watch(allTagsProvider);
@@ -891,7 +996,7 @@ class _TagNameChip extends ConsumerWidget {
             ),
           ),
           child: Text(
-            tag.name,
+            L10nHelper.getTagName(context, tag),
             style: const TextStyle(
               fontSize: 12,
               color: AppTheme.primaryTeal,

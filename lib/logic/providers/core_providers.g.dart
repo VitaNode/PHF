@@ -236,7 +236,7 @@ final class DatabaseServiceProvider
   }
 }
 
-String _$databaseServiceHash() => r'41a5cb3df2951886dbfb6d67efeca44f6a75b698';
+String _$databaseServiceHash() => r'f5932eb6b3e7c74d3e681c18e32aaa5e56390f8e';
 
 @ProviderFor(fileSecurityHelper)
 final fileSecurityHelperProvider = FileSecurityHelperProvider._();

@@ -1,0 +1,240 @@
+{
+  "@@locale": "en",
+  "appTitle": "PaperHealth",
+  "common_save": "Save",
+  "common_edit": "Edit",
+  "common_delete": "Delete",
+  "common_cancel": "Cancel",
+  "common_confirm": "Confirm",
+  "common_retry": "Retry",
+  "common_refresh": "Refresh",
+  "common_reset": "Reset",
+  "common_image_count": "{count} images",
+  "security_status_encrypted": "AES-256 Encrypted On-Device",
+  "security_status_unverified": "Encryption Not Verified",
+  "@common_image_count": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "common_loading": "Loading...",
+  "common_load_failed": "Load failed: {error}",
+  "@common_load_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "lock_screen_title": "Please enter PIN to unlock",
+  "lock_screen_error": "Incorrect PIN, please try again",
+  "lock_screen_biometric_tooltip": "Unlock with biometrics",
+  "ingestion_title": "Preview & Processing",
+  "ingestion_empty_hint": "Please add medical record photos",
+  "ingestion_add_now": "Add Now",
+  "ingestion_ocr_hint": "Metadata will be recognized by background OCR after saving",
+  "ingestion_submit_button": "Start Processing & Archive",
+  "ingestion_grouped_report": "Mark as a multi-page report",
+  "ingestion_grouped_report_hint": "SLM will treat these images as a single continuous document",
+  "ingestion_take_photo": "Take Photo",
+  "ingestion_pick_gallery": "Pick from Gallery",
+  "ingestion_processing_queue": "Added to background OCR queue...",
+  "ingestion_save_error": "Save blocked: {error}",
+  "@ingestion_save_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "review_edit_title": "Verify Information",
+  "review_edit_confirm": "Confirm & Archive",
+  "review_edit_basic_info": "Basic Info (Tap to Edit)",
+  "review_edit_hospital_label": "Hospital/Institution",
+  "review_edit_date_label": "Visit Date",
+  "review_edit_confidence": "OCR Confidence",
+  "review_edit_page_indicator": "Image {current} / {total} (Please verify each page)",
+  "@review_edit_page_indicator": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "review_list_title": "Pending Records",
+  "review_list_empty": "No records pending review",
+  "review_edit_ocr_section": "Recognition Results (Tap to edit)",
+  "review_edit_ocr_hint": "Tap text to focus on the corresponding image area",
+  "review_approve_failed": "Archive failed: {error}",
+  "@review_approve_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "settings_title": "Settings",
+  "settings_section_profiles": "Profiles & Categories",
+  "settings_manage_profiles": "Manage Profiles",
+  "settings_manage_profiles_desc": "Add or edit personnel profiles",
+  "settings_tag_library": "Tag Library",
+  "settings_tag_library_desc": "Maintain medical record tags",
+  "settings_language": "Language",
+  "settings_language_desc": "Switch application display language",
+  "settings_section_security": "Data Security",
+  "settings_privacy_security": "Privacy & Security",
+  "settings_privacy_security_desc": "Modify PIN and biometrics",
+  "settings_backup_restore": "Backup & Restore",
+  "settings_backup_restore_desc": "Export encrypted backup files",
+  "settings_section_support": "Help & Support",
+  "settings_feedback": "Feedback",
+  "settings_feedback_desc": "Report issues or suggestions",
+  "settings_section_about": "About",
+  "settings_privacy_policy": "Privacy Policy",
+  "settings_privacy_policy_desc": "View application privacy policy",
+  "settings_version": "Version",
+  "settings_security_app_lock": "App Lock",
+  "settings_security_change_pin": "Change PIN",
+  "settings_security_change_pin_desc": "Change the 6-digit code used to unlock",
+  "settings_security_lock_timeout": "Auto-Lock Timeout",
+  "settings_security_timeout_immediate": "Immediate",
+  "settings_security_timeout_1min": "After 1 minute",
+  "settings_security_timeout_5min": "After 5 minutes",
+  "settings_security_timeout_custom": "After {minutes} minutes",
+  "@settings_security_timeout_custom": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "settings_security_biometrics": "Biometric Unlock",
+  "settings_security_biometrics_desc": "Enable fingerprint or face recognition",
+  "settings_security_biometrics_enabled_failed": "Failed to enable biometrics",
+  "settings_security_biometrics_disabled_failed": "Failed to disable biometrics",
+  "settings_security_info_card": "PaperHealth uses local encryption. Your PIN and biometric data are stored only in your device's secure enclave. No third party (including developers) can access them.",
+  "settings_security_pin_current": "Enter current PIN",
+  "settings_security_pin_new": "Enter new PIN",
+  "settings_security_pin_confirm": "Confirm new PIN",
+  "settings_security_pin_mismatch": "PINs do not match",
+  "settings_security_pin_success": "PIN changed successfully",
+  "settings_security_pin_error": "Incorrect current PIN",
+  "person_management_empty": "No profiles found",
+  "person_management_default": "Default Profile",
+  "person_delete_title": "Delete Profile",
+  "person_delete_confirm": "Are you sure you want to delete {name}? Deletion will be rejected if there are records under this profile.",
+  "@person_delete_confirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "person_edit_title": "Edit Profile",
+  "person_add_title": "New Profile",
+  "person_field_nickname": "Nickname",
+  "person_field_nickname_hint": "Enter name or title",
+  "person_field_color": "Select Profile Color",
+  "tag_management_empty": "No tags found",
+  "tag_management_custom": "Custom Tags",
+  "tag_management_system": "System Tags",
+  "tag_add_title": "New Tag",
+  "tag_edit_title": "Edit Tag",
+  "tag_delete_title": "Delete Tag",
+  "tag_delete_confirm": "Are you sure you want to delete {name}? This will remove it from all associated images.",
+  "@tag_delete_confirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "tag_field_name": "Tag Name",
+  "tag_field_name_hint": "e.g., Lab Result, X-Ray",
+  "tag_reorder_title": "Reorder Tags",
+  "tag_create_new": "Create new tag: {query}",
+  "@tag_create_new": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "feedback_info": "We are committed to protecting your privacy. The app runs 100% offline.\nContact us via the following methods.",
+  "feedback_email": "Send Email",
+  "feedback_github": "GitHub Issues",
+  "feedback_github_desc": "Report bugs or suggestions",
+  "feedback_logs_section": "System Diagnostics",
+  "feedback_logs_copy": "Copy Logs",
+  "feedback_logs_exporting": "Exporting...",
+  "feedback_logs_hint": "Copy device info and sanitized logs to clipboard for sharing.",
+  "feedback_error_email": "Could not open email client",
+  "feedback_error_browser": "Could not open browser",
+  "feedback_copied": "Copied to clipboard",
+  "detail_hospital_label": "Hospital",
+  "detail_date_label": "Visit Date",
+  "detail_tags_label": "Tags",
+  "detail_image_delete_title": "Confirm Delete",
+  "detail_image_delete_confirm": "Are you sure you want to delete this image? This action cannot be undone.",
+  "detail_ocr_queued": "Re-added to queue, please wait...",
+  "detail_ocr_failed": "OCR failed: {error}",
+  "detail_ocr_text": "OCR Text",
+  "detail_ocr_title": "OCR Text",
+  "detail_ocr_result": "OCR Result",
+  "detail_title": "Record Detail",
+  "detail_edit_title": "Edit Record",
+  "detail_save": "Save Changes",
+  "detail_edit_page": "Edit Page",
+  "detail_retrigger_ocr": "Retrigger OCR",
+  "detail_delete_page": "Delete Page",
+  "detail_cancel_edit": "Cancel Edit",
+  "detail_view_raw": "Raw Text",
+  "detail_view_enhanced": "Smart Enhanced",
+  "detail_ocr_collapse": "Collapse",
+  "detail_ocr_expand": "Expand",
+  "detail_record_not_found": "Record not found",
+  "detail_manage_tags": "Manage Tags",
+  "detail_no_tags": "No Tags",
+  "detail_save_error": "Save failed: {error}",
+  "@detail_save_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "home_empty_records": "No records yet",
+  "timeline_pending_review": "{count} items pending verification",
+  "@timeline_pending_review": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "timeline_pending_hint": "Tap to verify and archive",
+  "disclaimer_title": "Medical Disclaimer",
+  "disclaimer_welcome": "Welcome to PaperHealth.",
+  "disclaimer_intro": "Before you start using this application, please read the following disclaimer carefully:",
+  "disclaimer_point_1_title": "1. Not Medical Advice",
+  "disclaimer_point_1_desc": "PaperHealth (hereinafter referred to as \"this application\") serves only as a personal medical record organization and digitization tool. It does not provide any form of medical diagnosis, advice, or treatment. No content within the app should be considered professional medical advice.",
+  "disclaimer_point_2_title": "2. OCR Accuracy",
+  "disclaimer_point_2_desc": "Information extracted via OCR (Optical Character Recognition) technology may contain errors. Users must verify this information against original paper reports or digital originals. The developer does not guarantee 100% accuracy of the recognition results.",
+  "disclaimer_point_3_title": "3. Professional Consultation",
+  "disclaimer_point_3_desc": "Any medical decision should be made in consultation with professional medical institutions or doctors. This application and its developers assume no legal responsibility for any direct or indirect consequences resulting from reliance on the information provided by this application.",
+  "disclaimer_point_4_title": "4. Local Data Storage",
+  "disclaimer_point_4_desc": "This application promises that all data is stored only locally with encryption and is not uploaded to any cloud server. Users are solely responsible for the physical security of their devices, PIN privacy, and data backups.",
+  "disclaimer_point_5_title": "5. Emergency Situations",
+  "disclaimer_point_5_desc": "If you are in a medical emergency, please call your local emergency services or go to the nearest hospital immediately. Do not rely on this application for emergency judgment.",
+  "disclaimer_footer": "By clicking \"Accept\", you acknowledge that you have read and accepted all the terms above.",
+  "disclaimer_checkbox": "I have read and agree to the medical disclaimer above",
+  "disclaimer_accept_button": "Accept & Continue",
+  "seed_person_me": "Me",
+  "seed_tag_lab": "Lab Result",
+  "seed_tag_exam": "Examination",
+  "seed_tag_record": "Medical Record",
+  "seed_tag_prescription": "Prescription",
+  "filter_title": "Filters",
+  "filter_date_range": "Date Range",
+  "filter_select_date_range": "Select Date Range",
+  "filter_date_to": "to",
+  "filter_tags_multi": "Tags (Multi-select)",
+  "search_hint": "Search OCR, hospital, or notes...",
+  "search_result_count": "Found {count} results",
+  "@search_result_count": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "search_initial_title": "Start Searching",
+  "search_initial_desc": "Enter hospital, medication, or tag keywords",
+  "search_empty_title": "No results found",
+  "search_empty_desc": "Try different keywords or check spelling",
+  "search_searching_person": "Searching: {name}",
+  "@search_searching_person": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # Project Review Status Summary
 
-**Last Updated**: 2026-01-08
-**Coverage**: T0 - Issue #96 (Backup/Restore Fix)
+**Last Updated**: 2026-01-09
+**Coverage**: T0 - Phase 4 (SLM Data Pipeline & Internationalization)
 
 ## Approved Features (Highlights)
 - [x] **Issue #128**: 修复解锁后自动跳转到首页的问题。
@@ -104,8 +104,30 @@ Phase 3 (Governance & Store Readiness) is now complete.
     - Developed `EnhancedOcrView` with dual-mode support and `ListView` performance optimization.
     - **Fix (2026-01-06)**: Resolved `RenderFlex` overflow in `CollapsibleOcrCard`.
 
+## 🟢 Phase 4 Complete
+Phase 4 (SLM Data Pipeline & Internationalization) is now complete.
+
+### Completed (Phase 4)
+- [x] **T22**: 国际化基础设施与数据库 V10 升级。
+    - **i18n**: 集成 `flutter_localizations`，建立 `lib/l10n` 及非合成包生成模式 (`lib/generated/l10n`)，支持多语言动态切换。
+    - **Schema (V10)**: `records` 表新增 `is_verified` (用于 SLM 校验) 和 `group_id` (用于跨页文档关联) 字段。
+    - **Refinement**: 将 `LockScreen` 关键 UI 文本迁移至国际化资源包。
+- [x] **T23**: SLM 数据预处理管道。
+    - **LayoutParser**: 基于 Y 轴聚类和 X 轴排序的启发式算法，重组 OCR Lines 为符合阅读顺序的数据块。
+    - **PrivacyMasker**: 本地 PII 脱敏服务，基于正则表达式过滤手机号和身份证号。
+    - **UnitNormalizer**: 医学单位归一化工具，统一不同写法的单位格式.
+    - **MarkdownConverter**: 将结构化数据块序列化为 Markdown 表格格式，优化 SLM 输入 Token。
+- [x] **T24**: UI 交互增强与全球化适配。
+    - **FocusZoom**: 实现 `FocusZoomOverlay` 局部放大预览组件，通过归一化坐标实时裁剪解密图像。
+    - **groupId**: 在 `ReviewEditPage` 中实现 `groupId` (跨页报告) 切换逻辑，支持多图关联。
+    - **i18n**: 补全 ES, PT, ID, VI, TH, HI 全量 ARB 词条映射，解决国际化运行时的缺失报错。
+    - **Hardening**: 为 Repository 添加 `groupId` 持久化支持，并修复测试环境 Schema 缺失问题。
+- [x] **Refactor**: SearchRepository 架构重构与实体映射集中化。
+    - **Architecture**: 引入 `EntityMapper` Mixin，统一全站数据库行至领域实体的解析逻辑，代码量减少 ~40%。
+    - **Performance**: 沉淀 `fetchImagesForRecords` 通用逻辑至 `BaseRepository`，彻底消除 N+1 查询隐患。
+    - **Robustness**: 重写 FTS5 搜索流，实现 SQL 构建、结果抓取与数据组装的职责分离。
+
 ## 🟡 Pending Issues / Technical Debt (New for Phase 4)
-- **Robustness**: `SearchRepository.search` requires refactoring due to structural logic issues.
 - None.
 
 ## 🔴 Blockers

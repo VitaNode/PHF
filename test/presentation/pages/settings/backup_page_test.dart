@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phf/presentation/pages/settings/backup_page.dart';
-import 'package:phf/logic/providers/core_providers.dart';
-import 'package:phf/logic/services/interfaces/security_service.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
+import 'package:phf/data/repositories/app_meta_repository.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
+import 'package:phf/logic/providers/core_providers.dart';
+import 'package:phf/presentation/pages/settings/backup_page.dart';
 
+@GenerateNiceMocks([MockSpec<AppMetaRepository>()])
 import 'backup_page_test.mocks.dart';
 
-@GenerateMocks([ISecurityService])
 void main() {
-  late MockISecurityService mockSecurityService;
+  late MockAppMetaRepository mockMetaRepo;
 
   setUp(() {
-    mockSecurityService = MockISecurityService();
+    mockMetaRepo = MockAppMetaRepository();
   });
 
   Widget createTestWidget() {
     return ProviderScope(
-      overrides: [
-        securityServiceProvider.overrideWithValue(mockSecurityService),
-      ],
-      child: const MaterialApp(home: BackupPage()),
+      overrides: [appMetaRepositoryProvider.overrideWithValue(mockMetaRepo)],
+      child: const MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('zh'),
+        home: BackupPage(),
+      ),
     );
   }
 

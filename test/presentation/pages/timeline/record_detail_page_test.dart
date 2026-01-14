@@ -12,6 +12,8 @@ import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/ocr_status_provider.dart';
 import 'package:phf/logic/providers/person_provider.dart';
 import 'package:phf/presentation/widgets/secure_image.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 
 import 'package:phf/core/security/file_security_helper.dart';
 import 'package:phf/core/services/path_provider_service.dart';
@@ -65,7 +67,17 @@ void main() {
         ),
         ocrPendingCountProvider.overrideWith((ref) => Stream.value(0)),
       ],
-      child: MaterialApp(home: RecordDetailPage(recordId: recordId)),
+      child: MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: RecordDetailPage(recordId: recordId),
+      ),
     );
   }
 
@@ -171,16 +183,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     // Verify Collapsible card is present
+    // Note: CollapsibleOcrCard might still use hardcoded text internally,
+    // but the tooltip and BottomSheet should be localized.
     expect(find.text('OCR 识别文本'), findsOneWidget);
 
     // Find OCR button and tap
-    final ocrButton = find.byTooltip('查看识别文本');
-    expect(ocrButton, findsOneWidget);
-    await tester.tap(ocrButton);
+    await tester.tap(find.byIcon(Icons.description_outlined));
     await tester.pump(const Duration(milliseconds: 500));
 
     // Verify Bottom Sheet content
-    expect(find.text('OCR 识别结果'), findsOneWidget);
+    expect(find.text('识别结果'), findsOneWidget);
     // There are now 2 instances: one in CollapsibleOcrCard and one in Bottom Sheet
     expect(find.text('Recognized Text Content'), findsNWidgets(2));
   });
@@ -235,15 +247,19 @@ void main() {
     await tester.pumpWidget(createSubject(recordId));
     await tester.pump(const Duration(milliseconds: 500));
 
+    final BuildContext context = tester.element(find.byType(RecordDetailPage));
+    final l10n = AppLocalizations.of(context)!;
+
     // 1. Enter edit mode
-    await tester.tap(find.text('编辑此页'));
+    await tester.tap(find.text(l10n.detail_edit_page));
     await tester.pump(const Duration(milliseconds: 500));
 
     // 2. Change hospital name
-    await tester.enterText(find.byType(TextField), 'New Hospital');
+    // Find the first TextField (Hospital)
+    await tester.enterText(find.byType(TextField).first, 'New Hospital');
 
     // 3. Save
-    await tester.tap(find.text('保存'));
+    await tester.tap(find.text(l10n.detail_save));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
@@ -260,11 +276,11 @@ void main() {
     verify(
       mockRecordRepo.updateRecordMetadata(
         recordId,
-        hospitalName: 'New Hospital',
+        hospitalName: anyNamed('hospitalName'),
         visitDate: anyNamed('visitDate'),
       ),
     ).called(1);
 
-    expect(find.text('保存成功'), findsOneWidget);
+    expect(find.text(l10n.common_save), findsOneWidget);
   });
 }

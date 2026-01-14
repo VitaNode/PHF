@@ -20,8 +20,6 @@ library;
 import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../core/utils/fts_helper.dart';
-import '../models/image.dart';
-import '../models/record.dart';
 import 'base_repository.dart';
 import 'interfaces/search_repository.dart';
 import '../models/search_result.dart';
@@ -41,13 +39,23 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     final exec = await getExecutor(executor);
 
     try {
-      final maps = await _executeSearchQuery(exec, personId, sanitizedQuery);
-      if (maps.isEmpty) return [];
+      // 1. 执行 FTS5 查询，获取 Record 数据及 Snippet
+      final rawResults = await _executeFtsQuery(exec, personId, sanitizedQuery);
+      if (rawResults.isEmpty) return [];
 
-      final recordIds = maps.map((m) => m['id'] as String).toList();
-      final imagesByRecord = await _fetchImagesForRecords(exec, recordIds);
+      final recordIds = rawResults.map((m) => m['id'] as String).toList();
 
-      return maps.map((m) => _mapToSearchResult(m, imagesByRecord)).toList();
+      // 2. 批量预加载图片 (复用 BaseRepository 逻辑)
+      final imagesMap = await fetchImagesForRecords(exec, recordIds);
+
+      // 3. 映射为领域对象
+      return rawResults.map((row) {
+        final rid = row['id'] as String;
+        return SearchResult(
+          record: mapToRecord(row, imagesMap[rid] ?? []),
+          snippet: FtsHelper.desegmentCJK(row['snippet'] as String? ?? ''),
+        );
+      }).toList();
     } catch (e) {
       return [];
     }
@@ -220,18 +228,20 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _executeSearchQuery(
+  // --- Private Helpers ---
+
+  Future<List<Map<String, dynamic>>> _executeFtsQuery(
     DatabaseExecutor exec,
     String personId,
     String sanitizedQuery,
   ) async {
     // 强化隔离：在 FTS 表中直接过滤 person_id
-    // snippet 列索引更新为 6 (content)
+    // snippet 列索引对应 'content' 列，在 Schema 中为第 6 列 (0-indexed)
     const sql = '''
         SELECT r.*, snippet(ocr_search_index, 6, '<b>', '</b>', '...', 16) as snippet
         FROM records r
-        INNER JOIN ocr_search_index ON r.id = ocr_search_index.record_id
-        WHERE ocr_search_index.person_id = ? 
+        INNER JOIN ocr_search_index fts ON r.id = fts.record_id
+        WHERE fts.person_id = ? 
           AND r.person_id = ?
           AND r.status != 'deleted' 
           AND ocr_search_index MATCH ?
@@ -240,102 +250,5 @@ class SearchRepository extends BaseRepository implements ISearchRepository {
       ''';
 
     return exec.rawQuery(sql, [personId, personId, sanitizedQuery]);
-  }
-
-  Future<Map<String, List<MedicalImage>>> _fetchImagesForRecords(
-    DatabaseExecutor exec,
-    List<String> recordIds,
-  ) async {
-    final String placeholders = List.filled(recordIds.length, '?').join(',');
-    final List<Map<String, dynamic>> imageMaps = await exec.query(
-      'images',
-      where: 'record_id IN ($placeholders)',
-      whereArgs: recordIds,
-      orderBy: 'page_index ASC',
-    );
-
-    final Map<String, List<MedicalImage>> imagesByRecord = {};
-    for (var imgRow in imageMaps) {
-      final rid = imgRow['record_id'] as String;
-      imagesByRecord.putIfAbsent(rid, () => []);
-
-      final image = _mapToMedicalImage(imgRow);
-      imagesByRecord[rid]!.add(image);
-    }
-    return imagesByRecord;
-  }
-
-  MedicalImage _mapToMedicalImage(Map<String, dynamic> imgRow) {
-    final List<String> tagIds = [];
-    if (imgRow['tags'] != null) {
-      try {
-        final decoded = jsonDecode(imgRow['tags'] as String);
-        if (decoded is List) {
-          tagIds.addAll(decoded.map((e) => e.toString()));
-        }
-      } catch (_) {}
-    }
-
-    return MedicalImage(
-      id: imgRow['id'] as String,
-      recordId: imgRow['record_id'] as String,
-      filePath: imgRow['file_path'] as String,
-      thumbnailPath: imgRow['thumbnail_path'] as String,
-      encryptionKey: imgRow['encryption_key'] as String,
-      thumbnailEncryptionKey:
-          imgRow['thumbnail_encryption_key'] as String? ?? '',
-      width: imgRow['width'] as int?,
-      height: imgRow['height'] as int?,
-      mimeType: imgRow['mime_type'] as String? ?? 'image/webp',
-      fileSize: imgRow['file_size'] as int? ?? 0,
-      displayOrder: imgRow['page_index'] as int? ?? 0,
-      tagIds: tagIds,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        imgRow['created_at_ms'] as int,
-      ),
-      ocrText: imgRow['ocr_text'] as String?,
-      ocrRawJson: imgRow['ocr_raw_json'] as String?,
-      ocrConfidence:
-          (imgRow['ocr_confidence'] ?? imgRow['confidence']) as double?,
-      hospitalName: imgRow['hospital_name'] as String?,
-      visitDate: imgRow['visit_date_ms'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(imgRow['visit_date_ms'] as int)
-          : null,
-    );
-  }
-
-  SearchResult _mapToSearchResult(
-    Map<String, dynamic> m,
-    Map<String, List<MedicalImage>> imagesByRecord,
-  ) {
-    final rid = m['id'] as String;
-    final createdAtMs = m['created_at_ms'] as int;
-    final visitDateMs = m['visit_date_ms'] as int?;
-
-    final record = MedicalRecord(
-      id: rid,
-      personId: m['person_id'] as String,
-      hospitalName: m['hospital_name'] as String?,
-      notes: m['notes'] as String?,
-      notedAt: visitDateMs != null
-          ? DateTime.fromMillisecondsSinceEpoch(visitDateMs)
-          : DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-      visitEndDate: m['visit_end_date_ms'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(m['visit_end_date_ms'] as int)
-          : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(m['updated_at_ms'] as int),
-      status: RecordStatus.values.firstWhere(
-        (e) => e.name == m['status'],
-        orElse: () => RecordStatus.archived,
-      ),
-      tagsCache: m['tags_cache'] as String?,
-      images: imagesByRecord[rid] ?? [],
-    );
-
-    return SearchResult(
-      record: record,
-      snippet: FtsHelper.desegmentCJK(m['snippet'] as String? ?? ''),
-    );
   }
 }

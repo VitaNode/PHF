@@ -151,6 +151,11 @@ class IngestionController extends _$IngestionController {
     state = state.copyWith(selectedTagIds: current);
   }
 
+  /// 切换跨页报告分组状态
+  void toggleGroupedReport(bool value) {
+    state = state.copyWith(isGroupedReport: value);
+  }
+
   /// 提交保存
   Future<void> submit() async {
     if (state.rawImages.isEmpty) {
@@ -243,6 +248,8 @@ class IngestionController extends _$IngestionController {
       final record = MedicalRecord(
         id: recordId,
         personId: currentPersonId,
+        isVerified: false,
+        groupId: state.isGroupedReport ? recordId : null,
         hospitalName: defaultHospital,
         notes: state.notes,
         notedAt: defaultDate,

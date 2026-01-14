@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/core/security/file_security_helper.dart';
 import 'package:phf/core/services/path_provider_service.dart';
 import 'package:phf/data/models/image.dart';
@@ -39,6 +41,14 @@ void main() {
         }),
       ],
       child: MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: EventCard(record: record, firstImage: image),
         ),

@@ -13,10 +13,6 @@
 ///   3. 更新 `records.tags_cache` 字段，确保列表页查询性能。
 library;
 
-/// ## 修复记录
-/// - **2025-12-31**: T21.2 级联删除逻辑优化 - 当一个 Record 下的所有图片被用户手动删除后，
-///   自动删除该 Record 实体及其关联的 OCR 队列任务。同时删除 FTS5 搜索索引中的相关记录。
-/// - **2026-01-08**: 修复：在更新标签或元数据时，同步更新 FTS5 搜索索引以防止数据失真（Issue #98）。
 import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../data/models/image.dart';
@@ -101,7 +97,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
       orderBy: 'page_index ASC',
     );
 
-    return maps.map((row) => _mapToImage(row)).toList();
+    return maps.map((row) => mapToImage(row)).toList();
   }
 
   @override
@@ -219,7 +215,7 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     );
 
     if (maps.isEmpty) return null;
-    return _mapToImage(maps.first);
+    return mapToImage(maps.first);
   }
 
   @override
@@ -288,27 +284,25 @@ class ImageRepository extends BaseRepository implements IImageRepository {
     String recordId,
   ) async {
     // 1. Query all tags for this record
-    // Join images -> image_tags -> tags to get Names
+    // Use DISTINCT on tag_id
     final List<Map<String, dynamic>> results = await exec.rawQuery(
       '''
-      SELECT DISTINCT t.name 
-      FROM tags t
-      INNER JOIN image_tags it ON t.id = it.tag_id
+      SELECT DISTINCT it.tag_id
+      FROM image_tags it
       INNER JOIN images i ON it.image_id = i.id
       WHERE i.record_id = ?
-      ORDER BY t.created_at_ms ASC
     ''',
       [recordId],
     );
 
-    final List<String> tagNames = results
-        .map((row) => row['name'] as String)
+    final List<String> tagIds = results
+        .map((row) => row['tag_id'] as String)
         .toList();
 
     // 2. Update record
     await exec.update(
       'records',
-      {'tags_cache': jsonEncode(tagNames)},
+      {'tags_cache': jsonEncode(tagIds)},
       where: 'id = ?',
       whereArgs: [recordId],
     );
@@ -388,47 +382,5 @@ class ImageRepository extends BaseRepository implements IImageRepository {
         whereArgs: [recordId],
       );
     }
-  }
-
-  MedicalImage _mapToImage(Map<String, dynamic> row) {
-    List<String> tags = [];
-    if (row['tags'] != null) {
-      try {
-        final decoded = jsonDecode(row['tags'] as String);
-        if (decoded is List) {
-          tags = List<String>.from(decoded);
-        }
-      } catch (e) {
-        // ignore parsing error
-      }
-    }
-
-    return MedicalImage.fromJson({
-      'id': row['id'],
-      'recordId': row['record_id'],
-      'encryptionKey': row['encryption_key'],
-      'thumbnailEncryptionKey':
-          row['thumbnail_encryption_key'] ?? row['encryption_key'],
-      'filePath': row['file_path'],
-      'thumbnailPath': row['thumbnail_path'],
-      'mimeType': row['mime_type'],
-      'file_size': row['file_size'],
-      'displayOrder': row['page_index'],
-      'width': row['width'],
-      'height': row['height'],
-      'ocrText': row['ocr_text'],
-      'ocrRawJson': row['ocr_raw_json'],
-      'ocrConfidence': row['ocr_confidence'],
-      'createdAt': DateTime.fromMillisecondsSinceEpoch(
-        row['created_at_ms'] as int,
-      ).toIso8601String(),
-      'hospitalName': row['hospital_name'],
-      'visitDate': row['visit_date_ms'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(
-              row['visit_date_ms'] as int,
-            ).toIso8601String()
-          : null,
-      'tagIds': tags,
-    });
   }
 }

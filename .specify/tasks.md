@@ -126,7 +126,7 @@
 - [x] **Implement**: 创建 `TimelineProvider`, `IngestionProvider` 基本结构。完成 Repository 注入。
 - [x] **Document**: 绘制状态流动示意图。
 - [x] **Test**: 验证 Provider 的 `ref.watch` 监听逻辑正确.
-- [x] **Review**: 是否符合 `constitution.md#II. Architecture (MVVM)`.
+- [x] **Review**: 是否符合 `constitution.md#II. Architecture (MVVM)`. 
 - [x] **Commit**: `feat(logic): bootstrap riverpod providers for core state management`
 
 ### T13.1 UI Kit Base: 原子组件与主题 [x]
@@ -382,6 +382,19 @@ Line/Tokens 使用 渲染， 类型使用主题色/灰色区分。
 UI 符合 Task 3.6 定义的视觉预期。
 支持点击切换“原文”与“增强视图”。
 
+**T3.8.5**
+目标
+实现基于坐标 (XY-Cut) 的文本布局重组，修复 OCR 原始文本的阅读顺序。
+核心任务
+在 `OcrEnhancer` 中实现排序逻辑：
+1. **Y轴聚类**: 将 Y 坐标重叠度 > 50% 的文字块视为同一行。
+2. **X轴排序**: 行内元素按 X 坐标升序排列。
+3. **格式化**: 根据块间距自动插入制表符 `	` (列分隔) 或换行符 `
+`。
+替换 `OcrProcessor` 中的纯文本拼接逻辑，使用重组后的结构化文本。
+验收标准
+对于多栏排版的检验报告（如：项目 | 结果 | 参考值），重组后的 `fullText` 应能正确保留表格结构，而非左右栏混杂。
+
 ### 3.9 问题反馈
 
 **问题反馈**
@@ -403,3 +416,128 @@ GitHub Issues：https://github.com/VitaNode/PHF/issues，点击后：调用设�
 “一键复制”日志（用于上面的“问题反馈”）
 在复制到剪贴板之前在内存中完成解密。用户复制的时候，能看到是可读的文字（方便确认没有泄露额外隐私）。
 需要确保在手机硬盘里的 .txt 文件全是加密后的乱码，这样即使手机丢失或被黑客提取，日志信息也是安全的。
+
+---
+
+## Phase 4: SLM Data Pipeline & Internationalization (P4)
+
+### T22: 国际化基础设施与语言包 (Phase 4.1) [x]
+- [x] **Implement (T22.1)**: 在 `pubspec.yaml` 中添加 `flutter_localizations` 和 `intl: ^0.18.1`。配置 `generate: true`。(Ref: Constitution#XI. Internationalization)
+- [x] **Implement (T22.2)**: 创建 `lib/l10n` 目录，并初始化 `app_en.arb` 和 `app_zh.arb`。定义基础 Key（如 `common_save`, `common_edit`）。
+- [x] **Implement (T22.3)**: 编写数据库迁移脚本 `migration_v8.sql`。
+    - `ALTER TABLE records ADD COLUMN is_verified INTEGER DEFAULT 0;`
+    - `ALTER TABLE records ADD COLUMN group_id TEXT;`
+- [x] **Test**: 运行 `flutter gen-l10n` 验证代码生成；验证数据库升级后 `is_verified` 字段默认值为 0。(Ref: Constitution#VI. Security)
+- [x] **Commit**: `feat(i18n): initialize localization scaffolding and update database schema v8`
+
+### T23: SLM 数据预处理管道 (Phase 4.2) [x]
+- [x] **Implement (T23.1)**: 定义 `SLMDataBlock` 实体类，包含坐标信息、置信度以及脱敏标记字段。(Ref: Constitution#VII. Coding Standards)
+- [x] **Implement (T23.2)**: 实现 `LayoutParser` 工具类。使用启发式聚类算法，将分散的 OCR Blocks 按 y 轴坐标重组成“行”。(Ref: Constitution#II. Local-First)
+- [x] **Implement (T23.3)**: 实现 `PrivacyMasker` 服务。使用正则表达式自动识别并掩盖姓名、手机号等 PII 信息。(Ref: Constitution#IV. Security & Privacy)
+- [x] **Implement (T23.4)**: 实现 `MedicalUnitNormalizer`。建立映射表，将 `g/L`, `G/L` 等变体统一为标准格式。
+- [x] **Implement (T23.5)**: 实现 `MarkdownConverter`。将处理后的 `SLMDataBlock` 序列化为 Markdown 表格字符串。(Ref: Constitution#X. Performance)
+- [x] **Test**: 为 `LayoutParser` 编写单元测试，输入带有错位坐标的 JSON，验证输出的 Markdown 文本顺序正确。
+- [x] **Commit**: `feat(slm): implement layout-aware parser and privacy masking pipeline`
+
+### T24: UI 交互增强与全球化适配 (Phase 4.3)
+- [x] **Implement (T24.1)**: 开发 `FocusZoomOverlay` 组件。通过 CustomPainter 实现像素级精准对焦与放大预览。(Ref: d001dd7)
+- [x] **Implement (T24.2)**: 在 `ReviewEditPage` 中集成置信度高亮。对 `confidence < 0.8` 的 `TextField` 应用橙色警告背景，引导用户精准校对。
+- [x] **Implement (T24.3)**: 扩充 ARB 文件，完整覆盖西、葡、印尼、越、泰、印地语。重点检查泰语、印地语在长文本下的 UI 截断问题。
+- [x] **Implement (T24.4)**: 在录入流程中增加 `PageGroupSelector`，允许用户将多张图片标记为同一 `group_id`，为 SLM 多页上下文分析提供支持。
+
+### T26: 国际化深度覆盖与硬化 (Phase 4.5) [x]
+- [x] **Implement (T26.1) 全站硬编码清理**: 遍历 `lib/presentation` 下的所有页面和组件，将所有硬编码中文迁移至 ARB 文件。
+- [x] **Implement (T26.2) 补全多国语言包**: 确保西、葡、印尼、越、泰、印地语 ARB 文件包含与 `app_en.arb` 100% 同步的 Key。
+- [x] **Implement (T26.3) 初始种子数据国际化**: 针对 `DatabaseSeeder` 产生的“本人”等默认数据，实现基于系统语言的动态生成。
+- [x] **Test (T26.4) 长文本溢出测试**: 在泰语、印地语环境下对详情页、卡片页执行布局压力测试，修复文字截断问题。
+
+### T25: SLM 启动前的数据微调 (Phase 4.4 Refinements) [x]
+- [x] **Implement (T25.1)**: 升级数据库至 V11。在 `records` 表中增加 `ai_interpretation` (TEXT) 和 `interpreted_at` (DATETIME) 字段。
+- [x] **Implement (T25.2)**: 建立 `analysis_results` 表，用于存储 SLM 提取的结构化 JSON（含分类、异常项、摘要）。
+- [x] **Implement (T25.3)**: 优化 `BackgroundWorker` 调度算法。确保在 OCR 任务完成后，自动检测电量及充电状态，低优先级触发 SLM 预提取逻辑。
+- [x] **Implement (T25.4)**: 实现“上下文压缩算法”。在将 OCR 文本送入 SLM 之前，剔除页眉页脚、冗余免责声明，仅保留指标、诊断结论等核心 Context。
+
+---
+
+## Phase 5: On-Device SLM Intelligence (端侧医疗智能解读)
+**Goal**: 将应用进化为能看懂病历、能分析趋势的智能助理，实现“数字化复刻”排版。
+
+### 5.1 OCR增强
+
+- [ ] **T5.1.1 前端: 原生文档扫描器**
+    - iOS: 实现 DocumentScanner MethodChannel，调用 VNDocumentCameraViewController。
+    - Android: 集成 ML Kit Document Scanner。
+    - 目标: 获取裁剪矫正后的图片。
+- [ ] **T5.1.2 中端: 原生 OpenCV 增强管线 (Extreme Clarity)**
+    - 集成: 在 iOS (Podfile) 和 Android (Gradle) 引入 OpenCV 原生库。
+    - 算法管线 (Native C++/Swift/Kotlin):
+        1. Gray: 转灰度。
+        2. CLAHE: cv::createCLAHE(clipLimit=2.0, tileGridSize=(8,8)) (参数可调) —— 拉伸局部对比度。
+        3. Bilateral Filter: bilateralFilter —— 保边去噪。
+        4. Adaptive Threshold: adaptiveThreshold，其中 blockSize = width / 30 (动态计算) —— 二值化。
+    - 输出: 完美的二值化图像路径。
+- [ ] **T5.1.3 后端: 串联业务**
+    - Flutter 端串联：Scanner -> NativeProcessor -> OCR Service。
+- [ ] **T5.1.4 其他（备注）**
+    - 需要测试纸质材料的识别
+    - 增加分流逻辑，模拟器不启用增强型原生相机，真机才启用。（上架之前要去掉）
+
+### 5.2 结构化提取与排版重构 (Logic)
+
+- [ ] **T5.2.1 实现基于坐标 (XY-Cut) 的文本布局重组，修复 OCR 原始文本的阅读顺序**: 在 `OcrEnhancer` 中实现排序逻辑：1. **Y轴聚类**: 将 Y 坐标重叠度 > 50% 的文字块视为同一行。2. **X轴排序**: 行内元素按 X 坐标升序排列。3. **格式化**: 根据块间距自动插入制表符 `	` (列分隔) 或换行符 `。替换 `OcrProcessor` 中的纯文本拼接逻辑，使用重组后的结构化文本。
+
+- [ ] **T5.2.2 实现结构化提取逻辑**: 不急于解读，先让 SLM 将乱序文本转换为标准 JSON (Item/Value/Unit/Status)。
+- [ ] **T5.2.3**: 实现 **“历史趋势解析器”**。根据标准化项目名，检索数据库过去 3 次记录，计算趋势。
+- [ ] **T5.2.4**: 开发 **“排版重构引擎”**。UI 根据 SLM 的语义块，渲染出类似于纸质资料的整齐电子报表。
+
+- [ ] **T5.2.5 LOINC与别名库Alias Map**: 把 "HGB、Hb、血红蛋白" 全部指向同一个 LOINC 唯一标识。建立一套 **“别名库（Alias Map）”** ，把非标准的、口语化 的 项目名 和 标准 LOINC 关联起来。
+
+
+### 5.3 模型基础设施 (Infrastructure)
+**Goal**: 集成 `llama.cpp` 并建立模型下载与管理机制。
+
+- [ ] **T5.3.1 Llama.cpp Engine Integration**: 集成 `llama_cpp_dart`。验证在 iOS (Metal) 和 Android (Vulkan/CL) 上的推理速度。
+- [ ] **T5.3.2 Model Management Service**: 实现 GGUF 模型的按需下载、完整性校验 (SHA256) 与存储管理。支持断点续传。 
+- [ ] **T5.3.3 Memory & Performance Profiling**: 建立性能监控。确保模型加载时内存占用符合预期 (Low: 0.5b, High: 4b)，退后台自动卸载。
+
+### 5.4 Local RAG System (本地检索增强生成)
+**Goal**: 基于 SQLite 的向量存储与混合检索系统。
+
+- [ ] **T5.4.1 Vector Store Implementation**: 扩展 SQLite Schema，创建 `knowledge_vectors` 表 (ID, Text, EmbeddingBlob)。 
+- [ ] **T5.4.2 Embedding Engine**: 集成轻量级 GGUF Embedding 模型 (via llama.cpp)。实现文本转向量接口。 
+- [ ] **T5.4.3 Hybrid Search Logic**: 实现“关键词 (FTS5) + 语义 (Vector Cosine)”混合检索算法。DoD: 准确检索到医学知识库中的相关条目。 
+- [ ] **T5.4.4 Local Knowledge Library**: 建立 **本地医学知识 SQL 库**。包含常用 200+ 检验项的标准临床意义、危急值及建议，用于 RAG 增强。
+
+
+### 5.5 智能解读与 UX (User Experience)
+**Goal**: 面向用户的解读与对话功能。
+
+- [ ] **T5.5.1**: 实现 **Insight Card (解读卡片)**。在详情页顶部展示 AI 结论、风险提示及生活建议。
+- [ ] **T5.5.2**: 开发 **对话式追问 (Medical QA)**。基于当前病历进行单/多轮提问，利用本地 RAG 确保回答稳健。
+- [ ] **T5.5.3**: 设计“推理中”骨架屏。提供深度视觉反馈，缓解端侧推理（10s+）的焦虑感。
+- [ ] **T5.5.4 Medical Report Interpretation**：实现“一键解读”：OCR 文本 -> Prompt 构建 (含 RAG 上下文) -> LLM 推理 -> 结构化输出 (Markdown/JSON)。 
+- [ ] **T5.5.5 Structured Extraction (JSON)**：利用 llama.cpp Grammar Sampling 提取关键指标 (Key-Value) 用于趋势分析。
+- [ ] **T5.5.6 Interactive Chat UI**：实现流式输出 (Streaming Response) 的对话界面，支持停止生成与重新生成。
+
+### 5.6 全球化 AI 适配
+- [ ] **T5.6.1**: 适配 8 种语言的 System Prompt，确保 SLM 输出报告语言与 App 语言设置一致。
+
+---
+
+## Phase 6: Hardening & Store Readiness (上架硬化与发布准备)
+**Goal**: 确保加解密链路 100% 稳健，重构首页展现形式，补全合规文档。
+
+### T6.1: 安全性全链路审计 (Security & Stability Audit)
+- [ ] **T6.1.1**: 编写集成测试，验证“拍 5 张图 -> 杀掉进程 -> 冷启动 -> 输入 Pin -> 解密”的闭环。
+- [ ] **T6.1.2**: 验证磁盘空间不足或权限关闭等极端情况下的数据库稳健性。
+
+### T6.2: 首页与详情 UI 最终打磨 (Summary-First UI)
+- [ ] **T6.2.1**: 首页 Timeline 重构：用“分类图标 + 医院名称 + 识别摘要”取代缩略图。
+- [ ] **T6.2.2**: 实现“关键指标一览”：在 Timeline 卡片上直接标注异常项。
+- [ ] **T6.2.3**: 优化详情页编辑流：解决日期选择器遮挡预览窗的问题。
+
+### T6.3: 品牌化、合规与反馈系统
+- [ ] **T6.3.1**: 生成全套尺寸的 App Icon 和 Splash Screen。
+- [ ] **T6.3.2**: 完善《隐私政策》Markdown 及开源 LICENSE。
+- [ ] **T6.3.3**: 实现设置页“加密日志一键复制”与“邮件/GitHub 反馈”系统。
+- [ ] **T6.3.4**: 最终 GM (Gold Master) 回归测试与 AppBundle/IPA 构建验证。

@@ -118,23 +118,122 @@ PaperHealth (PHF) 旨在通过 **100% 本地运行** 的方式，为用户提供
 
 ---
 
-# Phase 4: UI/UE Overhaul, Advanced Intelligence, Data Insights (Next)
+# Phase 4 Specification: SLM Data Pipeline & Internationalization
 
 
 
+**Status**: Draft (Current)  
+
+**Strategy**: SLM Readiness | Internationalization (i18n) | Privacy Masking
 
 
 
+## 1. Product Goals (Phase 4)
+
+为 Phase 5 的端侧小型语言模型 (SLM) 构建高效的数据预处理管道，并实现应用的多语言全球化支持。
+
+- **结构化数据供给**: 将 OCR 文本转化为高保真、布局感知的结构化数据（如 Markdown 表格），最大化 SLM 的理解能力。
+
+- **全球化支持**: 适配全球 8 种主要语言，建立完善的 i18n 基础设施。
+
+- **隐私加固**: 在数据进入 SLM 管道前执行本地脱敏，确保极致的隐私安全并优化 Token 效率。
 
 
 
+## 2. User Flows (Phase 4)
 
 
+
+### A. 增强型编辑与校验流 (Enhanced Edit Flow)
+
+1.  **现有流程升级**: 在详情页编辑模式下，引入智能辅助功能。
+
+2.  **置信度辅助**: OCR 置信度低于阈值（如 0.8）的字段自动以橙色底纹高亮，引导用户重点检查。
+
+3.  **点对点对照预览**: 点击编辑字段时，界面上方自动弹出该字段在原始加密图片中的裁剪放大区域，实现无缝对照修改。
+
+4.  **数据确认状态**: 用户保存后，记录被标记为 `verified`，作为 SLM 推理的高信度输入。
+
+
+
+### B. i18n 语言切换 (Multi-Language Support)
+
+1.  **首选项设置**: 设置页增加“语言选择”项。
+
+2.  **动态适配**: 切换语言后，全应用 UI 元素、错误提示及推送通知实时更新。
+
+
+
+## 3. Functional Requirements
+
+
+
+### FR-401: 布局感知型数据重构 (Layout-Aware Reconstructor)
+
+- **Coordinate Clustering**: 利用 OCR Bounding Box 坐标，通过启发式聚类算法重建行列逻辑，特别是化验单表格。
+
+- **Semantic Tagging**: 为文本块标注语义类别（如 `#ClinicalHeader`, `#LabValues`, `#DiagnosisSum`）。
+
+- **Unit Normalization**: 建立医学单位归一化词典（如 `g/L`, `mg/dl`），消除 SLM 的歧义。
+
+
+
+### FR-402: SLM 数据协议与脱敏
+
+- **Standardized Schema**: 定义 `SLMDataBlock` 协议，包含原始文本、归一化实体、布局信息及置信度。
+
+- **Token Optimization**: 移除无关的页眉页脚及免责条款，将 JSON 转化为更紧凑且 SLM 友好的 Markdown 格式。
+
+- **Local PII Masking**: 自动识别并脱敏姓名、具体住址、证件号，仅保留核心医疗上下文。
+
+
+
+### FR-403: 多页文档合并逻辑 (Session Handling)
+
+- **Document Grouping**: 建立 `page_group` 机制，处理跨页的医疗报告，确保 SLM 能够获得完整的上下文。
+
+
+
+### FR-404: 国际化基础设施 (i18n)
+
+- **Supported Languages**: 英语、西班牙语、葡萄牙语、印尼语、越南语、泰语、印地语、中文。
+
+- **Framework Integration**: 引入 `flutter_localizations`，建立类型安全的字符串映射体系。
+
+
+
+## 4. Technical Implementation (Phase 4)
+
+
+
+### 4.1 数据管道
+
+- 实现 `LayoutParser` 逻辑：基于聚类算法重组 OCR Lines。
+
+- 实现 `PrivacyFilter`：基于正则表达式与实体识别的本地脱敏。
+
+
+
+### 4.2 UI 增强
+
+- 开发 `FocusZoomOverlay` 组件：实现字段编辑时的图片局部放大预览。
+
+- 升级 `AppTheme` 以支持动态字符长度适配。
+
+
+
+---
 
 
 
 # Roadmap Overview
+
 - **Phase 1**: Core Architecture, Camera/Gallery, AES/SQLCipher (Done)
+
 - **Phase 2**: Offline OCR, SMART Extraction, FTS5 Search (Done)
-- **Phase 3**: Multi-Person, Tag CRUD, Encrypted Backup, Store Readiness (Current)
-- **Phase 4**: UI/UE Overhaul, Advanced Intelligence, Data Insights (Next)
+
+- **Phase 3**: Multi-Person, Tag CRUD, Encrypted Backup, Store Readiness (Done)
+
+- **Phase 4**: SLM Data Pipeline & Internationalization (Current)
+
+- **Phase 5**: On-Device SLM Integration & Medical Insights (Next)

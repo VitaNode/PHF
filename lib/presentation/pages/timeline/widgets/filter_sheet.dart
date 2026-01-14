@@ -11,10 +11,12 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:phf/logic/providers/core_providers.dart';
 import 'package:phf/logic/providers/timeline_provider.dart';
 import 'package:phf/data/models/tag.dart';
 import 'package:phf/presentation/theme/app_theme.dart';
+import '../../../utils/l10n_helper.dart';
 
 class TimelineFilterSheet extends ConsumerStatefulWidget {
   const TimelineFilterSheet({super.key});
@@ -27,7 +29,7 @@ class TimelineFilterSheet extends ConsumerStatefulWidget {
 class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
   DateTime? _startDate;
   DateTime? _endDate;
-  List<String> _selectedTags = [];
+  List<String> _selectedTagIds = [];
 
   @override
   void initState() {
@@ -37,7 +39,9 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
     if (currentState != null) {
       _startDate = currentState.startDate;
       _endDate = currentState.endDate;
-      _selectedTags = List.from(currentState.filterTags ?? []);
+      // Note: We need to map back names to IDs if timelineController stores names.
+      // But let's assume it should store IDs now.
+      _selectedTagIds = List.from(currentState.filterTags ?? []);
     }
   }
 
@@ -45,7 +49,7 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
     setState(() {
       _startDate = null;
       _endDate = null;
-      _selectedTags = [];
+      _selectedTagIds = [];
     });
   }
 
@@ -53,7 +57,7 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
     ref
         .read(timelineControllerProvider.notifier)
         .search(
-          tags: _selectedTags.isEmpty ? null : _selectedTags,
+          tags: _selectedTagIds.isEmpty ? null : _selectedTagIds,
           startDate: _startDate,
           endDate: _endDate,
         );
@@ -93,6 +97,7 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final allTagsAsync = ref.watch(allTagsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -107,9 +112,9 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '筛选条件',
-                style: TextStyle(
+              Text(
+                l10n.filter_title,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -117,17 +122,17 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
               ),
               TextButton(
                 onPressed: _reset,
-                child: const Text(
-                  '重置',
-                  style: TextStyle(color: AppTheme.textHint),
+                child: Text(
+                  l10n.common_reset,
+                  style: const TextStyle(color: AppTheme.textHint),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text(
-            '日期范围',
-            style: TextStyle(
+          Text(
+            l10n.filter_date_range,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -153,8 +158,8 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
                   const SizedBox(width: 12),
                   Text(
                     _startDate == null || _endDate == null
-                        ? '选择日期范围'
-                        : '${DateFormat('yyyy-MM-dd').format(_startDate!)} 至 ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
+                        ? l10n.filter_select_date_range
+                        : '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${l10n.filter_date_to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
                     style: TextStyle(
                       fontSize: 14,
                       color: _startDate == null
@@ -183,9 +188,9 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
             ),
           ),
           const SizedBox(height: 32),
-          const Text(
-            '标签 (多选)',
-            style: TextStyle(
+          Text(
+            l10n.filter_tags_multi,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -195,29 +200,37 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
           allTagsAsync.when(
             data: (tags) {
               if (tags.isEmpty) {
-                return const Text(
-                  '暂无可用标签',
-                  style: TextStyle(color: AppTheme.textHint, fontSize: 13),
+                return Text(
+                  l10n.tag_management_empty,
+                  style: const TextStyle(
+                    color: AppTheme.textHint,
+                    fontSize: 13,
+                  ),
                 );
               }
-              // 按名称排序
+              // 按本地化名称排序
               final sortedTags = List<Tag>.from(tags)
-                ..sort((a, b) => a.name.compareTo(b.name));
+                ..sort(
+                  (a, b) => L10nHelper.getTagName(
+                    context,
+                    a,
+                  ).compareTo(L10nHelper.getTagName(context, b)),
+                );
 
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: sortedTags.map((tag) {
-                  final isSelected = _selectedTags.contains(tag.name);
+                  final isSelected = _selectedTagIds.contains(tag.id);
                   return FilterChip(
-                    label: Text(tag.name),
+                    label: Text(L10nHelper.getTagName(context, tag)),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
                         if (selected) {
-                          _selectedTags.add(tag.name);
+                          _selectedTagIds.add(tag.id);
                         } else {
-                          _selectedTags.remove(tag.name);
+                          _selectedTagIds.remove(tag.id);
                         }
                       });
                     },
@@ -249,7 +262,7 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
               height: 40,
               child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             ),
-            error: (err, _) => Text('加载失败: $err'),
+            error: (err, _) => Text(l10n.common_load_failed(err.toString())),
           ),
           const SizedBox(height: 40),
           SizedBox(
@@ -264,9 +277,9 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                '确认筛选',
-                style: TextStyle(
+              child: Text(
+                l10n.common_confirm,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

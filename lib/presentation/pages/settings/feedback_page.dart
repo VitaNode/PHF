@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phf/generated/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,16 +25,16 @@ class FeedbackPage extends ConsumerStatefulWidget {
 class _FeedbackPageState extends ConsumerState<FeedbackPage> {
   bool _isLoadingLogs = false;
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.bgGrey,
         borderRadius: BorderRadius.circular(AppTheme.radiusCard),
       ),
-      child: const Text(
-        '我们致力于保护您的隐私，App 为纯离线运行。\n如需反馈问题，请通过以下方式与我们联系。',
-        style: TextStyle(
+      child: Text(
+        l10n.feedback_info,
+        style: const TextStyle(
           height: 1.5,
           color: AppTheme.textSecondary,
           fontSize: 14,
@@ -97,13 +98,13 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
     );
   }
 
-  Widget _buildLogSection() {
+  Widget _buildLogSection(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '辅助调试',
-          style: TextStyle(
+        Text(
+          l10n.feedback_logs_section,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
             color: AppTheme.textHint,
@@ -124,7 +125,11 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
                     ),
                   )
                 : const Icon(Icons.copy_all),
-            label: Text(_isLoadingLogs ? '正在导出...' : '一键复制日志'),
+            label: Text(
+              _isLoadingLogs
+                  ? l10n.feedback_logs_exporting
+                  : l10n.feedback_logs_copy,
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.bgGrey,
               foregroundColor: AppTheme.textPrimary,
@@ -134,15 +139,16 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          '将复制设备信息及已脱敏的日志到剪贴板，方便您粘贴到邮件或 Issue 中。',
-          style: TextStyle(fontSize: 12, color: AppTheme.textHint),
+        Text(
+          l10n.feedback_logs_hint,
+          style: const TextStyle(fontSize: 12, color: AppTheme.textHint),
         ),
       ],
     );
   }
 
   Future<void> _sendEmail() async {
+    final l10n = AppLocalizations.of(context)!;
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'VitaNode@outlook.com',
@@ -152,23 +158,25 @@ class _FeedbackPageState extends ConsumerState<FeedbackPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('无法打开邮件客户端')));
+        ).showSnackBar(SnackBar(content: Text(l10n.feedback_error_email)));
       }
     }
   }
 
   Future<void> _openGitHub() async {
+    final l10n = AppLocalizations.of(context)!;
     final Uri url = Uri.parse('https://github.com/VitaNode/PHF/issues');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('无法打开浏览器')));
+        ).showSnackBar(SnackBar(content: Text(l10n.feedback_error_browser)));
       }
     }
   }
 
   Future<void> _copyLogsToClipboard() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoadingLogs = true);
     try {
       final info = await _getDeviceInfo();
@@ -189,13 +197,13 @@ $logs
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+        ).showSnackBar(SnackBar(content: Text(l10n.feedback_copied)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('导出失败: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.common_load_failed(e.toString()))),
+        );
       }
     } finally {
       setState(() => _isLoadingLogs = false);
@@ -228,10 +236,11 @@ System: $systemVersion
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: const Text('问题反馈'),
+        title: Text(l10n.settings_feedback),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
@@ -242,23 +251,23 @@ System: $systemVersion
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildInfoSection(),
+              _buildInfoSection(l10n),
               const SizedBox(height: 32),
               _buildContactItem(
                 icon: Icons.email_outlined,
-                title: '发送邮件',
+                title: l10n.feedback_email,
                 subtitle: 'VitaNode@outlook.com',
                 onTap: _sendEmail,
               ),
               const SizedBox(height: 16),
               _buildContactItem(
                 icon: Icons.code,
-                title: 'GitHub Issues',
-                subtitle: '提交 Bug 或建议',
+                title: l10n.feedback_github,
+                subtitle: l10n.feedback_github_desc,
                 onTap: _openGitHub,
               ),
               const SizedBox(height: 48),
-              _buildLogSection(),
+              _buildLogSection(l10n),
             ],
           ),
         ),

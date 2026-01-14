@@ -116,6 +116,7 @@ class MockIRecordRepository extends _i1.Mock implements _i4.IRecordRepository {
     String? hospitalName,
     DateTime? visitDate,
     String? notes,
+    String? groupId,
     _i7.DatabaseExecutor? executor,
   }) =>
       (super.noSuchMethod(
@@ -126,6 +127,7 @@ class MockIRecordRepository extends _i1.Mock implements _i4.IRecordRepository {
                 #hospitalName: hospitalName,
                 #visitDate: visitDate,
                 #notes: notes,
+                #groupId: groupId,
                 #executor: executor,
               },
             ),

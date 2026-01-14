@@ -397,6 +397,21 @@ class MockSQLCipherDatabaseService extends _i1.Mock
           as _i6.PathProviderService);
 
   @override
+  String get locale =>
+      (super.noSuchMethod(
+            Invocation.getter(#locale),
+            returnValue: _i12.dummyValue<String>(
+              this,
+              Invocation.getter(#locale),
+            ),
+            returnValueForMissingStub: _i12.dummyValue<String>(
+              this,
+              Invocation.getter(#locale),
+            ),
+          )
+          as String);
+
+  @override
   _i9.Future<_i7.Database> get database =>
       (super.noSuchMethod(
             Invocation.getter(#database),

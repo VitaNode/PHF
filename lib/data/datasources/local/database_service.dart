@@ -43,10 +43,11 @@ import 'seeds/database_seeder.dart';
 
 class SQLCipherDatabaseService {
   static const String _dbName = 'phf_encrypted.db';
-  static const int _dbVersion = 9;
+  static const int _dbVersion = 10;
 
   final MasterKeyManager keyManager;
   final PathProviderService pathService;
+  final String locale;
   final DatabaseFactory? _dbFactory;
 
   Database? _database;
@@ -55,6 +56,7 @@ class SQLCipherDatabaseService {
   SQLCipherDatabaseService({
     required this.keyManager,
     required this.pathService,
+    this.locale = 'zh',
     DatabaseFactory? dbFactory,
   }) : _dbFactory = dbFactory;
 
@@ -169,6 +171,8 @@ class SQLCipherDatabaseService {
         id              TEXT PRIMARY KEY,
         person_id       TEXT NOT NULL REFERENCES persons(id) ON DELETE CASCADE,
         status          TEXT NOT NULL DEFAULT 'processing',
+        is_verified     INTEGER DEFAULT 0,
+        group_id        TEXT,
         visit_date_ms   INTEGER,
         visit_date_iso  TEXT,
         hospital_name   TEXT,
@@ -278,13 +282,14 @@ class SQLCipherDatabaseService {
     batch.execute('CREATE INDEX idx_ocr_queue_status ON ocr_queue(status)');
 
     // 10. 执行种子数据填充
-    DatabaseSeeder.run(batch);
+    DatabaseSeeder.run(batch, locale: locale);
 
     await batch.commit();
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     final batch = db.batch();
+    final isEn = locale.startsWith('en');
 
     if (oldVersion < 2) {
       // Upgrade to v2: Add Tags Schema
@@ -324,10 +329,30 @@ class SQLCipherDatabaseService {
       // 5. Seed System Tags
       final now = DateTime.now().millisecondsSinceEpoch;
       final tags = [
-        {'id': 'sys_tag_1', 'name': '检验', 'color': '#009688', 'order_index': 1},
-        {'id': 'sys_tag_2', 'name': '检查', 'color': '#26A69A', 'order_index': 2},
-        {'id': 'sys_tag_3', 'name': '病历', 'color': '#00796B', 'order_index': 3},
-        {'id': 'sys_tag_4', 'name': '处方', 'color': '#4DB6AC', 'order_index': 4},
+        {
+          'id': 'sys_tag_1',
+          'name': isEn ? 'Lab Result' : '检验',
+          'color': '#009688',
+          'order_index': 1,
+        },
+        {
+          'id': 'sys_tag_2',
+          'name': isEn ? 'Examination' : '检查',
+          'color': '#26A69A',
+          'order_index': 2,
+        },
+        {
+          'id': 'sys_tag_3',
+          'name': isEn ? 'Medical Record' : '病历',
+          'color': '#00796B',
+          'order_index': 3,
+        },
+        {
+          'id': 'sys_tag_4',
+          'name': isEn ? 'Prescription' : '处方',
+          'color': '#4DB6AC',
+          'order_index': 4,
+        },
       ];
 
       for (var tag in tags) {
@@ -489,6 +514,16 @@ class SQLCipherDatabaseService {
           tokenize = "unicode61"
         )
       ''');
+    }
+
+    if (oldVersion < 10) {
+      // Upgrade to v10: Phase 4 SLM Data Pipeline support
+      try {
+        await db.execute(
+          'ALTER TABLE records ADD COLUMN is_verified INTEGER DEFAULT 0',
+        );
+        await db.execute('ALTER TABLE records ADD COLUMN group_id TEXT');
+      } catch (_) {}
     }
 
     await batch.commit();

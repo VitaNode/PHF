@@ -147,8 +147,8 @@ void main() {
     // Verify Record Cache
     final recRes = await db.query('records');
     final tagsCache = jsonDecode(recRes.first['tags_cache'] as String);
-    expect(tagsCache, contains('TagA'));
-    expect(tagsCache, contains('TagB'));
+    expect(tagsCache, contains('t1'));
+    expect(tagsCache, contains('t2'));
   });
 
   test('Should retrieve all tags correctly', () async {
