@@ -24,8 +24,10 @@ import '../../data/models/image.dart';
 import 'person_provider.dart';
 import '../../data/models/record.dart';
 import '../services/background_worker_service.dart';
+import '../services/image_processing_service.dart';
 import '../utils/secure_wipe_helper.dart';
 import '../providers/logging_provider.dart';
+import 'native_plugins_provider.dart';
 import 'ocr_status_provider.dart';
 import 'core_providers.dart';
 import 'states/ingestion_state.dart';
@@ -85,6 +87,39 @@ class IngestionController extends _$IngestionController {
         _addFiles([photo]);
       }
     } catch (e) {
+      _setError(e);
+    }
+  }
+
+  /// 扫描文档 (Native Scanner + OpenCV Enhancer)
+  Future<void> scanDocuments() async {
+    try {
+      final scanner = ref.read(documentScannerServiceProvider);
+      final paths = await scanner.scanDocument();
+
+      if (paths.isNotEmpty) {
+        final processor = ref.read(imageProcessorServiceProvider);
+        final processedFiles = <XFile>[];
+
+        for (final path in paths) {
+          try {
+            // 1. OpenCV Enhance
+            final processedPath = await processor.processImage(path);
+            processedFiles.add(XFile(processedPath));
+
+            // 2. Wipe original scan immediately
+            await SecureWipeHelper.wipe(File(path)).catchError((_) {});
+          } catch (e) {
+            // Fallback: use original if processing fails
+            processedFiles.add(XFile(path));
+          }
+        }
+
+        _addFiles(processedFiles);
+      }
+    } catch (e) {
+      // If cancelled (returns empty list), nothing happens.
+      // If error, show it.
       _setError(e);
     }
   }

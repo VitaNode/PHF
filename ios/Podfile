@@ -29,6 +29,8 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  
+  pod 'OpenCVWrapper', :path => 'OpenCVWrapper'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
@@ -42,6 +44,16 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
+      # Exclude simulator architectures for device builds
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphoneos*]'] = 'x86_64 i386'
+    end
+    
+    # Fix for sqlite3 framework signing issue on physical devices
+    if target.name == 'sqlite3'
+      target.build_configurations.each do |config|
+        config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      end
     end
   end
 end

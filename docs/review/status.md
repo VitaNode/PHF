@@ -127,7 +127,24 @@ Phase 4 (SLM Data Pipeline & Internationalization) is now complete.
     - **Performance**: 沉淀 `fetchImagesForRecords` 通用逻辑至 `BaseRepository`，彻底消除 N+1 查询隐患。
     - **Robustness**: 重写 FTS5 搜索流，实现 SQL 构建、结果抓取与数据组装的职责分离。
 
-## 🟡 Pending Issues / Technical Debt (New for Phase 4)
+## 🟢 Phase 5.1 Complete
+Phase 5.1 (OCR Enhancement) is now complete.
+
+### Completed (Phase 5.1)
+- [x] **T5.1.1**: 原生文档扫描器集成。
+    - **iOS**: 集成 `VisionKit` -> `VNDocumentCameraViewController`，支持自动裁切与矫正。
+    - **Android**: 集成 `ML Kit Document Scanner`，提供系统级高质量文档捕获。
+- [x] **T5.1.2**: 原生 OpenCV 增强管线。
+    - **Algorithm**: 实现了 `CLAHE` (局部对比度增强) -> `Bilateral Filter` (保边去噪) -> `Adaptive Thresholding` (动态二值化) 的极致清晰管线。
+    - **iOS**: 封装 `OpenCVWrapper` (Local Pod)，解决 C++ 宏冲突并实现硬件加速。
+    - **Android**: 实现 `ImageProcessor` (Kotlin)，集成 OpenCV SDK。
+- [x] **T5.1.3**: Flutter 业务全链路串联。
+    - 实现了 `DocumentScannerService` 和 `ImageProcessorService`。
+    - 改造 `IngestionController`，支持扫描后自动进入增强管线处理。
+- [x] **T5.1.4**: 模拟器兼容性分流。
+    - 引入 `device_info_plus`，在模拟器环境下自动隐藏原生扫描入口，确保开发流程平滑。
+
+## 🟡 Pending Issues / Technical Debt (New for Phase 4 & 5)
 - None.
 
 ## 🔴 Blockers

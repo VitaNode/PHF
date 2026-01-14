@@ -42,6 +42,8 @@ android {
 dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.0")
     implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
+    implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1")
+    implementation("com.quickbirdstudios:opencv:4.5.3.0")
 }
 
 flutter {

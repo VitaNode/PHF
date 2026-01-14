@@ -462,13 +462,13 @@ GitHub Issues：https://github.com/VitaNode/PHF/issues，点击后：调用设�
 ## Phase 5: On-Device SLM Intelligence (端侧医疗智能解读)
 **Goal**: 将应用进化为能看懂病历、能分析趋势的智能助理，实现“数字化复刻”排版。
 
-### 5.1 OCR增强
+### 5.1 OCR增强 [x]
 
-- [ ] **T5.1.1 前端: 原生文档扫描器**
+- [x] **T5.1.1 前端: 原生文档扫描器** [x]
     - iOS: 实现 DocumentScanner MethodChannel，调用 VNDocumentCameraViewController。
     - Android: 集成 ML Kit Document Scanner。
     - 目标: 获取裁剪矫正后的图片。
-- [ ] **T5.1.2 中端: 原生 OpenCV 增强管线 (Extreme Clarity)**
+- [x] **T5.1.2 中端: 原生 OpenCV 增强管线 (Extreme Clarity)** [x]
     - 集成: 在 iOS (Podfile) 和 Android (Gradle) 引入 OpenCV 原生库。
     - 算法管线 (Native C++/Swift/Kotlin):
         1. Gray: 转灰度。
@@ -476,9 +476,9 @@ GitHub Issues：https://github.com/VitaNode/PHF/issues，点击后：调用设�
         3. Bilateral Filter: bilateralFilter —— 保边去噪。
         4. Adaptive Threshold: adaptiveThreshold，其中 blockSize = width / 30 (动态计算) —— 二值化。
     - 输出: 完美的二值化图像路径。
-- [ ] **T5.1.3 后端: 串联业务**
+- [x] **T5.1.3 后端: 串联业务** [x]
     - Flutter 端串联：Scanner -> NativeProcessor -> OCR Service。
-- [ ] **T5.1.4 其他（备注）**
+- [x] **T5.1.4 其他（备注）** [x]
     - 需要测试纸质材料的识别
     - 增加分流逻辑，模拟器不启用增强型原生相机，真机才启用。（上架之前要去掉）
 

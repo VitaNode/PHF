@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import Vision
+import VisionKit
 
 #if canImport(workmanager_apple)
 import workmanager_apple
@@ -10,16 +11,20 @@ import workmanager
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+  
+  var scannerResult: FlutterResult?
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     
-    // 现代方式获取 Registrar
+    // 获取 Registrar
     let registrar = self.registrar(forPlugin: "OCRPlugin")
+    
+    // 1. OCR Channel
     let ocrChannel = FlutterMethodChannel(name: "com.example.phf/ocr",
                                               binaryMessenger: registrar!.messenger())
-    
     ocrChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
       if call.method == "recognizeText" {
@@ -35,6 +40,45 @@ import workmanager
       }
     })
 
+    // 2. Scanner Channel
+    let scannerChannel = FlutterMethodChannel(name: "com.example.phf/scanner",
+                                              binaryMessenger: registrar!.messenger())
+    scannerChannel.setMethodCallHandler { [weak self] (call, result) in
+        guard let self = self else { return }
+        if call.method == "scanDocument" {
+            self.startScanning(result: result)
+        } else {
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    // 3. Image Processor Channel (OpenCV)
+    let processorChannel = FlutterMethodChannel(name: "com.example.phf/image_processor",
+                                                binaryMessenger: registrar!.messenger())
+    processorChannel.setMethodCallHandler { (call, result) in
+        if call.method == "processImage" {
+            guard let args = call.arguments as? [String: Any],
+                  let path = args["path"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Path is missing", details: nil))
+                return
+            }
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                if let processedPath = OpenCVWrapper.processImage(path) {
+                    DispatchQueue.main.async {
+                        result(processedPath)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        result(FlutterError(code: "PROCESSING_FAILED", message: "OpenCV processing failed", details: nil))
+                    }
+                }
+            }
+        } else {
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
     GeneratedPluginRegistrant.register(with: self)
     
     // Workmanager 注册
@@ -43,6 +87,23 @@ import workmanager
     }
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  private func startScanning(result: @escaping FlutterResult) {
+      guard VNDocumentCameraViewController.isSupported else {
+          result(FlutterError(code: "UNSUPPORTED", message: "Document scanning is not supported on this device", details: nil))
+          return
+      }
+
+      self.scannerResult = result
+      let scanner = VNDocumentCameraViewController()
+      scanner.delegate = self
+      
+      if let controller = self.window?.rootViewController {
+          controller.present(scanner, animated: true, completion: nil)
+      } else {
+          result(FlutterError(code: "UI_ERROR", message: "Root view controller not found", details: nil))
+      }
   }
 
   private func performOCR(imagePath: String, language: String, result: @escaping FlutterResult) {
@@ -134,4 +195,41 @@ import workmanager
           }
       }
   }
+}
+
+extension AppDelegate: VNDocumentCameraViewControllerDelegate {
+    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+        var scannedPages: [String] = []
+        let tempDir = FileManager.default.temporaryDirectory
+        
+        for i in 0..<scan.pageCount {
+            let image = scan.imageOfPage(at: i)
+            let uuid = UUID().uuidString
+            let fileUrl = tempDir.appendingPathComponent("scan_\(uuid).jpg")
+            
+            if let data = image.jpegData(compressionQuality: 0.8) {
+                try? data.write(to: fileUrl)
+                scannedPages.append(fileUrl.path)
+            }
+        }
+        
+        controller.dismiss(animated: true) {
+            self.scannerResult?(scannedPages)
+            self.scannerResult = nil
+        }
+    }
+
+    func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+        controller.dismiss(animated: true) {
+            self.scannerResult?(FlutterError(code: "CANCELLED", message: "User cancelled scanning", details: nil))
+            self.scannerResult = nil
+        }
+    }
+
+    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+        controller.dismiss(animated: true) {
+            self.scannerResult?(FlutterError(code: "SCAN_ERROR", message: error.localizedDescription, details: nil))
+            self.scannerResult = nil
+        }
+    }
 }

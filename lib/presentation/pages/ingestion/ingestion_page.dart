@@ -1,12 +1,22 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phf/generated/l10n/app_localizations.dart';
+import 'package:phf/l10n/app_localizations.dart';
 import '../../../logic/providers/ingestion_provider.dart';
 import '../../../logic/providers/states/ingestion_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/active_button.dart';
 
+/// # IngestionPage Component
+///
+/// ## Description
+/// 病历录入页面。支持原生文档扫描、基础拍照及相册选择。
+///
+/// ## Features
+/// - **Simulator Detection**: 在模拟器环境下自动隐藏原生扫描仪入口。
+/// - **Native Scanning**: 真机环境下启用 VisionKit/MLKit 扫描仪。
+/// - **OpenCV Enhancement**: 扫描后的图片自动进入 OpenCV 增强管线。
 class IngestionPage extends ConsumerStatefulWidget {
   const IngestionPage({super.key});
 
@@ -15,15 +25,37 @@ class IngestionPage extends ConsumerStatefulWidget {
 }
 
 class _IngestionPageState extends ConsumerState<IngestionPage> {
+  bool _isSimulator = false;
+
   @override
   void initState() {
     super.initState();
+    _checkSimulator();
     // Auto-trigger picker if empty
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ref.read(ingestionControllerProvider).rawImages.isEmpty) {
         _showPickerMenu();
       }
     });
+  }
+
+  Future<void> _checkSimulator() async {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      if (mounted) {
+        setState(() {
+          _isSimulator = !iosInfo.isPhysicalDevice;
+        });
+      }
+    } else if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      if (mounted) {
+        setState(() {
+          _isSimulator = !androidInfo.isPhysicalDevice;
+        });
+      }
+    }
   }
 
   void _showPickerMenu() {
@@ -34,6 +66,28 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!_isSimulator) ...[
+              ListTile(
+                leading: const Icon(
+                  Icons.document_scanner,
+                  color: AppTheme.primary,
+                ),
+                title: const Text(
+                  '文档扫描 (增强模式)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  ref
+                      .read(ingestionControllerProvider.notifier)
+                      .scanDocuments();
+                },
+              ),
+              const Divider(height: 1),
+            ],
             ListTile(
               leading: const Icon(Icons.camera_alt),
               title: Text(l10n.ingestion_take_photo),
@@ -83,7 +137,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.ingestion_title),
+        title: Text(l10n.ingestion_title),
         backgroundColor: AppTheme.bgWhite,
         foregroundColor: AppTheme.textPrimary,
         elevation: 0,
@@ -112,16 +166,14 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        AppLocalizations.of(context)!.ingestion_grouped_report,
+                        l10n.ingestion_grouped_report,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
-                        AppLocalizations.of(
-                          context,
-                        )!.ingestion_grouped_report_hint,
+                        l10n.ingestion_grouped_report_hint,
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppTheme.textHint,
@@ -133,7 +185,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)!.ingestion_ocr_hint,
+                      l10n.ingestion_ocr_hint,
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppTheme.textHint,
@@ -144,9 +196,7 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
                     SizedBox(
                       width: double.infinity,
                       child: ActiveButton(
-                        text: AppLocalizations.of(
-                          context,
-                        )!.ingestion_submit_button,
+                        text: l10n.ingestion_submit_button,
                         onPressed: () => notifier.submit(),
                         isLoading: state.status == IngestionStatus.processing,
                       ),
@@ -159,20 +209,61 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
   }
 
   Widget _buildEmpty(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (_isSimulator) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.photo_outlined,
+              size: 64,
+              color: AppTheme.textHint,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '模拟器模式：仅支持基础拍照/相册',
+              style: TextStyle(color: AppTheme.textHint),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _showPickerMenu,
+              child: Text(l10n.ingestion_add_now),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.photo_outlined, size: 64, color: AppTheme.textHint),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context)!.ingestion_empty_hint,
-            style: const TextStyle(color: AppTheme.textHint),
+          const Icon(
+            Icons.document_scanner_outlined,
+            size: 64,
+            color: AppTheme.primary,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          const Text(
+            '高清识别首选',
+            style: TextStyle(color: AppTheme.textHint, fontSize: 12),
+          ),
+          const SizedBox(height: 8),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            onPressed: () =>
+                ref.read(ingestionControllerProvider.notifier).scanDocuments(),
+            child: const Text('扫描文档'),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
             onPressed: _showPickerMenu,
-            child: Text(AppLocalizations.of(context)!.ingestion_add_now),
+            child: const Text('其他方式添加...'),
           ),
         ],
       ),
