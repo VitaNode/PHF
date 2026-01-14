@@ -60,9 +60,10 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PROCESSOR_CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "processImage") {
                 val path = call.argument<String>("path")
+                val cacheDir = context.cacheDir.absolutePath
                 if (path != null) {
                     Thread {
-                        val processedPath = ImageProcessor.processImage(path)
+                        val processedPath = ImageProcessor.processImage(path, cacheDir)
                         runOnUiThread {
                             if (processedPath != null) {
                                 result.success(processedPath)
