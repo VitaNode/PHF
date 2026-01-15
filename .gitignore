@@ -41,10 +41,12 @@ android/gradlew
 android/gradlew.bat
 
 # Agent Tools
-.gemini/tmp/
-.qwen/tmp/
+.gemini/
+.qwen/
 .pub-cache/
 .worktrees/
 
-.qwen/
 gha-creds-*.json
+
+.specify/
+docs/

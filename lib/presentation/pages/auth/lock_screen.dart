@@ -5,10 +5,6 @@ import '../../../logic/providers/core_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/pin_keyboard.dart';
 
-/// # LockScreen
-///
-/// ## Description
-/// 应用锁界面。在冷启动或从后台恢复时显示，要求用户进行身份验证。
 class LockScreen extends ConsumerStatefulWidget {
   final VoidCallback onAuthenticated;
 
@@ -62,8 +58,6 @@ class _LockScreenState extends ConsumerState<LockScreen>
     if (!_canCheckBiometrics || _isProcessing) return;
 
     final securityService = ref.read(securityServiceProvider);
-    // 这里的 enableBiometrics 实际上是执行一次认证
-    // 建议将来在 SecurityService 中拆分出 authenticate 方法
     final success = await securityService.enableBiometrics();
     if (success && mounted) {
       widget.onAuthenticated();
@@ -112,63 +106,96 @@ class _LockScreenState extends ConsumerState<LockScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppTheme.bgWhite,
+      backgroundColor: AppTheme.primaryTeal,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
-            const Icon(Icons.lock_outline, size: 48, color: AppTheme.primary),
-            const SizedBox(height: 24),
-            Text(
-              AppLocalizations.of(context)!.lock_screen_title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 48),
-
-            // PIN Dots
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(6, (index) {
-                final filled = index < _pin.length;
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: filled ? AppTheme.primary : AppTheme.bgGray,
-                    border: Border.all(
-                      color: filled ? AppTheme.primary : Colors.grey.shade300,
-                    ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 2),
+                      const Icon(
+                        Icons.lock_outline,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'PaperHealth',
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.lock_screen_title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      // Pin Display
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(6, (index) {
+                          final bool filled = index < _pin.length;
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: filled
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.3),
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 24),
+                      // Number Pad
+                      PinKeyboard(
+                        onInput: _onPinInput,
+                        onDelete: _onDelete,
+                        textColor: Colors.white,
+                        buttonBackgroundColor: Colors.white.withValues(
+                          alpha: 0.1,
+                        ),
+                      ),
+                      if (_canCheckBiometrics) ...[
+                        const SizedBox(height: 24),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.fingerprint,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                          onPressed: _authenticateWithBiometrics,
+                          tooltip: l10n.lock_screen_biometric_tooltip,
+                        ),
+                      ],
+                      const Spacer(),
+                    ],
                   ),
-                );
-              }),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Biometric Trigger
-            if (_canCheckBiometrics && !_isProcessing)
-              IconButton(
-                onPressed: _authenticateWithBiometrics,
-                icon: const Icon(Icons.face, size: 40, color: AppTheme.primary),
-                tooltip: AppLocalizations.of(
-                  context,
-                )!.lock_screen_biometric_tooltip,
+                ),
               ),
-
-            const Spacer(),
-
-            // Keyboard
-            if (!_isProcessing)
-              PinKeyboard(onInput: _onPinInput, onDelete: _onDelete),
-            const SizedBox(height: 32),
-          ],
+            );
+          },
         ),
       ),
     );

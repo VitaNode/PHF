@@ -12,7 +12,7 @@ A local wrapper for OpenCV to use in Flutter Runner.
   s.source_files = '*.{h,mm}'
   s.public_header_files = '*.h'
   
-  s.platform = :ios, '11.0'
-  s.dependency 'OpenCV', '~> 4.3'
+  s.platform = :ios, '12.0'
+  s.dependency 'OpenCV'
   s.static_framework = true
 end

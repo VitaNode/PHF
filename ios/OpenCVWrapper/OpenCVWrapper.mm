@@ -10,13 +10,6 @@
 
 #import "OpenCVWrapper.h"
 
-/// # OpenCVWrapper (iOS)
-/// 
-/// ## Hardening Features
-/// - **Scoped Memory**: intermediate cv::Mat objects are released when they go out of scope.
-/// - **Performance**: Downscales images to max 2000px to prevent OOM during Bilateral filtering.
-/// - **Safety**: Explicit path validation.
-
 @implementation OpenCVWrapper
 
 + (NSString * _Nullable)processImage:(NSString *)imagePath {
@@ -31,62 +24,106 @@
     }
     
     try {
-        const double MAX_DIMENSION = 2000.0;
-        cv::Mat targetSrc;
+        const double TARGET_LONG_EDGE = 2200.0;
+        cv::Mat resized;
         
-        // 0. Downscale if too large
-        double scale = std::min(1.0, std::min(MAX_DIMENSION / src.cols, MAX_DIMENSION / src.rows));
-        if (scale < 1.0) {
-            cv::resize(src, targetSrc, cv::Size(src.cols * scale, src.rows * scale));
-        } else {
-            targetSrc = src;
-        }
+        // 1. Resizing
+        double width = (double)src.cols;
+        double height = (double)src.rows;
+        double scale = TARGET_LONG_EDGE / std::max(width, height);
+        cv::resize(src, resized, cv::Size(width * scale, height * scale), 0, 0, cv::INTER_AREA);
         
+        // 2. Grayscale
         cv::Mat gray;
-        if (targetSrc.channels() == 3 || targetSrc.channels() == 4) {
-            cv::cvtColor(targetSrc, gray, cv::COLOR_BGR2GRAY);
+        cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
+        
+        // 3. Deskew (HoughLinesP)
+        double angle = [self computeSkewAngle:gray];
+        cv::Mat deskewed;
+        if (std::abs(angle) > 0.5 && std::abs(angle) < 20.0) {
+            cv::Point2f center(gray.cols / 2.0, gray.rows / 2.0);
+            cv::Mat rotMat = cv::getRotationMatrix2D(center, angle, 1.0);
+            cv::warpAffine(gray, deskewed, rotMat, gray.size(), cv::INTER_CUBIC, cv::BORDER_REPLICATE);
         } else {
-            gray = targetSrc;
+            deskewed = gray;
         }
         
-        // 1. CLAHE
-        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+        // 4. Noise Reduction (Gaussian 3x3)
+        cv::Mat blurred;
+        cv::GaussianBlur(deskewed, blurred, cv::Size(3, 3), 0);
+        
+        // 5. Dynamic C Value
+        cv::Scalar mean, stddev;
+        cv::meanStdDev(blurred, mean, stddev);
+        double sd = stddev[0];
+        double dynamicC = 12.0;
+        if (sd < 30) dynamicC = 22.0;
+        else if (sd < 50) dynamicC = 18.0;
+        
+        // 6. CLAHE
+        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(1.2, cv::Size(8, 8));
         cv::Mat claheResult;
-        clahe->apply(gray, claheResult);
+        clahe->apply(blurred, claheResult);
         
-        // 2. Bilateral Filter
-        cv::Mat bilateral;
-        cv::bilateralFilter(claheResult, bilateral, 9, 75, 75);
-        
-        // 3. Adaptive Threshold
-        cv::Mat binary;
-        int blockSize = targetSrc.cols / 30;
+        // 7. Adaptive Threshold Mask (using dynamic C)
+        cv::Mat binaryMask;
+        int blockSize = claheResult.cols / 10;
         if (blockSize % 2 == 0) blockSize++;
         if (blockSize < 3) blockSize = 3;
         
-        cv::adaptiveThreshold(bilateral, binary, 255, 
-                              cv::ADAPTIVE_THRESH_GAUSSIAN_C, 
-                              cv::THRESH_BINARY, 
-                              blockSize, 10);
+        cv::adaptiveThreshold(claheResult, binaryMask, 255,
+                              cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                              cv::THRESH_BINARY,
+                              blockSize, dynamicC);
         
-        // 4. Save to temp
-        NSString *fileName = [NSString stringWithFormat:@"processed_%@.jpg", [[NSUUID UUID] UUIDString]];
+        // 8. Median Blur
+        cv::Mat filteredMask;
+        cv::medianBlur(binaryMask, filteredMask, 3);
+        
+        // 9. Whitening
+        cv::Mat finalResult(claheResult.size(), claheResult.type());
+        finalResult.setTo(cv::Scalar(255));
+        cv::Mat binaryInv;
+        cv::bitwise_not(filteredMask, binaryInv);
+        claheResult.copyTo(finalResult, binaryInv);
+        
+        // 10. Save
+        NSString *fileName = [NSString stringWithFormat:@"enhanced_%@.jpg", [[NSUUID UUID] UUIDString]];
         NSString *tempDir = NSTemporaryDirectory();
         NSString *outPath = [tempDir stringByAppendingPathComponent:fileName];
         
-        if (cv::imwrite([outPath UTF8String], binary)) {
+        std::vector<int> params;
+        params.push_back(cv::IMWRITE_JPEG_QUALITY);
+        params.push_back(100);
+        
+        if (cv::imwrite([outPath UTF8String], finalResult, params)) {
             return outPath;
         }
         return nil;
         
-    } catch (const cv::Exception& e) {
-        NSLog(@"OpenCVWrapper: cv::Exception: %s", e.what());
-        return nil;
     } catch (...) {
-        NSLog(@"OpenCVWrapper: Unknown processing error");
         return nil;
     }
-    // C++ Mat objects will be automatically released as they go out of scope
+}
+
++ (double)computeSkewAngle:(cv::Mat &)gray {
+    cv::Mat edges;
+    cv::Canny(gray, edges, 50, 150);
+    std::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(edges, lines, 1, CV_PI/180, 100, 100, 20);
+    
+    double angleSum = 0;
+    int count = 0;
+    for (size_t i = 0; i < lines.size(); i++) {
+        double dx = lines[i][2] - lines[i][0];
+        double dy = lines[i][3] - lines[i][1];
+        double angle = atan2(dy, dx) * 180.0 / CV_PI;
+        if (std::abs(angle) < 15.0) {
+            angleSum += angle;
+            count++;
+        }
+    }
+    return count > 0 ? (angleSum / count) : 0.0;
 }
 
 @end

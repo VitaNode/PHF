@@ -201,16 +201,6 @@ void main() {
     tester,
   ) async {
     const recordId = 'r1';
-    final record = MedicalRecord(
-      id: recordId,
-      personId: 'p1',
-      hospitalName: 'Old Hospital',
-      notedAt: DateTime(2023, 10, 1),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      status: RecordStatus.archived,
-    );
-
     final image = MedicalImage(
       id: 'i1',
       recordId: recordId,
@@ -221,6 +211,17 @@ void main() {
       createdAt: DateTime.now(),
       hospitalName: 'Old Hospital',
       visitDate: DateTime(2023, 10, 1),
+    );
+
+    final record = MedicalRecord(
+      id: recordId,
+      personId: 'p1',
+      hospitalName: 'Old Hospital',
+      notedAt: DateTime(2023, 10, 1),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      status: RecordStatus.archived,
+      images: [image],
     );
 
     when(
@@ -252,17 +253,16 @@ void main() {
 
     // 1. Enter edit mode
     await tester.tap(find.text(l10n.detail_edit_page));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle(); // Wait for navigation animation
 
     // 2. Change hospital name
     // Find the first TextField (Hospital)
+    expect(find.byType(TextField), findsAtLeastNWidgets(1));
     await tester.enterText(find.byType(TextField).first, 'New Hospital');
 
     // 3. Save
-    await tester.tap(find.text(l10n.detail_save));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text(l10n.common_save));
+    await tester.pumpAndSettle();
 
     // Verify repository calls
     verify(
@@ -281,6 +281,6 @@ void main() {
       ),
     ).called(1);
 
-    expect(find.text(l10n.common_save), findsOneWidget);
+    expect(find.text(l10n.detail_edit_page), findsOneWidget);
   });
 }

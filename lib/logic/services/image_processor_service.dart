@@ -9,14 +9,15 @@ class ImageProcessorService {
     'com.example.phf/image_processor',
   );
 
-  /// 对图片进行 OpenCV 极致增强 (CLAHE + Bilateral + AdaptiveThreshold)
+  /// 对图片进行 OpenCV 极致增强
   ///
+  /// [mode] 可选值为 'UPLOAD' 或 'CAMERA'。
   /// 返回增强后的图片路径。
-  Future<String> processImage(String path) async {
+  Future<String> processImage(String path, {String mode = 'CAMERA'}) async {
     try {
       final String? result = await _channel.invokeMethod<String>(
         'processImage',
-        {'path': path},
+        {'path': path, 'mode': mode},
       );
       if (result == null) throw Exception('Processing returned null');
       return result;

@@ -71,19 +71,40 @@ class IngestionController extends _$IngestionController {
     try {
       final gallery = ref.read(galleryServiceProvider);
       final files = await gallery.pickImages();
-      _addFiles(files);
+      if (files.isNotEmpty) {
+        final processor = ref.read(imageProcessorServiceProvider);
+        final processedFiles = <XFile>[];
+
+        for (final xFile in files) {
+          try {
+            // 1. Apply OpenCV Enhancement with UPLOAD mode (Contrast only)
+            final processedPath = await processor.processImage(
+              xFile.path,
+              mode: 'UPLOAD',
+            );
+            processedFiles.add(XFile(processedPath));
+
+            _pathsToCleanup.add(xFile.path);
+          } catch (e) {
+            processedFiles.add(xFile);
+          }
+        }
+        _addFiles(processedFiles);
+      }
     } catch (e) {
       _setError(e);
     }
   }
 
-  /// 拍照
+  /// 拍照 (普通拍照模式 - 保留彩色，跳过 OpenCV)
   Future<void> takePhoto() async {
     try {
       final picker = ImagePicker();
       final XFile? photo = await picker.pickImage(source: ImageSource.camera);
       if (photo != null) {
+        // 直接使用原始图片，不接入 OpenCV 增强
         _addFiles([photo]);
+        _pathsToCleanup.add(photo.path);
       }
     } catch (e) {
       _setError(e);
@@ -91,6 +112,7 @@ class IngestionController extends _$IngestionController {
   }
 
   /// 扫描文档 (Native Scanner + OpenCV Enhancer)
+  /// 实现方案 A：自动降级 (Fallback)
   Future<void> scanDocuments() async {
     try {
       final scanner = ref.read(documentScannerServiceProvider);
@@ -102,24 +124,35 @@ class IngestionController extends _$IngestionController {
 
         for (final path in paths) {
           try {
-            // 1. OpenCV Enhance
-            final processedPath = await processor.processImage(path);
+            final processedPath = await processor.processImage(
+              path,
+              mode: 'CAMERA',
+            );
             processedFiles.add(XFile(processedPath));
-
-            // 2. Wipe original scan immediately
             await SecureWipeHelper.wipe(File(path)).catchError((_) {});
           } catch (e) {
-            // Fallback: use original if processing fails
             processedFiles.add(XFile(path));
           }
         }
-
         _addFiles(processedFiles);
       }
     } catch (e) {
-      // If cancelled (returns empty list), nothing happens.
-      // If error, show it.
-      _setError(e);
+      // 方案 A: 针对任何启动错误（如低端机性能不足、系统库缺失等），自动切换到普通拍照
+      if (Platform.isAndroid ||
+          e.toString().contains('UNSUPPORTED') ||
+          e.toString().contains('SCAN_ERROR')) {
+        // 设置状态为错误以触发 SnackBar 提示用户，然后立即开启拍照
+        state = state.copyWith(
+          status: IngestionStatus.error,
+          errorMessage: "检测到系统扫描器不可用，已为您开启专业相机模式",
+        );
+        // 延迟一小会儿执行，确保 UI 能够先响应错误状态（展示 SnackBar）
+        Future.delayed(const Duration(milliseconds: 500), () {
+          takePhoto();
+        });
+      } else {
+        _setError(e);
+      }
     }
   }
 

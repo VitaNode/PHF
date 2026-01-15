@@ -1,12 +1,4 @@
 /// # ReviewEditPage Component
-///
-/// ## Description
-/// 专门用于校对刚识别完成的 OCR 结果。支持多图平滑切换。
-///
-/// ## Features (Phase 4)
-/// - **Sticky Magnifier**: 编辑模式下，预览浮层固定在顶部，不随内容滚动。
-/// - **Immersive Edit**: 编辑模式下自动隐藏文档原图，提供全屏编辑空间。
-/// - **Precise Targeting**: 点击不同字段，预览区精准对焦至原图相应位置。
 library;
 
 import 'dart:convert';
@@ -27,8 +19,13 @@ import '../../theme/app_theme.dart';
 
 class ReviewEditPage extends ConsumerStatefulWidget {
   final MedicalRecord record;
+  final bool isReviewMode;
 
-  const ReviewEditPage({super.key, required this.record});
+  const ReviewEditPage({
+    super.key,
+    required this.record,
+    this.isReviewMode = true,
+  });
 
   @override
   ConsumerState<ReviewEditPage> createState() => _ReviewEditPageState();
@@ -41,10 +38,10 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
   DateTime? _visitDate;
   int _currentImageIndex = 0;
 
-  // Structured data blocks
   List<SLMDataBlock> _currentBlocks = [];
   final List<TextEditingController> _blockControllers = [];
   final List<FocusNode> _blockFocusNodes = [];
+  double? _currentConfidence;
 
   @override
   void initState() {
@@ -95,6 +92,7 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     }
 
     if (ocr != null) {
+      _currentConfidence = ocr.confidence;
       _currentBlocks = LayoutParser().parse(ocr);
       for (final block in _currentBlocks) {
         final controller = TextEditingController(text: block.rawText);
@@ -104,23 +102,89 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
         _blockFocusNodes.add(focusNode);
       }
     } else {
+      _currentConfidence = null;
       _currentBlocks = [];
     }
   }
 
-  Future<void> _approve() async {
+  Future<void> _handleSave() async {
     try {
       final recordRepo = ref.read(recordRepositoryProvider);
       final imageRepo = ref.read(imageRepositoryProvider);
-      final reviewNotifier = ref.read(reviewListControllerProvider.notifier);
+      final currentImage = widget.record.images[_currentImageIndex];
 
       if (_blockControllers.isNotEmpty) {
-        final newFullText = _blockControllers.map((c) => c.text).join('\n');
+        final List<String> updatedTexts = _blockControllers
+            .map((c) => c.text.trim())
+            .toList();
+        final newFullText = updatedTexts.where((t) => t.isNotEmpty).join('\n');
+
+        // Reconstruct a clean OCR JSON structure based on the current visual order
+        // This prevents "data disorganization" caused by sorting/clustering mismatches.
+        String? updatedRawJson = currentImage.ocrRawJson;
+        if (currentImage.ocrRawJson != null) {
+          try {
+            final oldOcr = OcrResult.fromJson(
+              jsonDecode(currentImage.ocrRawJson!) as Map<String, dynamic>,
+            );
+
+            final List<OcrBlock> newBlocks = [];
+            for (int i = 0; i < _currentBlocks.length; i++) {
+              final block = _currentBlocks[i];
+              final updatedText = _blockControllers[i].text.trim();
+              if (updatedText.isEmpty) continue;
+
+              // Create a flat but structurally correct block-line pair
+              newBlocks.add(
+                OcrBlock(
+                  text: updatedText,
+                  x: block.boundingBox[0],
+                  y: block.boundingBox[1],
+                  w: block.boundingBox[2],
+                  h: block.boundingBox[3],
+                  lines: [
+                    OcrLine(
+                      text: updatedText,
+                      x: block.boundingBox[0],
+                      y: block.boundingBox[1],
+                      w: block.boundingBox[2],
+                      h: block.boundingBox[3],
+                      confidence: block.confidence,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final updatedOcr = oldOcr.copyWith(
+              text: newFullText,
+              pages: [
+                OcrPage(
+                  pageNumber: 0,
+                  blocks: newBlocks,
+                  confidence: _currentConfidence ?? 0.0,
+                ),
+              ],
+            );
+            updatedRawJson = jsonEncode(updatedOcr.toJson());
+          } catch (_) {
+            // If reconstruction fails, we'll fall back to just saving text
+          }
+        }
+
         await imageRepo.updateOCRData(
-          widget.record.images[_currentImageIndex].id,
+          currentImage.id,
           newFullText,
+          rawJson: updatedRawJson,
+          confidence: _currentConfidence ?? 0.0,
         );
       }
+
+      await imageRepo.updateImageMetadata(
+        widget.record.images[_currentImageIndex].id,
+        hospitalName: _hospitalController.text,
+        visitDate: _visitDate,
+      );
 
       await recordRepo.updateRecordMetadata(
         widget.record.id,
@@ -128,18 +192,17 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
         visitDate: _visitDate,
       );
 
-      await reviewNotifier.approveRecord(widget.record.id);
-      ref.invalidate(timelineControllerProvider);
-
-      if (mounted) {
-        Navigator.pop(context, true);
+      if (widget.isReviewMode) {
+        final reviewNotifier = ref.read(reviewListControllerProvider.notifier);
+        await reviewNotifier.approveRecord(widget.record.id);
       }
+      ref.invalidate(timelineControllerProvider);
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.review_approve_failed(e.toString()))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -148,25 +211,101 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     final l10n = AppLocalizations.of(context)!;
     return AppBar(
       title: Text(
-        l10n.review_edit_title,
-        style: const TextStyle(color: Colors.black),
+        widget.isReviewMode ? l10n.review_edit_title : l10n.detail_edit_title,
       ),
-      backgroundColor: Colors.white,
-      elevation: 0,
-      iconTheme: const IconThemeData(color: Colors.black),
       actions: [
         TextButton(
-          onPressed: _approve,
+          onPressed: _handleSave,
           child: Text(
-            l10n.review_edit_confirm,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            widget.isReviewMode ? l10n.review_edit_confirm : l10n.common_save,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMagnifier(MedicalImage currentImage) {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    if (widget.record.images.isEmpty) {
+      return Scaffold(
+        appBar: _buildAppBar(),
+        body: const Center(child: Text('无图片数据')),
+      );
+    }
+    final currentImage = widget.record.images[_currentImageIndex];
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: Column(
+          children: [
+            _buildMagnifier(currentImage),
+            _buildImageNav(widget.record.images.length),
+            if (_currentConfidence != null)
+              Container(
+                width: double.infinity,
+                color: _currentConfidence! < 0.6
+                    ? AppTheme.warningOrange.withValues(alpha: 0.1)
+                    : AppTheme.successGreen.withValues(alpha: 0.1),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 16,
+                ),
+                child: Text(
+                  '${l10n.review_edit_confidence}: ${(_currentConfidence! * 100).toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: _currentConfidence! < 0.6
+                        ? AppTheme.warningOrange
+                        : AppTheme.successGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(24),
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                children: [
+                  _buildHospitalField(l10n),
+                  const SizedBox(height: 16),
+                  _buildDatePicker(l10n),
+                  const SizedBox(height: 32),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  if (_currentBlocks.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          '暂无 OCR 识别结果',
+                          style: TextStyle(color: AppTheme.textHint),
+                        ),
+                      ),
+                    )
+                  else
+                    ...List.generate(_currentBlocks.length, (i) {
+                      if (i >= _blockControllers.length) {
+                        return const SizedBox.shrink();
+                      }
+                      return _buildBlockField(i);
+                    }),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMagnifier(MedicalImage img) {
     List<double>? rect;
     if (_hospitalFocus.hasFocus) {
       rect = LayoutParser().findFieldCoordinates(_currentBlocks, 'hospital');
@@ -176,7 +315,6 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       final idx = _blockFocusNodes.indexWhere((f) => f.hasFocus);
       if (idx != -1) rect = _currentBlocks[idx].boundingBox;
     }
-
     if (rect == null) return const SizedBox.shrink();
 
     return Container(
@@ -184,8 +322,8 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       width: double.infinity,
       color: Colors.black,
       child: FocusZoomOverlay(
-        imagePath: currentImage.filePath,
-        encryptionKey: currentImage.encryptionKey,
+        imagePath: img.filePath,
+        encryptionKey: img.encryptionKey,
         normalizedRect: rect,
       ),
     );
@@ -196,34 +334,27 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Colors.black.withValues(alpha: 0.05),
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: _currentImageIndex > 0
-                ? () {
-                    setState(() {
-                      _currentImageIndex--;
-                      _updateControllersForIndex(_currentImageIndex);
-                    });
-                  }
+                ? () => setState(() {
+                    _currentImageIndex--;
+                    _updateControllersForIndex(_currentImageIndex);
+                  })
                 : null,
           ),
-          Text(
-            l10n.review_edit_page_indicator(_currentImageIndex + 1, total),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(l10n.review_edit_page_indicator(_currentImageIndex + 1, total)),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: _currentImageIndex < total - 1
-                ? () {
-                    setState(() {
-                      _currentImageIndex++;
-                      _updateControllersForIndex(_currentImageIndex);
-                    });
-                  }
+                ? () => setState(() {
+                    _currentImageIndex++;
+                    _updateControllersForIndex(_currentImageIndex);
+                  })
                 : null,
           ),
         ],
@@ -231,13 +362,21 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
     );
   }
 
-  Widget _buildDatePicker(bool isLow, Color? warnColor) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildHospitalField(AppLocalizations l10n) {
+    return TextField(
+      controller: _hospitalController,
+      focusNode: _hospitalFocus,
+      decoration: InputDecoration(
+        labelText: l10n.review_edit_hospital_label,
+        prefixIcon: const Icon(Icons.local_hospital),
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(AppLocalizations l10n) {
     return GestureDetector(
       onTap: () async {
-        setState(() {
-          _dateFocus.requestFocus();
-        });
+        _dateFocus.requestFocus();
         final date = await showDatePicker(
           context: context,
           initialDate: _visitDate ?? DateTime.now(),
@@ -257,117 +396,36 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
           decoration: InputDecoration(
             labelText: l10n.review_edit_date_label,
             prefixIcon: const Icon(Icons.calendar_today),
-            border: const OutlineInputBorder(),
-            filled: isLow,
-            fillColor: isLow ? warnColor : null,
           ),
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final images = widget.record.images;
-    if (images.isEmpty) return const SizedBox();
-    final currentImage = images[_currentImageIndex];
-    final l10n = AppLocalizations.of(context)!;
-    final isLowConfidence =
-        currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
-    final warningColor = Colors.orange.shade50;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          _buildMagnifier(currentImage),
-          _buildImageNav(images.length),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.review_edit_basic_info,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _hospitalController,
-                    focusNode: _hospitalFocus,
-                    onTap: () => setState(() {}),
-                    decoration: InputDecoration(
-                      labelText: l10n.review_edit_hospital_label,
-                      prefixIcon: const Icon(Icons.local_hospital_outlined),
-                      border: const OutlineInputBorder(),
-                      filled: isLowConfidence,
-                      fillColor: isLowConfidence ? warningColor : null,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDatePicker(isLowConfidence, warningColor),
-
-                  const SizedBox(height: 32),
-                  if (_blockControllers.isNotEmpty) ...[
-                    Text(
-                      l10n.review_edit_ocr_section,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.review_edit_ocr_hint,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.textHint,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _blockControllers.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final block = _currentBlocks[index];
-                        final isBlockLow = block.confidence < 0.8;
-                        return TextField(
-                          controller: _blockControllers[index],
-                          focusNode: _blockFocusNodes[index],
-                          onTap: () => setState(() {}),
-                          maxLines: null,
-                          style: AppTheme.monoStyle.copyWith(fontSize: 14),
-                          decoration: InputDecoration(
-                            filled: isBlockLow,
-                            fillColor: isBlockLow
-                                ? warningColor
-                                : Colors.grey.shade50,
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            isDense: true,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
+  Widget _buildBlockField(int i) {
+    final block = _currentBlocks[i];
+    final isLowConfidence = block.confidence < 0.8;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        controller: _blockControllers[i],
+        focusNode: _blockFocusNodes[i],
+        maxLines: null,
+        decoration: InputDecoration(
+          labelText: block.semanticLabel ?? 'Block ${i + 1}',
+          alignLabelWithHint: true,
+          filled: isLowConfidence,
+          fillColor: isLowConfidence
+              ? AppTheme.warningOrange.withValues(alpha: 0.1)
+              : null,
+          border: const OutlineInputBorder(),
+          suffixText: '${(block.confidence * 100).toStringAsFixed(0)}%',
+          suffixStyle: TextStyle(
+            fontSize: 12,
+            color: isLowConfidence ? AppTheme.warningOrange : AppTheme.textHint,
+            fontWeight: isLowConfidence ? FontWeight.bold : null,
           ),
-        ],
+        ),
       ),
     );
   }

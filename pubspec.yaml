@@ -49,6 +49,9 @@ dependencies:
   package_info_plus: ^9.0.0
   synchronized: ^3.4.0
 
+  phf_native_bridge:
+    path: local_plugins/phf_native_bridge
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

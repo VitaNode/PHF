@@ -11,21 +11,30 @@ import '../theme/app_theme.dart';
 class PinKeyboard extends StatelessWidget {
   final void Function(String) onInput;
   final VoidCallback onDelete;
+  final Color? textColor;
+  final Color? buttonBackgroundColor;
 
-  const PinKeyboard({super.key, required this.onInput, required this.onDelete});
+  const PinKeyboard({
+    super.key,
+    required this.onInput,
+    required this.onDelete,
+    this.textColor,
+    this.buttonBackgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildRow(['1', '2', '3']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _buildRow(['4', '5', '6']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _buildRow(['7', '8', '9']),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _buildRow([null, '0', 'delete']),
         ],
       ),
@@ -41,7 +50,7 @@ class PinKeyboard extends StatelessWidget {
         }
         if (key == 'delete') {
           return _buildKey(
-            child: const Icon(Icons.backspace_outlined),
+            child: Icon(Icons.backspace_outlined, color: textColor),
             onTap: onDelete,
             isFunction: true,
           );
@@ -49,7 +58,11 @@ class PinKeyboard extends StatelessWidget {
         return _buildKey(
           child: Text(
             key,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
           ),
           onTap: () => onInput(key),
         );
@@ -73,9 +86,9 @@ class PinKeyboard extends StatelessWidget {
           alignment: Alignment.center,
           decoration: isFunction
               ? null
-              : const BoxDecoration(
+              : BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.bgGray,
+                  color: buttonBackgroundColor ?? AppTheme.bgGray,
                 ),
           child: child,
         ),

@@ -1,0 +1,21 @@
+name: phf_native_bridge
+description: A local plugin to bridge OCR and Image Processing.
+version: 0.0.1
+publish_to: 'none'
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.phf_native_bridge
+        pluginClass: PhfNativeBridgePlugin
+      ios:
+        pluginClass: PhfNativeBridgePlugin
+
+dependencies:
+  flutter:
+    sdk: flutter

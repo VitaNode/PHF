@@ -120,7 +120,9 @@ class LayoutParser {
     }
 
     // Fallback: 医院通常在顶部，日期通常在顶部或底部
-    if (fieldType == 'hospital') return blocks.first.boundingBox;
+    if (blocks.isNotEmpty) {
+      if (fieldType == 'hospital') return blocks.first.boundingBox;
+    }
 
     return null;
   }

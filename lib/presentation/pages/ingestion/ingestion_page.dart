@@ -60,13 +60,17 @@ class _IngestionPageState extends ConsumerState<IngestionPage> {
 
   void _showPickerMenu() {
     final l10n = AppLocalizations.of(context)!;
+    // Hide native scanner only on simulator.
+    // Android will use auto-fallback to regular camera if scan fails.
+    final bool showNativeScanner = !_isSimulator;
+
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (!_isSimulator) ...[
+            if (showNativeScanner) ...[
               ListTile(
                 leading: const Icon(
                   Icons.document_scanner,

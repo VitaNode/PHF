@@ -1,12 +1,8 @@
 /// # Record Detail Page
 ///
 /// ## Description
-/// 展示病历详情，支持图片轮播、OCR 结果查看及增强型结构化编辑模式。
-///
-/// ## Features (Phase 4)
-/// - **Sticky Magnifier**: 编辑模式下，预览浮层固定在顶部，不随内容滚动。
-/// - **Immersive Edit Mode**: 编辑时隐藏原图大窗口，腾出全屏空间进行逐行校对。
-/// - **Precise Targeting**: 点击不同字段，预览区精准对焦。
+/// 展示病历详情，支持图片轮播、OCR 结果查看。
+/// 点击“编辑”将进入专用的校对模式 (ReviewEditPage)。
 library;
 
 import 'dart:async';
@@ -15,25 +11,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:phf/generated/l10n/app_localizations.dart';
-import 'package:phf/presentation/widgets/focus_zoom_overlay.dart';
-import 'package:phf/logic/services/slm/layout_parser.dart';
-import 'package:phf/data/models/slm/slm_data_block.dart';
-import 'package:uuid/uuid.dart';
 import '../../../data/models/image.dart';
 import '../../../data/models/ocr_result.dart';
 import '../../../data/models/record.dart';
 import '../../../data/models/tag.dart';
 import '../../../logic/providers/core_providers.dart';
 import '../../../logic/providers/timeline_provider.dart';
-import '../../../logic/providers/logging_provider.dart';
 import '../../../logic/providers/ocr_status_provider.dart';
-import '../../../logic/providers/person_provider.dart';
 import '../../../logic/services/background_worker_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/l10n_helper.dart';
 import '../../widgets/secure_image.dart';
-import '../../widgets/tag_selector.dart';
 import '../../widgets/full_image_viewer.dart';
+import '../review/review_edit_page.dart';
 import 'widgets/collapsible_ocr_card.dart';
 import 'widgets/enhanced_ocr_view.dart';
 
@@ -51,49 +41,19 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   List<MedicalImage> _images = [];
   bool _isLoading = true;
   int _currentIndex = 0;
-  bool _isEditing = false;
   late PageController _pageController;
-
-  // Edit controllers & focus nodes
-  late TextEditingController _hospitalController;
-  final FocusNode _hospitalFocus = FocusNode();
-  final FocusNode _dateFocus = FocusNode();
-  DateTime? _visitDate;
-
-  // Structured data blocks
-  List<SLMDataBlock> _currentBlocks = [];
-  final List<TextEditingController> _blockControllers = [];
-  final List<FocusNode> _blockFocusNodes = [];
 
   @override
   void initState() {
     super.initState();
-    _hospitalController = TextEditingController();
     _pageController = PageController();
-    _hospitalFocus.addListener(() => setState(() {}));
-    _dateFocus.addListener(() => setState(() {}));
     _loadData();
   }
 
   @override
   void dispose() {
-    _hospitalController.dispose();
-    _hospitalFocus.dispose();
-    _dateFocus.dispose();
-    _disposeBlockResources();
     _pageController.dispose();
     super.dispose();
-  }
-
-  void _disposeBlockResources() {
-    for (final c in _blockControllers) {
-      c.dispose();
-    }
-    for (final f in _blockFocusNodes) {
-      f.dispose();
-    }
-    _blockControllers.clear();
-    _blockFocusNodes.clear();
   }
 
   @override
@@ -115,152 +75,18 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     return Scaffold(
       backgroundColor: AppTheme.bgWhite,
       appBar: _buildAppBar(),
-      body: _isEditing
-          ? _buildImmersiveEditView(currentImage)
-          : _buildStandardDetailView(currentImage),
-    );
-  }
-
-  Widget _buildStandardDetailView(MedicalImage currentImage) {
-    return Column(
-      children: [
-        Expanded(flex: 4, child: _buildImageSection()),
-        const Divider(height: 1),
-        Expanded(
-          flex: 6,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: _buildInfoView(currentImage),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImmersiveEditView(MedicalImage currentImage) {
-    final l10n = AppLocalizations.of(context)!;
-    final isLowConfidence =
-        currentImage.ocrConfidence != null && currentImage.ocrConfidence! < 0.8;
-    final warningColor = Colors.orange.shade50;
-
-    return Column(
-      children: [
-        _buildMagnifier(currentImage),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.review_edit_basic_info,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _hospitalController,
-                  focusNode: _hospitalFocus,
-                  onTap: () => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.review_edit_hospital_label,
-                    border: const OutlineInputBorder(),
-                    filled: isLowConfidence,
-                    fillColor: isLowConfidence ? warningColor : null,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildDatePicker(currentImage, isLowConfidence, warningColor),
-                const SizedBox(height: 32),
-                if (_blockControllers.isNotEmpty) ...[
-                  Text(
-                    l10n.review_edit_ocr_section,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.review_edit_ocr_hint,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.textHint,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _blockControllers.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final block = _currentBlocks[index];
-                      final isBlockLow = block.confidence < 0.8;
-                      return TextField(
-                        controller: _blockControllers[index],
-                        focusNode: _blockFocusNodes[index],
-                        onTap: () => setState(() {}),
-                        maxLines: null,
-                        style: AppTheme.monoStyle.copyWith(fontSize: 14),
-                        decoration: InputDecoration(
-                          filled: isBlockLow,
-                          fillColor: isBlockLow
-                              ? warningColor
-                              : Colors.grey.shade50,
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          isDense: true,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-                const SizedBox(height: 32),
-                Text(
-                  l10n.detail_manage_tags,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                _buildTagSelector(),
-                const SizedBox(height: 32),
-                _buildCancelEditButton(),
-                const SizedBox(height: 24),
-              ],
+      body: Column(
+        children: [
+          Expanded(flex: 4, child: _buildImageSection()),
+          const Divider(height: 1),
+          Expanded(
+            flex: 6,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: _buildInfoView(currentImage),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMagnifier(MedicalImage currentImage) {
-    List<double>? rect;
-    if (_hospitalFocus.hasFocus) {
-      rect = LayoutParser().findFieldCoordinates(_currentBlocks, 'hospital');
-    } else if (_dateFocus.hasFocus) {
-      rect = LayoutParser().findFieldCoordinates(_currentBlocks, 'date');
-    } else {
-      final idx = _blockFocusNodes.indexWhere((f) => f.hasFocus);
-      if (idx != -1) rect = _currentBlocks[idx].boundingBox;
-    }
-
-    if (rect == null) return const SizedBox.shrink();
-
-    return Container(
-      height: 160,
-      width: double.infinity,
-      color: Colors.black,
-      child: FocusZoomOverlay(
-        imagePath: currentImage.filePath,
-        encryptionKey: currentImage.encryptionKey,
-        normalizedRect: rect,
+        ],
       ),
     );
   }
@@ -279,10 +105,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           _record = record;
           _images = images;
           _isLoading = false;
-          if (_images.isNotEmpty) {
-            final index = _currentIndex < _images.length ? _currentIndex : 0;
-            _updateControllersForIndex(index);
-          }
         });
       }
     } catch (e) {
@@ -290,86 +112,26 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     }
   }
 
-  void _updateControllersForIndex(int index) {
-    final img = _images[index];
-    _hospitalController.text = img.hospitalName ?? _record?.hospitalName ?? '';
-    _visitDate = img.visitDate ?? _record?.notedAt;
-
-    _disposeBlockResources();
-    OcrResult? ocr;
-    if (img.ocrRawJson != null) {
-      try {
-        ocr = OcrResult.fromJson(
-          jsonDecode(img.ocrRawJson!) as Map<String, dynamic>,
-        );
-      } catch (_) {}
-    }
-
-    if (ocr != null) {
-      _currentBlocks = LayoutParser().parse(ocr);
-      for (final block in _currentBlocks) {
-        final controller = TextEditingController(text: block.rawText);
-        final focusNode = FocusNode();
-        focusNode.addListener(() => setState(() {}));
-        _blockControllers.add(controller);
-        _blockFocusNodes.add(focusNode);
-      }
-    } else {
-      _currentBlocks = [];
-    }
-  }
-
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
-      _updateControllersForIndex(index);
     });
   }
 
-  Future<void> _saveChanges() async {
-    if (_images.isEmpty) return;
-    final currentImage = _images[_currentIndex];
-
-    final imageRepo = ref.read(imageRepositoryProvider);
-    final recordRepo = ref.read(recordRepositoryProvider);
-
-    try {
-      if (_blockControllers.isNotEmpty) {
-        final newFullText = _blockControllers.map((c) => c.text).join('\n');
-        await imageRepo.updateOCRData(currentImage.id, newFullText);
-      }
-
-      await imageRepo.updateImageMetadata(
-        currentImage.id,
-        hospitalName: _hospitalController.text,
-        visitDate: _visitDate,
-      );
-
-      await recordRepo.updateRecordMetadata(
-        widget.recordId,
-        hospitalName: _hospitalController.text,
-        visitDate: _visitDate,
-      );
-
+  Future<void> _enterEditMode() async {
+    if (_record == null) return;
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReviewEditPage(
+          record: _record!.copyWith(images: _images),
+          isReviewMode: false,
+        ),
+      ),
+    );
+    if (result == true && mounted) {
       await _loadData();
-      setState(() => _isEditing = false);
       await ref.read(timelineControllerProvider.notifier).refresh();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.common_save)),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.detail_save_error(e.toString()),
-            ),
-          ),
-        );
-      }
     }
   }
 
@@ -426,11 +188,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
       final ocrQueueRepo = ref.read(ocrQueueRepositoryProvider);
       await ocrQueueRepo.enqueue(currentImage.id);
       await BackgroundWorkerService().triggerProcessing();
-      unawaited(
-        BackgroundWorkerService().startForegroundProcessing(
-          talker: ref.read(talkerProvider),
-        ),
-      );
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -449,33 +206,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
     }
   }
 
-  Future<void> _handleCreateTag(String name) async {
-    final tagRepo = ref.read(tagRepositoryProvider);
-    final personId = await ref.read(currentPersonIdControllerProvider.future);
-    final newTag = Tag(
-      id: const Uuid().v4(),
-      name: name,
-      personId: personId,
-      color: '#009688',
-      createdAt: DateTime.now(),
-      isCustom: true,
-    );
-    try {
-      await tagRepo.createTag(newTag);
-      ref.invalidate(allTagsProvider);
-      final currentIds = [..._images[_currentIndex].tagIds, newTag.id];
-      setState(() {
-        _images[_currentIndex] = _images[_currentIndex].copyWith(
-          tagIds: currentIds,
-        );
-      });
-      await ref
-          .read(imageRepositoryProvider)
-          .updateImageTags(_images[_currentIndex].id, currentIds);
-      await ref.read(timelineControllerProvider.notifier).refresh();
-    } catch (_) {}
-  }
-
   void _setupOcrListener() {
     ref.listen(ocrPendingCountProvider, (previous, next) {
       if (next.hasValue && next.value! < (previous?.value ?? 0)) {
@@ -489,19 +219,11 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
   PreferredSizeWidget _buildAppBar() {
     final l10n = AppLocalizations.of(context)!;
     return AppBar(
-      title: Text(_isEditing ? l10n.detail_edit_title : l10n.detail_title),
+      title: Text(l10n.detail_title),
       backgroundColor: AppTheme.bgWhite,
       foregroundColor: AppTheme.textPrimary,
       elevation: 0,
       actions: [
-        if (_isEditing)
-          TextButton(
-            onPressed: _saveChanges,
-            child: Text(
-              l10n.detail_save,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
         IconButton(
           icon: const Icon(Icons.description_outlined),
           tooltip: l10n.detail_ocr_text,
@@ -702,7 +424,7 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => setState(() => _isEditing = true),
+                onPressed: _enterEditMode,
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: Text(l10n.detail_edit_page),
               ),
@@ -735,117 +457,6 @@ class _RecordDetailPageState extends ConsumerState<RecordDetailPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDatePicker(MedicalImage img, bool isLow, Color? warnColor) {
-    final l10n = AppLocalizations.of(context)!;
-    return GestureDetector(
-      onTap: () async {
-        setState(() {
-          _dateFocus.requestFocus();
-        });
-        final picked = await showDatePicker(
-          context: context,
-          initialDate: _visitDate ?? DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime.now(),
-        );
-        if (picked != null) setState(() => _visitDate = picked);
-      },
-      child: AbsorbPointer(
-        child: TextField(
-          controller: TextEditingController(
-            text: _visitDate != null
-                ? DateFormat('yyyy-MM-dd').format(_visitDate!)
-                : '',
-          ),
-          focusNode: _dateFocus,
-          decoration: InputDecoration(
-            labelText: l10n.review_edit_date_label,
-            filled: isLow,
-            fillColor: isLow ? warnColor : null,
-            border: const OutlineInputBorder(),
-            suffixIcon: const Icon(Icons.calendar_today),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTagSelector() {
-    return TagSelector(
-      selectedTagIds: _images[_currentIndex].tagIds,
-      onToggle: (tid) async {
-        final currentIds = [..._images[_currentIndex].tagIds];
-        if (currentIds.contains(tid)) {
-          currentIds.remove(tid);
-        } else {
-          currentIds.add(tid);
-        }
-        final oldIds = _images[_currentIndex].tagIds;
-        setState(() {
-          _images[_currentIndex] = _images[_currentIndex].copyWith(
-            tagIds: currentIds,
-          );
-        });
-        try {
-          await ref
-              .read(imageRepositoryProvider)
-              .updateImageTags(_images[_currentIndex].id, currentIds);
-          await ref.read(timelineControllerProvider.notifier).refresh();
-        } catch (e) {
-          setState(() {
-            _images[_currentIndex] = _images[_currentIndex].copyWith(
-              tagIds: oldIds,
-            );
-          });
-        }
-      },
-      onReorder: (oldIdx, newIdx) async {
-        final originalIds = [..._images[_currentIndex].tagIds];
-        final currentIds = [...originalIds];
-        if (oldIdx < newIdx) newIdx -= 1;
-        final item = currentIds.removeAt(oldIdx);
-        currentIds.insert(newIdx, item);
-        setState(() {
-          _images[_currentIndex] = _images[_currentIndex].copyWith(
-            tagIds: currentIds,
-          );
-        });
-        try {
-          await ref
-              .read(imageRepositoryProvider)
-              .updateImageTags(_images[_currentIndex].id, currentIds);
-          await ref.read(timelineControllerProvider.notifier).refresh();
-        } catch (e) {
-          setState(() {
-            _images[_currentIndex] = _images[_currentIndex].copyWith(
-              tagIds: originalIds,
-            );
-          });
-        }
-      },
-      onCreate: _handleCreateTag,
-    );
-  }
-
-  Widget _buildCancelEditButton() {
-    final l10n = AppLocalizations.of(context)!;
-    return SizedBox(
-      width: double.infinity,
-      child: TextButton(
-        onPressed: () {
-          setState(() {
-            _isEditing = false;
-            _updateControllersForIndex(_currentIndex);
-          });
-        },
-        child: Text(
-          l10n.detail_cancel_edit,
-          style: const TextStyle(color: AppTheme.textGrey),
-        ),
-      ),
     );
   }
 
