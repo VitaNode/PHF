@@ -114,15 +114,61 @@ class _ReviewEditPageState extends ConsumerState<ReviewEditPage> {
       final currentImage = widget.record.images[_currentImageIndex];
 
       if (_blockControllers.isNotEmpty) {
-        // Filter out empty blocks to keep data clean
-        final newFullText = _blockControllers
+        final List<String> updatedTexts = _blockControllers
             .map((c) => c.text.trim())
-            .where((text) => text.isNotEmpty)
-            .join('\n');
+            .toList();
+        final newFullText = updatedTexts.where((t) => t.isNotEmpty).join('\n');
+
+        // Sync back to JSON structure to ensure persistence across sessions
+        String? updatedRawJson = currentImage.ocrRawJson;
+        if (currentImage.ocrRawJson != null) {
+          try {
+            final ocr = OcrResult.fromJson(
+              jsonDecode(currentImage.ocrRawJson!) as Map<String, dynamic>,
+            );
+
+            // Reconstruct the OCR structure with edited text
+            int controllerIndex = 0;
+            final updatedPages = <OcrPage>[];
+
+            for (final page in ocr.pages) {
+              final updatedBlocks = <OcrBlock>[];
+              for (final block in page.blocks) {
+                final updatedLines = <OcrLine>[];
+                for (final line in block.lines) {
+                  if (controllerIndex < updatedTexts.length) {
+                    updatedLines.add(
+                      line.copyWith(text: updatedTexts[controllerIndex++]),
+                    );
+                  } else {
+                    updatedLines.add(line);
+                  }
+                }
+                // Update block text based on its lines
+                updatedBlocks.add(
+                  block.copyWith(
+                    lines: updatedLines,
+                    text: updatedLines.map((l) => l.text).join(' '),
+                  ),
+                );
+              }
+              updatedPages.add(page.copyWith(blocks: updatedBlocks));
+            }
+
+            final updatedOcr = ocr.copyWith(
+              pages: updatedPages,
+              text: newFullText,
+            );
+            updatedRawJson = jsonEncode(updatedOcr.toJson());
+          } catch (_) {
+            // Fallback to original if parsing fails
+          }
+        }
+
         await imageRepo.updateOCRData(
           currentImage.id,
           newFullText,
-          rawJson: currentImage.ocrRawJson,
+          rawJson: updatedRawJson,
           confidence: _currentConfidence ?? 0.0,
         );
       }
